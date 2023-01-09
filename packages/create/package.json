@@ -1,13 +1,40 @@
 {
-    "name": "@httpc/create",
-    "version": "0.0.1",
-    "main": "index.mjs",
+    "name": "create-httpc",
+    "description": "create httpc API from a template",
+    "version": "0.1.0",
+    "author": {
+        "name": "Giuseppe La Torre",
+        "url": "https://github.com/giuseppelt"
+    },
+    "license": "MIT",
+    "type": "module",
+    "exports": {
+        ".": "./index.mjs"
+    },
     "scripts": {
         "start": "node index.mjs"
     },
     "bin": {
-        "create": "index.mjs"
+        "create": "./index.mjs"
     },
+    "homepage": "https://httpc.dev",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/giuseppelt/httpc.git",
+        "directory": "packages/create"
+    },
+    "bugs": "https://github.com/giuseppelt/httpc/issues",
+    "keywords": [
+        "httpc",
+        "api",
+        "rpc",
+        "rpc-api",
+        "json",
+        "json-api",
+        "typescript",
+        "javascript",
+        "client-generation"
+    ],
     "dependencies": {
         "@httpc/cli": "workspace:*"
     },

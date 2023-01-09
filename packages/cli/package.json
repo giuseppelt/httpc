@@ -1,9 +1,15 @@
 {
     "name": "@httpc/cli",
-    "version": "0.0.1",
+    "description": "httpc cli for building function-based API with minimal code and end-to-end type safety",
+    "version": "0.1.0",
+    "author": {
+        "name": "Giuseppe La Torre",
+        "url": "https://github.com/giuseppelt"
+    },
+    "license": "MIT",
     "main": "dist/index.js",
     "scripts": {
-        "build": "tsc && node tasks/export-version.js",
+        "build": "rimraf dist && tsc -p tsconfig.build.json && node tasks/export-version.js",
         "start:dev": "ts-node --files src/index.ts"
     },
     "bin": {
@@ -11,13 +17,32 @@
     },
     "files": [
         "dist",
+        "README.md",
         "package.json"
     ],
     "engines": {
         "node": ">=16.13.0"
     },
+    "homepage": "https://httpc.dev",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/giuseppelt/httpc.git",
+        "directory": "packages/cli"
+    },
+    "bugs": "https://github.com/giuseppelt/httpc/issues",
+    "keywords": [
+        "httpc",
+        "api",
+        "rpc",
+        "rpc-api",
+        "json",
+        "json-api",
+        "typescript",
+        "javascript",
+        "client-generation"
+    ],
     "dependencies": {
-        "@httpc/client": "workspace:^0.0.1",
+        "@httpc/client": "workspace:^0.1.0",
         "commander": "^9.5.0",
         "cross-fetch": "^3.1.5",
         "giget": "^1.0.0",
@@ -29,6 +54,7 @@
     "devDependencies": {
         "@types/node": "^16.18.11",
         "@types/prompts": "^2.4.2",
+        "rimraf": "^3.0.2",
         "ts-node": "^10.9.1"
     }
 }

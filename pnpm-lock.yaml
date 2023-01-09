@@ -19,8 +19,8 @@ importers:
 
   packages/adapter-netlify:
     specifiers:
-      '@httpc/kit': workspace:^0.0.1
-      '@httpc/server': workspace:^0.0.1
+      '@httpc/kit': workspace:^0.1.0
+      '@httpc/server': workspace:^0.1.0
       '@netlify/functions': ^1.4.0
       '@types/jest': ^29.2.5
       jest: ^29.3.1
@@ -43,8 +43,8 @@ importers:
 
   packages/adapter-vercel:
     specifiers:
-      '@httpc/kit': workspace:^0.0.1
-      '@httpc/server': workspace:^0.0.1
+      '@httpc/kit': workspace:^0.1.0
+      '@httpc/server': workspace:^0.1.0
       '@types/express': ^4.17.15
       '@types/jest': ^29.2.5
       '@types/node': ^16.18.11
@@ -71,7 +71,7 @@ importers:
 
   packages/cli:
     specifiers:
-      '@httpc/client': workspace:^0.0.1
+      '@httpc/client': workspace:^0.1.0
       '@types/node': ^16.18.11
       '@types/prompts': ^2.4.2
       commander: ^9.5.0
@@ -80,6 +80,7 @@ importers:
       kleur: ^4.1.5
       prompts: ^2.4.2
       reflect-metadata: ^0.1.13
+      rimraf: ^3.0.2
       ts-node: ^10.9.1
       typescript: ^4.9.4
     dependencies:
@@ -94,6 +95,7 @@ importers:
     devDependencies:
       '@types/node': 16.18.11
       '@types/prompts': 2.4.2
+      rimraf: 3.0.2
       ts-node: 10.9.1_qacynw5b4krdzzrloasmebsynu
 
   packages/client:
@@ -116,7 +118,7 @@ importers:
 
   packages/kit:
     specifiers:
-      '@httpc/server': workspace:^0.0.1
+      '@httpc/server': workspace:^0.1.0
       '@types/jest': ^29.2.5
       '@types/jws': ^3.2.4
       '@types/node': ^16.18.11
@@ -223,14 +225,14 @@ importers:
 
   templates/client:
     specifiers:
-      '@httpc/client': ^0.0.1
+      '@httpc/client': workspace:^0.1.0
     dependencies:
       '@httpc/client': link:../../packages/client
 
   templates/kit-blank:
     specifiers:
-      '@httpc/cli': ^0.0.1
-      '@httpc/kit': ^0.0.1
+      '@httpc/cli': workspace:^0.1.0
+      '@httpc/kit': workspace:^0.1.0
       '@types/node': ^16.18.11
       reflect-metadata: ^0.1.13
       ts-node-dev: ^2.0.0
@@ -248,8 +250,8 @@ importers:
 
   templates/server-blank:
     specifiers:
-      '@httpc/cli': ^0.0.1
-      '@httpc/server': ^0.0.1
+      '@httpc/cli': workspace:^0.1.0
+      '@httpc/server': workspace:^0.1.0
       '@types/node': ^16.18.11
       ts-node-dev: ^2.0.0
       typescript: ^4.9.4

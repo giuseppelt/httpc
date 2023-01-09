@@ -1,6 +1,7 @@
 import { injectable } from "tsyringe";
 import { options } from "../di";
-import { ILogger, logger } from "../logging";
+import { logger } from "../logging";
+import type { ILogger } from "../logging";
 import { Assertion, Authorization, InvalidClaim, PermissionsChecker, PermissionSerializer, PermissionsModel } from "../permissions";
 import { BaseService } from "../services";
 import { IAuthorizationService } from "./types";

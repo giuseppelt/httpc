@@ -1,6 +1,7 @@
 import { singleton, injectAll } from "tsyringe";
 import { KEY, options } from "../di";
-import { logger, ILogger } from "../logging";
+import { logger } from "../logging";
+import type { ILogger } from "../logging";
 import { BaseService } from "../services";
 import { cleanUndefined } from "../utils";
 import { IValidator, ValidationResult } from "./types";

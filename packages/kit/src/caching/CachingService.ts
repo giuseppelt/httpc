@@ -1,6 +1,7 @@
 import { singleton } from "tsyringe";
 import { alias, KEY, options } from "../di";
-import { ILogger, logger } from "../logging";
+import { logger } from "../logging";
+import type { ILogger } from "../logging";
 import { BaseService } from "../services";
 import { CacheKey, CachingGetOptions, ICache, ICachingService } from "./types";
 import { LogCacheDecorator } from "./LogCacheDecorator";

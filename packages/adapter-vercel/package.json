@@ -1,6 +1,12 @@
 {
     "name": "@httpc/adapter-vercel",
-    "version": "0.0.1",
+    "description": "Adapter for hosting on Vercel an httpc API",
+    "version": "0.0.1-pre",
+    "author": {
+        "name": "Giuseppe La Torre",
+        "url": "https://github.com/giuseppelt"
+    },
+    "license": "MIT",
     "type": "module",
     "module": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -14,9 +20,34 @@
     "engines": {
         "node": ">=16.13"
     },
+    "files": [
+        "dist",
+        "README.md",
+        "package.json"
+    ],
+    "homepage": "https://httpc.dev",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/giuseppelt/httpc.git",
+        "directory": "packages/adapter-vercel"
+    },
+    "bugs": "https://github.com/giuseppelt/httpc/issues",
+    "keywords": [
+        "httpc",
+        "api",
+        "rpc",
+        "rpc-api",
+        "json",
+        "json-api",
+        "typescript",
+        "javascript",
+        "client-generation",
+        "vercel",
+        "next"
+    ],
     "peerDependencies": {
-        "@httpc/kit": "^0.0.1",
-        "@httpc/server": "^0.0.1"
+        "@httpc/kit": "^0.1.0",
+        "@httpc/server": "^0.1.0"
     },
     "peerDependenciesMeta": {
         "@httpc/server": {
@@ -27,8 +58,8 @@
         }
     },
     "devDependencies": {
-        "@httpc/kit": "workspace:^0.0.1",
-        "@httpc/server": "workspace:^0.0.1",
+        "@httpc/kit": "workspace:^0.1.0",
+        "@httpc/server": "workspace:^0.1.0",
         "@types/express": "^4.17.15",
         "@types/jest": "^29.2.5",
         "@types/node": "^16.18.11",

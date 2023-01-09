@@ -1,4 +1,4 @@
-# @httpc/server
+# create-httpc
 This package is part of [httpc](https://httpc.dev) framework.
 
 ## httpc

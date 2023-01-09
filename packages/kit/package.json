@@ -1,7 +1,14 @@
 {
     "name": "@httpc/kit",
-    "version": "0.0.1",
+    "description": "httpc toolbox for building function-based API with minimal code and end-to-end type safety",
+    "version": "0.1.0",
+    "author": {
+        "name": "Giuseppe La Torre",
+        "url": "https://github.com/giuseppelt"
+    },
+    "license": "MIT",
     "main": "./dist/cjs/index.js",
+    "module": "./dist/esm/index.js",
     "exports": {
         ".": {
             "require": "./dist/cjs/index.js",
@@ -21,7 +28,7 @@
         }
     },
     "scripts": {
-        "build": "rimraf dist && tsc --module commonjs --outDir ./dist/cjs && tsc --module es2020 --outDir ./dist/esm",
+        "build": "rimraf dist && tsc -p tsconfig.build.json --module commonjs --outDir ./dist/cjs && tsc -p tsconfig.build.json --module es2020 --outDir ./dist/esm",
         "coverage": "jest --coverage",
         "test": "jest",
         "test:debug": "node --inspect ./node_modules/jest/bin/jest --runInBand",
@@ -30,8 +37,32 @@
     "engines": {
         "node": ">=16.13.0"
     },
+    "files": [
+        "dist",
+        "*.ts",
+        "README.md",
+        "package.json"
+    ],
+    "homepage": "https://httpc.dev",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/giuseppelt/httpc.git",
+        "directory": "packages/kit"
+    },
+    "bugs": "https://github.com/giuseppelt/httpc/issues",
+    "keywords": [
+        "httpc",
+        "api",
+        "rpc",
+        "rpc-api",
+        "json",
+        "json-api",
+        "typescript",
+        "javascript",
+        "client-generation"
+    ],
     "dependencies": {
-        "@httpc/server": "workspace:^0.0.1",
+        "@httpc/server": "workspace:^0.1.0",
         "jws": "^4.0.0"
     },
     "devDependencies": {

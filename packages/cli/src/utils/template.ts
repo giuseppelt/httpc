@@ -32,7 +32,7 @@ export async function initialize(templateName: string, dest: string, options?: {
 }
 
 
-const TEMPLATE_ROOT = "github:giuseppelt/httpc/templates";
+const TEMPLATE_PATH = "github:giuseppelt/httpc/templates/$TEMPLATE_NAME#master";
 
 async function copyTemplate(templateName: string, dest: string): Promise<void> {
     if (process.env.LOCAL_TEMPLATE_ROOT) {
@@ -44,7 +44,7 @@ async function copyTemplate(templateName: string, dest: string): Promise<void> {
     }
 
     log.verbose("Downloading template: %s", templateName);
-    await downloadTemplate(`${TEMPLATE_ROOT}/${templateName}`, {
+    await downloadTemplate(TEMPLATE_PATH.replace("$TEMPLATE_NAME", templateName), {
         dir: dest,
     });
 }

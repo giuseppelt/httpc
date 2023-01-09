@@ -1,4 +1,4 @@
-# @httpc/server
+# @httpc/client
 This package is part of [httpc](https://httpc.dev) framework.
 
 ## httpc

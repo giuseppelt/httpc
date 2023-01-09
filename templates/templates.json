@@ -4,7 +4,7 @@
         "name": "@httpc/template-client",
         "type": "client",
         "path": "templates/client",
-        "version": "0.0.1"
+        "version": "0.1.0"
     },
     {
         "id": "kit-blank",
@@ -13,7 +13,7 @@
         "description": "Black template based on @httpc/kit",
         "type": "server",
         "path": "templates/kit-blank",
-        "version": "0.0.1"
+        "version": "0.1.0"
     },
     {
         "id": "server-blank",
@@ -22,6 +22,6 @@
         "description": "Black template based on @httpc/server",
         "type": "server",
         "path": "templates/server-blank",
-        "version": "0.0.1"
+        "version": "0.1.0"
     }
 ]

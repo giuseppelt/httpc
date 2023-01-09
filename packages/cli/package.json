@@ -1,0 +1,34 @@
+{
+    "name": "@httpc/cli",
+    "version": "0.0.1",
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "tsc && node tasks/export-version.js",
+        "start:dev": "ts-node --files src/index.ts"
+    },
+    "bin": {
+        "httpc": "dist/index.js"
+    },
+    "files": [
+        "dist",
+        "package.json"
+    ],
+    "engines": {
+        "node": ">=16.13.0"
+    },
+    "dependencies": {
+        "@httpc/client": "workspace:^0.0.1",
+        "commander": "^9.5.0",
+        "cross-fetch": "^3.1.5",
+        "giget": "^1.0.0",
+        "kleur": "^4.1.5",
+        "prompts": "^2.4.2",
+        "reflect-metadata": "^0.1.13",
+        "typescript": "^4.9.4"
+    },
+    "devDependencies": {
+        "@types/node": "^16.18.11",
+        "@types/prompts": "^2.4.2",
+        "ts-node": "^10.9.1"
+    }
+}

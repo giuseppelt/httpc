@@ -1,0 +1,51 @@
+---
+import { Icon } from "astro-icon";
+import { Package, packageMeta } from "../constants";
+
+export interface Props {
+  href: string;
+  title: Package;
+  description?: string;
+}
+
+const { href, title, description = packageMeta[title].description } = Astro.props;
+const { icon } = packageMeta[title];
+---
+
+<a class="button-card" href={href}>
+  <div class="package-card d-flex">
+    {icon && <Icon class="icon" name={icon} />}
+    <div class="wrap ms-3">
+      <p class="text-xl fw-bold mb-1">{title}</p>
+      <p class="text-sm">{description}</p>
+    </div>
+  </div>
+</a>
+
+<style lang="scss">
+  .button-card {
+    color: var(--color-black);
+    text-decoration: none !important;
+    font-weight: normal !important;
+  }
+
+  .icon {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    color: #a8b4bd;
+    // color: var(--color-dim);
+  }
+
+  .package-card {
+    padding: 1rem;
+    border: 1px solid #c6c6c6;
+    border-radius: var(--theme-rounded);
+    background-color: rgb(247 248 249 / 80%);
+
+    &:hover {
+      border-color: #bbb;
+      background-color: #fff;
+    }
+  }
+</style>

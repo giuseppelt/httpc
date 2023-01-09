@@ -1,0 +1,20 @@
+{
+  "name": "movie-personal-library-console",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^16.13",
+    "@types/prompts": "^2.4.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.3"
+  },
+  "dependencies": {
+    "cross-fetch": "^3.1.5",
+    "kleur": "^4.1.5",
+    "movie-personal-library-api-client": "workspace:^0.0.1",
+    "prompts": "^2.4.2"
+  }
+}

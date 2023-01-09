@@ -1,0 +1,49 @@
+---
+import { Code } from "astro/components";
+import { readFile } from "../utils";
+
+export interface Props {
+  title?: string;
+  src: string;
+  language?: any;
+}
+
+const THEME = "nord";
+
+const { title, src, language = src.split(".").pop() } = Astro.props;
+const code = (await readFile(src, "<no code found>")) || "";
+---
+
+<section class="code-sample">
+  {title && <p class="code-title">{title}</p>}
+  <Code lang={language} code={code.trim()} theme={THEME} />
+</section>
+
+<style>
+  .code-sample {
+    --border-color: rgb(131 135 151);
+    --border-size: 3px;
+  }
+
+  .code-sample :global(> pre) {
+    padding: 1em;
+    border-radius: 0 0 var(--theme-rounded) var(--theme-rounded);
+    border-color: var(--border-color);
+    border-style: solid;
+    border-width: var(--border-size);
+  }
+  .code-title {
+    /* align-self: flex-start; */
+    position: relative;
+    bottom: calc(var(--border-size) * -1);
+    padding: 0.5em 0.75em;
+    display: inline-block;
+    border-radius: var(--theme-rounded) var(--theme-rounded) 0 0;
+    background-color: rgb(38, 43, 55);
+    color: rgba(255, 255, 255, 0.9);
+    font-family: var(--font-mono);
+    border-color: var(--border-color);
+    border-style: solid;
+    border-width: var(--border-size) var(--border-size) 0;
+  }
+</style>

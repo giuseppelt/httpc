@@ -1,0 +1,371 @@
+---
+layout: ~/layouts/Docs.astro
+title: httpc call convention
+#cspell:ignore httpcclient
+---
+import Aside from "~/components/Aside.astro";
+import Tabs from "~/components/tabs/Tabs.tsx";
+
+
+## The convention
+The **httpc call convention** describes a set of rules to structure an _http request_ so it can be easily translated into a function call.
+
+<br />
+An **httpc call** is an abstraction over the HTTP protocol. It shapes the _http request_ in order to:
+1. identity which function to call
+2. send the function arguments
+3. receive the function result
+
+<br />
+The **httpc call convention** provides a simple way to build function-based APIs without worrying much about the underling HTTP complexity.
+
+
+<Aside type="info">
+The **httpc call convention** is implemented by the builtin `HttpCCallParser` which is included by default with any [httpc server](server-architecture) configuration.
+*** 
+An **httpc server** can handle any _http request_, even when non **httpc** compliant, with [custom parsers](server-extending#custom-parser).
+</Aside>
+
+<br />
+The **httpc call convention** defines two [Conformity Levels](#conformity-level):
+
+- [Strict](#strict-mode)
+
+  A request must conform to all _convention rules_, otherwise it will be rejected.
+  This is useful when receiving requests from _httpc-aware_ clients like `HttpCClient` or the custom client [generated](client-generation) from an API.
+
+- [Loose](#loose-mode)
+
+  The server goes around some rules and tries to understand the request even when not strictly following the convention.
+  **Loose mode** can be used to accept _standard http requests_ from browsers, rest client or server webhooks.
+
+
+<Aside type="tip">
+You can have sections of your api with different conformity levels.
+<br />
+For example you can set the **strict mode** for a sub/path used by _httpc-aware_ clients, and another sub/path in **loose mode** which targets other clients like browsers.
+</Aside>
+
+
+### The Rules
+The rules aim to identify:
+1. **the function** to execute
+
+    The http _request path_ is used as _call path_, that is, the unique id of any server function.
+
+    <details>
+    <summary>Examples</summary>
+
+    When a request is sent to `https://domain/products/getById`
+
+    <br />
+    the server expects a function on `/products/getById` to be defined.
+
+    ***
+
+    A server can also bind to a subpath, for example `/api`, so when a request is sent to `https://domain/api/orders/create`
+
+    <br />
+    the server expects a function on `/orders/create` to be defined.
+    </details>
+    <br />
+
+2. the function **arguments**
+
+    In the basic usage, the **http verb** doesn't play a role. So by convention, the <mark>POST</mark> verb is used for any function call.
+    
+    <br/>
+    The arguments are sent with the request body as a json serialized array, with a <mark>content-type</mark> header equals to `application/json`. When the function has no arguments, an empty array `[]` is sent.
+
+    <details>
+    <summary>Examples</summary>
+
+    The function call `add(1, 2)` corresponds to the _http request_:
+    ```
+    POST /add
+    Content-Type: application/json
+
+    [1, 2]
+    ```
+    ***
+
+    Same, with a single-argument function call `update({ name: "new-name" })`
+    ```
+    POST /update
+    Content-Type: application/json
+
+    [{"name": "new-name"}]
+    ```
+    </details>
+
+    Advanced usage involves both <mark>GET</mark> and <mark>POST</mark> verbs, read the [following section](#advanced-rules) for details.
+    <br />
+
+
+3. the function **result**
+
+    The _exact_ response status code has no relevance. An **httpc client** will evaluate the response with:
+    - <mark>status</mark> < 400: result is a success
+    - <mark>status</mark> >= 400: result is an error
+
+    An httpc server will respond with a content-type of `application/json`. The result will be parsed from the body as json. The whole body is the result. If the body is empty, the result is `undefined`.
+
+    <br />
+    When the result is a success, the parsed value is returned to the caller. If the result is an error, an **httpc client** will throw a `HttpCClientError` with the body as error data.
+    
+    <br />
+    More details on [Error result](#error-result) section.
+
+
+### Advanced Rules
+In case interoperability with _http-level_ cache is required, the **httpc call convention** defines two **call access**: `"read"` and `"write"`. Because http caching works only with the <mark>GET</mark> verb, the call access `"read"` adopts the <mark>GET</mark> to send the request.
+
+<br/>
+The convention establishes:
+
+- **read** call
+    
+    The request is sent using the <mark>GET</mark> verb. The request path still identifies the call path, that is, the unique function to invoke.
+
+    <br />
+    Function arguments are sent via query string. The `$p` param is a json serialization of the arguments.
+
+    <details>
+    <summary>Examples</summary>
+
+    The function call `getPost("id-10")` corresponds to the _http request_:
+    ```
+    GET /getPost?$p=["id-10"]
+    ```
+    ***
+
+    A no-argument function call `getLatestPost()` can avoid to send the query string:
+    ```
+    GET /getLatestPost
+    ```
+    </details>
+
+- **write** call
+
+    The default call access and follows the _basic_ rules mentioned in the [previous section](#the-rules).
+
+    The request is sent using the <mark>POST</mark> verb.
+
+
+<br />
+A call assess is simply a way to send the underlying http request. With no specification, the default call access `"write"` is used. The call access `"read"` is introduced with the single purpose of interoperability with the http-level cache. 
+
+<br />
+The names `"read"` and `"write"` are just a convention and don't define different behaviors. On **httpc** level, there's no difference, both call access produce the same invocation with the same processing.
+
+<Aside type="info">
+**http caching** is a concern somewhat _external_ to the function invocation per se.
+The httpc framework provides [helpers](kit-caching) to set http caching headers with flexible configurations.
+</Aside>
+
+
+### HTTP vs HTTPC
+// TODO
+#### Http verb
+#### Headers
+#### response status code
+
+
+## Error result
+When a request fails, an **httpc server** sends the error details back to the client as json with the response body. The <mark>content-type</mark> header will be `application/json`.
+
+<br />
+When the response has <mark>status</mark> `>= 400`, it's considered an error. An **httpc client** will throw a `HttpCClientError` with the relevant info.
+
+<br />
+An error is defined with:
+<div class="property-table">
+| property   | type       | description                     |
+|:-----------|:-----------|:--------------------------------|
+| `status`   | `number`   | the _http response_ status code |
+| `error`    | `string`   | an application-defined error code      |
+| `message`  | `string?`  | optional message to explain the error |
+| `data`     | `object?`  | optional extra data for context |
+</div>
+
+<br />
+<Aside type="tip" title="Guideline" icon="guide">
+The specific response status code shouldn't determine a specific behavior. The `status` is sent for interoperability reasons. Non-httpc applications may need the status code to process requests.
+<br />
+Client logic should rely only on the `error` code as it's defined by the application with a non-ambiguous meaning.
+</Aside>
+
+
+### Examples
+A basic error response defines the _request status code_ and an `error`.
+```json
+{
+    "status": 401,
+    "error": "unauthorized"
+}
+```
+
+An optional message can be sent to better explain the error.
+```json
+{
+    "status": 404,
+    "error": "not_found",
+    "message": "The article(U-NkrLT2) is not found"
+}
+```
+
+Extra data can be added to provide error context.
+```json
+{
+    "status": 400,
+    "error": "bad_request",
+    "message": "Some parameter are not valid",
+    "data": {
+        "username": "Must be at least 10 char"
+    }
+}
+```
+
+
+
+
+## Call access
+
+### Read call
+A `read` call uses the http <mark>GET</mark> verb and sends arguments via a json-serialized query string `$p` parameter.
+<Tabs client:idle tabs={["HttpCClient", "cli", "fetch", "HTTP"]} initial="httpcclient">
+    <Fragment slot="panel.httpcclient">
+```ts
+import { HttpCClient } from "@httpc/client";
+
+const client = new HttpCClient();
+const result = await client.read("call/path", arg1, arg2, ...argN);
+```        
+    </Fragment>
+    <Fragment slot="panel.cli">
+```
+httpc call --read call/path arg1 arg2 argN
+```    
+    </Fragment>    
+    <Fragment slot="panel.fetch">
+```ts
+function sendReadCall(callPath: string, parameters: any[]) {
+    const url = this.apiEndpoint + "/" + callPath + "?$p=" + JSON.stringify(parameters);
+
+    return fetch(url, { method: "GET" });
+}
+```      
+    </Fragment>
+    <Fragment slot="panel.http">
+```
+GET /call/path?$p=[ serialized-parameters ]
+```    
+    </Fragment>
+</Tabs>
+
+
+
+### Write call
+A `write` call uses the http <mark>POST</mark> verb and sends arguments via body with a json-serialized content.
+<Tabs client:idle tabs={["HttpCClient", "cli", "fetch", "HTTP"]} initial="httpcclient">
+    <Fragment slot="panel.httpcclient">
+```ts
+import { HttpCClient } from "@httpc/client";
+
+const client = new HttpCClient();
+const result = await client.write("call/path", arg1, arg2, ...argN);
+```        
+    </Fragment>
+    <Fragment slot="panel.cli">
+```
+httpc call call/path arg1 arg2 argN
+```    
+    </Fragment>    
+    <Fragment slot="panel.fetch">
+```ts
+function sendWriteCall(callPath: string, parameters: any[]) {
+    const url = this.apiEndpoint + "/" + callPath;
+
+    return fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        }
+        body: JSON.stringify(parameters)
+    });
+}
+```      
+    </Fragment>    
+    <Fragment slot="panel.http">
+```
+POST /call/path
+Content-Type: application/json
+
+[ serialized-parameters ]
+``` 
+    </Fragment>
+</Tabs>
+
+
+
+## Conformity level
+
+### Strict mode
+
+In **strict mode** any _http requests_ must conform to all **httpc call convention** rules:
+
+1. **http verb** must be either <mark>GET</mark> or <mark>POST</mark>
+2. **http verb** must match the call access:
+    - for `read` calls the http verb must be <mark>GET</mark>
+    - for `write` calls the http verb must be <mark>POST</mark>
+3. **function arguments** must be passed:
+    - for `read` calls via query string parameter `$p` and must be a serialized json array
+    - for `write` calls via body content and must be a serialized json array, with a <mark>content-type</mark> header set to `application/json`
+    
+    if no argument is necessary for the call, they can omitted:
+    - for `read` calls the query string parameter `$p` can be omitted
+    - for `write` calls the body can be empty
+    
+<br />
+In **strict mode**, the server will reject the non-conformant requests with a `BadRequestError`.
+
+### Loose mode
+
+In **loose mode**, the server will parse the _http request_ in a more lenient way. **Loose mode** is useful when you need to adapt the parsing with some additional flexibility.
+
+<Aside type="tip" title="example">
+In a _rest post request_, the body is a single object, not an array as the httpc call convention states. In **loose mode**, the server will accept the request and use the body as the first argument of the function call.
+</Aside>
+
+<br />
+In **loose mode**, the server can accept:
+
+1. the **http verb** can be any of <mark>GET</mark>, <mark>POST</mark>, <mark>PUT</mark> or <mark>PATCH</mark> with no match required to the relative `call access`.
+
+2. for <mark>GET</mark> requests:
+    - if the query string has the `$p` param, it will parsed as in **strict mode**
+    - otherwise, the query string will be transformed in an object where each query param will be an object field
+
+    <details>
+        <summary>Example</summary>
+
+        The query string:
+        ```
+        GET /search?term=test&language=en
+        ```
+
+        will be parsed into:
+        ```ts
+        search({
+            term: "test",
+            language: "en"
+        });
+        ```
+    </details>
+
+
+3. for requests with body (<mark>POST</mark>, ...):
+    - if the body contains a non-array value( `string`, `number`, `boolean`, `object`), it will be used as the first and unique argument for the function call
+
+<br />
+In **loose mode**, the server still accepts **strict httpc requests**. In other words, **loose mode** are additional rules on top the **strict mode** ones.

@@ -1,0 +1,5 @@
+{
+    "name": "movie-personal-library-api-client",
+    "entry": "src/calls/index.ts",
+    "dest": "client"
+}

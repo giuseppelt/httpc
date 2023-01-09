@@ -1,0 +1,33 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "tsc watch",
+            "type": "npm",
+            "script": "watch:ts",
+            "group": "build",
+            "isBackground": true,
+            "problemMatcher": "$tsc-watch",
+            "presentation": {
+                "reveal": "never"
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            }
+        },
+        {
+            "label": "www dev",
+            "type": "npm",
+            "script": "dev",
+            "group": "build",
+            "path": "${workspaceFolder}/packages/www",
+            "options": {
+                "cwd": "${workspaceFolder}/packages/www"
+            },
+            "isBackground": true,
+            "presentation": {
+                "reveal": "never"
+            },
+        },
+    ]
+}

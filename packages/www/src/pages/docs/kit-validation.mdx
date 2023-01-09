@@ -1,0 +1,383 @@
+---
+layout: ~/layouts/Docs.astro
+title: Validation
+status: working in progress
+#cspell:ignore nativetypevalidator, predicatevalidator
+---
+import Aside from "~/components/Aside.astro";
+import Tabs from "~/components/tabs/Tabs.tsx";
+import CodeTabs from "~/components/tabs/CodeTabs.tsx";
+import TagList from "~/components/TagList.astro";
+import Tag from "~/components/Tag.astro";
+
+
+## What is Validation?
+Validation ensures an input data conforms to a _schema_ or, in general, a set of rules. Validation is a gate that allows only expected data to pass and continuing the execution.
+
+<br />
+Validation is an essential tool when data crosses different boundaries and to check predefined expectations are met.
+
+<Aside type="tip" title="cross boundary data" icon="info">
+In typescript type annotation are a _compile time_ construct. To ensure a variable is really the annotated type _at run time_, you have to perform validation.
+<br />
+As long as the data runs _inside_ your application, the validation is not needed as the typescript compiler will check it.
+<br />
+But when data come from _outside_, for example an api call or a user input, the typescript compiler doesn't know anything about that data. In those cases, the validation is needed to ensure the external data matches the types the application expects.
+</Aside>
+
+Because an httpc server exposes functions, a special focus is put on **function arguments** validation.
+
+<br />
+**@httpc/kit** provides the `Validate` middleware to easily check function parameters.
+
+<Aside type="info" title="Guideline" icon="guide">
+Because function calls come from an external source, it's strongly suggested all functions perform argument validation.
+</Aside>
+
+
+
+## Core components
+### `Validate` middleware
+To perform function arguments validation, you can use the `Validate` middleware.
+<br />
+You can apply the `Validate` middleware to a function and specify in order the _schema_ for each argument the function defines.
+```ts mark=4
+import { httpCall, Validate } from "@httpc/kit";
+
+const add = httpCall(
+    Validate(Number, Number),
+    async (x: number, y: number) {
+        // here x and y are validated
+    }
+);
+```
+
+In the previous example, the _schema_ `Number` is being used by the [NativeTypeValidator](#nativetypevalidator) to check the relative argument against the primitive type `Number`.
+
+<br />
+**httpc/kit** provides multiple _validators_. Each one accepts a specific schema to perform the validation. By default [NativeTypeValidator](#nativetypevalidator) and [PredicateValidator](#predicatevalidator) are enabled. You can also add [3rd party validators](#3rd-party-validators) using popular validation packages. 
+
+<br />
+While you can specify one _schema_ per argument, you can mix different _schema_ types for different arguments.
+```ts
+import { httpCall, Validate } from "@httpc/kit";
+
+const sentNotification = httpCall(
+    Validate(
+        Number,
+        priority => priority === "normal" || priority === "important",
+        String,
+    ),
+    async (destination: number, priority: string, message: string) {
+        // here arguments are validated
+    }
+);
+```
+In the previous example:
+- `destination` is validated by the `NativeTypeValidator`, checking it is a `number`
+- `priority` is validated by the `PredicateValidator`, running the function
+- `message` is validated by the `NativeTypeValidator`, checking it is a `string`
+
+<br />
+When the validation fails, that is, at least one argument doesn't pass the validation, the `Validate` middleware throws a `ValidationError`, which translates into an _HTTP 400_ response.
+
+<Aside type="warn">
+There's no compilation check between the argument type and the _schema_ used with `Validate`. It is developer responsibility to ensure the right definition are set.
+```ts
+const send = httpCall(
+    Validate(Number),
+    async (message: string) {
+        // here message will be a `number`
+    }
+);
+```
+In the previous sample, even if the `message` type is `string`, at run time the `message` will be validated against `number`. Therefore, if a `string` is sent, the validation will not succeed, and the function will not execute.
+
+<br />
+This happens because the _schema_ used with the `Validate` is `Number`, which forces the argument to conform to a `number`.
+
+<br />
+Any mismatch is not detected by the typescript compiler. It's your responsibility to use the right _schema_ for each argument.
+</Aside>
+
+### `ValidationService` service
+Behind the scenes, the `Validate` middleware uses the builtin `ValidationService`. The `ValidationService` manages all the enabled validators and runs the right one for the relative schema.
+
+<br />
+Usually you don't need to interact directly with the `ValidationService`, but if you need to perform manual validation, you can resolve it via injection:
+```ts
+import { useInjected, ValidationService } from "@httpc/kit";
+import { ProfileSchema } from "./schemas";
+
+function manualValidation(profile: unknown) {
+    const validation = useInjected(ValidationService);
+    const result = validation.validate(profile, ProfileSchema);
+    if (result.error) {
+        throw new ValidationError(result.errors);
+    }
+
+    return result.object as ProfileSchema;
+}
+```
+
+## Builtin validators
+**@httpc/kit** provides two first-party validators:
+- [NativeTypeValidator](#nativetypevalidator) to validate against primitive types
+- [PredicateValidator](#predicatevalidator) to do imperative validation via functions
+
+Both validators are enabled by default. Which means, you can use both to validate function arguments via [`Validate`](#validate-middleware) middleware.
+
+<br />
+Check out [3rd party validators](#3rd-party-validators) for builtin integrations with popular libraries.
+
+
+### `NativeTypeValidator`
+The NativeTypeValidator offers a quick but effective way to perform validation against primitive types.
+
+<br />
+You can use javascript native object as _schema_ to validate function arguments. The supported native object are:
+- `String`
+- `Number`
+- `Boolean`
+- `Date`
+- `Object`
+- `Array`
+
+```ts mark=4,11
+import { httpCall, Validate } from "@httpc/kit";
+
+const add = httpCall(
+    Validate(Number, Number),
+    async (x: number, y: number) {
+        // here x and y are validated
+    }
+);
+
+const great = httpCall(
+    Validate(String, Boolean),
+    async (name: string, isFirstTime: boolean) {
+        // here name and isFirstTime are validated
+    }
+);
+```
+
+The `NativeTypeValidator` goes a little beyond the strict checking. For some types it tries to parse them into the target native type:
+- `Number`: if the input is a `string` and it is recognized as `number`
+- `Date`: if the input is a `string` with a valid date format
+- `Boolean`: if the input is a `string` with a lowercase value of `true` or `false`
+
+<br />
+You can disable this _extended_ behavior, by setting the option:
+```ts
+import { NativeTypeValidator, NativeTypeValidatorOptions, REGISTER_OPTIONS } from "@httpc/kit";
+
+REGISTER_OPTIONS<NativeTypeValidatorOptions>(NativeTypeValidator, {
+    disableParsing: true
+});
+```
+
+<Aside type="warn">
+The **NativeTypeValidator** checks the argument type only. It doesn't do deep validation.
+
+<br />
+For example, with `Array`, it ensures only that the argument is an `Array` without caring about its content. The same happens for `Object`, it checks only `typeof argument === "object"`, with no validation against its fields.
+</Aside>
+
+
+### `PredicateValidator`
+The `PredicateValidator` allows to validate arguments with custom code. This validation is activated when the _schema_ is a `function`.
+```ts mark=6
+const divideBy = httpCall(
+    Validate(
+        // use the NativeType validation for `dividend`
+        Number, 
+        // use a custom function to validate `divisor`
+        divisor => typeof divisor === "number" && divisor > 0,
+    ),
+    (dividend: number, divisor: number) => {
+        return dividend / divisor;
+    }
+);
+```
+<br />
+The validating `function`, aka the _predicate_, accepts the argument and returns the result of the validation.
+```ts
+type Predicate = (argument: unknown) => boolean | ValidationResult
+```
+The result can be:
+ - `true`: the validation succeeded, the argument is used as is
+ - `false`: the validation failed
+ - `ValidationResult`: allows to specify a custom message when the validation fails, or to overwrite the argument if passes (useful when parsing is involved) 
+
+
+## 3rd party validators
+**@httpc/kit** offers some pre-configured integration with 3rd party libraries.
+
+<br />
+Usually a 3rd party validator can be enabled with a single import:
+```ts
+import "@httpc/kit/validation-*";
+```
+where the `*` is the 3rd party package name.
+<br />
+
+<br />
+The pre-configured validator libraries are:
+- [class-validator](#class-validator)
+- [zod](#zod)
+
+<Aside type="tip" title="Need other libraries?" icon="message">
+Integration with other libraries are being developed. You can ask for your preference on [external:Discord](/discord) or open a feature request on [external:Github](/issues).
+</Aside>
+
+
+### class-validator
+**@httpc/kit** provides out of the box an integration with the [class-validator](https://www.npmjs.com/package/class-validator) package.
+
+<br />
+To enable the integration, use the import:
+```ts
+import "@httpc/kit/validation-class";
+```
+And to do parameter validation, use the `Validate` middleware:
+<CodeTabs client:idle tabs={["calls.ts", "schemas.ts"]}>
+    <Fragment slot="0">
+```ts
+import { httpCall, Validate } from "@httpc/kit";
+import { ProfileSchema } from "./schemas";
+
+const updateProfile = httpCall(
+    Validate(ProfileSchema),
+    async (profile: ProfileSchema) => {
+        // here the profile is validated
+    }
+);
+```
+    </Fragment>
+    <Fragment slot="1">
+```ts
+import { Length, IsEmail, IsOptional, IsString } from "class-validator";
+
+export class ProfileSchema {
+  @Length(10, 20)
+  username: string;
+
+  @IsEmail()
+  email: string;
+
+  @IsOptional()
+  @IsString()
+  website?: strict;
+}
+```
+    </Fragment>
+</CodeTabs>
+
+#### Options
+The `class-validator` integration is pre-configured with the default options:
+```ts
+import { ValidatorOptions } from "class-validator";
+
+const DEFAULT_OPTIONS: ValidatorOptions = {
+    whitelist: true, // allows only schema-defined property, stripping all the rest
+}
+```
+For more details, checkout the [class-validator documentation](https://www.npmjs.com/package/class-validator#passing-options);
+
+<br />
+You can override the defaults with a new configuration. For convenience, the integration provides the `ClassValidatorOptions` type as an alias to the `ValidatorOptions`.
+
+<br />
+In your import file:
+```ts del=2, add=3
+import { REGISTER_OPTIONS } from "@httpc/kit";
+import "@httpc/kit/validation-class";
+import { ClassValidator, ClassValidatorOptions } from "@httpc/kit/validation-class";
+
+REGISTER_OPTIONS<ClassValidatorOptions>(ClassValidator, {
+    // custom configuration
+    whitelist: true,
+});
+```
+
+#### Standalone use
+If you need to run a validation manually, you can get the `class-validation` validator via injection.
+```ts
+import { useInjected, ValidationError } from "@httpc/kit";
+import { ClassValidator } from "@httpc/kit/validation-class";
+import { ProfileSchema } from "./schemas";
+
+function manualValidation(profile: any) {
+    const validator = useInjected(ClassValidator);
+    const result = validator.validate(profile, ProfileSchema);
+    if (!result.success) {
+        throw new ValidationError(result.errors);
+    }
+
+    return result.object as ProfileSchema;
+}
+```
+
+
+
+### zod
+**@httpc/kit** provides out of the box an integration with the [zod](https://www.npmjs.com/package/zod) package.
+
+<br />
+To enable the integration, use the import:
+```ts
+import "@httpc/kit/validation-zod";
+```
+
+And to do parameter validation, use the `Validate` middleware:
+```ts
+import { httpCall, Validate } from "@httpc/kit";
+import { z } from "zod";
+
+const ProfileSchema = z.object({
+    username: z.string().min(10).max(20),
+    email: z.string().email()
+    website: z.string().optional()
+});
+
+const updateProfile = httpCall(
+    Validate(ProfileSchema),
+    async (profile: z.infer<typeof ProfileSchema>) => {
+        // here the profile is validated
+    }
+);
+```
+
+
+#### Standalone use
+If you need to run a validation manually, you can get the `zod` validator via injection.
+```ts
+import { useInjected } from "@httpc/kit";
+import { ZodValidator } from "@httpc/kit/validation-class";
+import { z } from "zod";
+
+const ProfileSchema = z.object({
+    username: z.string().min(10).max(20),
+    email: z.string().email(),
+    website: z.string().optional(),
+});
+
+function manualValidation(order: any) {
+    const validator = useInjected(ZodValidator);
+    const result = validator.validate(order, ProfileSchema);
+    if (!result.success) {
+        throw new ValidationError(result.errors);
+    }
+
+    return result.object as z.infer<typeof ProfileSchema>;
+}
+```
+
+
+## Custom validator
+// TODO
+
+
+## Interfaces
+### `IValidator`
+// TODO

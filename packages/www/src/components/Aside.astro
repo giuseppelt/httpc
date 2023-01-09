@@ -1,0 +1,63 @@
+---
+import { Icon } from "astro-icon";
+
+const ICONS = {
+  info: "ci:info-square",
+  message: "eva:message-square-fill",
+  magic: "bi:stars",
+  warning: "ph:warning-fill",
+  guide: "mdi:drive-document",
+  question: "mdi:question-mark-box",
+};
+
+export type AsideIcons = keyof typeof ICONS;
+
+export interface Props {
+  type: keyof typeof VARIANTS;
+  title?: string | false;
+  icon?: AsideIcons;
+  small?: boolean;
+}
+
+const VARIANTS = {
+  info: {
+    title: "Note",
+    icon: "info",
+  },
+  tip: {
+    title: "Tip",
+    icon: "magic",
+  },
+  warn: {
+    title: "Warning",
+    icon: "warning",
+  },
+};
+
+const TYPES = Object.keys(VARIANTS);
+
+const { type = "info", small, title: _title, icon: _icon } = Astro.props;
+if (!TYPES.includes(type)) {
+  throw new Error(`Aside type "${type}" invalid(available: "${TYPES.join('", "')}")`);
+}
+
+const title = _title === false ? false : _title || VARIANTS[type].title;
+const icon = (ICONS as any)[_icon || VARIANTS[type].icon];
+if (!icon) {
+  console.warn("Aside icon '%s' not defined", icon);
+}
+---
+
+<aside class={`aside-box ${type} ${small ? "text-xs" : ""}`} aria-label={title || ""}>
+  {
+    title && (
+      <p class="aside-title d-flex" aria-hidden="true">
+        <Icon class="aside-icon" name={icon} />
+        <span>{title}</span>
+      </p>
+    )
+  }
+  <section>
+    <slot />
+  </section>
+</aside>

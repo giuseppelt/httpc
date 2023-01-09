@@ -1,0 +1,37 @@
+---
+import Navbar from "../components/Navbar.astro";
+import "../style/style.scss";
+import fontBody from "@fontsource/mulish/files/mulish-latin-variable-wghtOnly-normal.woff2"; //cspell:disable-line
+import fontMono from "/assets/iosevka-custom.woff2"; //cspell:disable-line
+//cspell:ignore crossorigin
+
+export interface Props {
+  navbar?: boolean;
+  frontmatter?: Frontmatter;
+  title?: string;
+  width?: "page" | "docs";
+}
+
+const { frontmatter, title = frontmatter?.title, navbar = true, url: currentPage, width = "page" } = Astro.props;
+
+if (!title) {
+  throw new Error("Title required");
+}
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preload" as="font" type="font/woff2" href={fontBody} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={fontMono} crossorigin />
+    <title>{title}</title>
+    {frontmatter?.description && frontmatter.description !== "description" && <meta name="description" content={frontmatter.description} />}
+  </head>
+  <body>
+    {navbar && <Navbar currentPage={currentPage} width={width} />}
+    <slot />
+  </body>
+</html>

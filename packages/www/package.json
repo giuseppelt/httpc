@@ -1,0 +1,39 @@
+{
+  "name": "@httpc/www",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev --host",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^0.14.0",
+    "@astrojs/preact": "^1.2.0",
+    "@fontsource/mulish": "^4.5.13",
+    "astro": "^1.9.1",
+    "astro-compress": "^1.1.25",
+    "astro-integration-lottie": "^0.1.1",
+    "lottie-web": "^5.10.1",
+    "preact": "^10.11.3",
+    "shiki": "^0.12.1"
+  },
+  "devDependencies": {
+    "@nanostores/preact": "^0.3.1",
+    "@types/hast": "^2.3.4",
+    "@types/mdast": "^3.0.10",
+    "@types/node": "^16.18.11",
+    "astro-icon": "^0.8.0",
+    "dotenv": "^16.0.3",
+    "hastscript": "^7.2.0",
+    "nanostores": "^0.7.1",
+    "node-html-parser": "^6.1.4",
+    "rehype-link-processor": "^1.0.2",
+    "sass": "^1.57.1",
+    "unified": "^10.1.2",
+    "unist-util-visit": "^4.1.1"
+  }
+}

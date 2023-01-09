@@ -1,0 +1,188 @@
+---
+import { MarkdownHeading, MarkdownContent } from "astro";
+import Icon from "astro-icon";
+import { getGithubEditLink } from "../utils";
+import NavbarIcons from "./NavbarIcons.astro";
+import TableOfContents from "./TableOfContents.astro";
+
+interface Props {
+  currentPage: string;
+  headings?: readonly MarkdownHeading[];
+  content?: MarkdownContent;
+  frontmatter?: Frontmatter;
+}
+
+const { currentPage, headings, content, frontmatter } = Astro.props;
+---
+
+<div id="rightbar">
+  <div id="rightbar-selector">
+    <button class="btn-selector">
+      <span class="rightbar-title">On this page</span>
+      <Icon name="ic:round-code" class="icon" />
+    </button>
+  </div>
+  <div class="body">
+    <header class="visible-large">
+      <NavbarIcons />
+    </header>
+
+    <section>
+      {headings && headings.length > 0 && <TableOfContents headings={headings} />}
+    </section>
+
+    <section class="mt-4">
+      <p role="heading" class="text-sm fw-bold">Meta</p>
+      <a class="bar-link" target="_blank" href={getGithubEditLink(currentPage)}><Icon name="mdi:pencil" class="icon" /> Edit this page</a>
+    </section>
+  </div>
+</div>
+
+<script>
+  document.querySelector("#rightbar .btn-selector")?.addEventListener("click", e => {
+    const selector = e.currentTarget as HTMLElement;
+    const body = document.querySelector<HTMLElement>("#rightbar .body");
+    if (!body) return;
+    document.body.classList.add("no-scroll");
+
+    body.style.display = "block";
+    selector.style.display = "none";
+
+    document.dispatchEvent(new Event("rightbar-open"));
+
+    function onClick(e: MouseEvent) {
+      function hide() {
+        document.body.classList.remove("no-scroll");
+
+        e.stopPropagation();
+        e.preventDefault();
+
+        body!.style.display = "none";
+        selector.style.display = "flex";
+        document.removeEventListener("click", onClick, { capture: true });
+      }
+
+      const el = e.target as HTMLElement;
+      if (!body!.contains(el)) {
+        hide();
+      } else if (el.tagName === "A" || el.parentElement?.tagName === "A") {
+        hide();
+
+        const headerId = (el.tagName === "A" ? el : el.parentElement!)?.getAttribute("href")?.substring(1);
+        const header = document.querySelector<HTMLElement>(`#${headerId}`);
+        if (header) {
+          const top = header.offsetTop - 96; /** top margin */
+          window.scrollTo({ top, behavior: "smooth" });
+        }
+      }
+    }
+
+    document.addEventListener("click", onClick, { capture: true });
+  });
+</script>
+
+<style lang="scss">
+  #rightbar {
+    width: var(--right-sidebar-width);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    section {
+      border-left: 1.5px solid #b8c2ce;
+      padding-left: 2rem;
+      padding-right: var(--side-spacing);
+    }
+
+    @media (max-width: 768px) {
+      position: fixed;
+      top: var(--navbar-height);
+      left: 0;
+      width: 100%;
+      z-index: 10;
+
+      section {
+        border: none;
+        padding: 0 var(--side-spacing);
+      }
+
+      #rightbar-selector {
+        position: absolute;
+        top: 12px;
+        left: 0;
+        right: 0;
+        display: block;
+        padding: 0 var(--side-spacing);
+      }
+      .btn-selector {
+        font-size: 1em;
+      }
+
+      .body {
+        display: none;
+        background-color: var(--theme-bg-color-dark);
+        border-bottom: 1px solid var(--color-dim);
+        overflow-y: auto;
+        max-height: calc(100vh - var(--navbar-height));
+        max-height: calc(100dvh - var(--navbar-height));
+      }
+    }
+  }
+
+  #rightbar-selector {
+    display: none;
+  }
+
+  .body {
+    padding: 1.25rem 0;
+    position: sticky;
+    top: 0;
+
+    header {
+      padding-left: 1.5rem;
+      margin-bottom: 56px;
+    }
+  }
+
+  .bar-link {
+    color: currentColor;
+    &:hover {
+      color: var(--theme-btn-primary-hover);
+    }
+
+    .icon {
+      width: 20px;
+      display: inline-block;
+      vertical-align: bottom;
+    }
+  }
+
+  .btn-selector {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--color-dim);
+    background-color: var(--theme-bg-color-dark);
+    border-radius: var(--theme-rounded-sm);
+    padding: 0.25rem 0.75rem;
+    text-align: left;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    box-shadow: 1px 2px 2px rgba($color: #000000, $alpha: 0.1);
+
+    &:active {
+      top: 1px;
+      box-shadow: none;
+    }
+
+    .icon {
+      display: inline-block;
+      width: 20px;
+      margin-right: -0.5rem;
+      transform: rotateZ(90deg);
+      color: var(--color-black);
+    }
+  }
+</style>

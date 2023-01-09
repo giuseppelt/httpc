@@ -1,0 +1,26 @@
+{
+    "files": [],
+    "references": [
+        {
+            "path": "./packages/client/tsconfig.dev.cjs.json"
+        },
+        {
+            "path": "./packages/client/tsconfig.dev.esm.json"
+        },
+        {
+            "path": "./packages/server/tsconfig.dev.json"
+        },
+        {
+            "path": "./packages/cli/tsconfig.json"
+        },
+        {
+            "path": "./packages/kit/tsconfig.dev.json"
+        },
+        {
+            "path": "./packages/adapter-vercel/tsconfig.build.json"
+        },
+        {
+            "path": "./packages/adapter-netlify/tsconfig.build.json"
+        }
+    ]
+}

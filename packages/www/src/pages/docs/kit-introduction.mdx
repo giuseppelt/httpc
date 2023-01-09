@@ -1,0 +1,481 @@
+---
+layout: ~/layouts/Docs.astro
+title: Introduction
+description: description
+---
+import Aside from "~/components/Aside.astro";
+import CodeTabs from "~/components/tabs/CodeTabs.tsx";
+
+
+## What is @httpc/kit?
+**@httpc/kit** is a highly opinionated framework to build function-based API with minimal boilerplate code and e2e type safety.
+
+<br />
+**@httpc/kit** is built on top of [@httpc/server](package-httpc-server) and provides many ready-to-go components covering concerns like authentication, validation, caching and so on...
+
+<br />
+**@httpc/kit** major goals are:
+
+- [Writing less code](#writing-less-code-minimizing-repetition-redundancy-and-boilerplate)
+
+    Developing function-based API with just the function code itself with no need to bind paths, extract parameters and all the plumbing and tedious repetitions
+
+
+- [Extensive type safety](#pursuing-extensive-type-safety)
+
+    Write safer code with end-to-end type checking, declaration merging, custom definition extensions and other techniques to reduce the _unchecked_ surface area
+
+- [Providing a toolkit ready to use](#toolkit-ready-to-use)
+
+    Common scenarios are covered by builtin components already enabled with sensible defaults or very easily configurable or disabled
+
+
+
+## Writing less code: minimizing repetition, redundancy and boilerplate
+### Functions at the core
+In **httpc**, functions are first class citizen. You can expose a function with just its definition. No scaffolding, no binding, no parsing. Nothing extra is required.
+<br />
+You expose just plain functions.
+```ts
+function greet(name: string) {
+    return `Hello ${name}`;
+}
+
+async function loadPosts() {
+    return await db.select("posts").take(10);
+}
+
+export default {
+    greet,
+    loadPosts,
+}
+```
+
+You can build a pipeline around a function with a simple middleware sequence.
+```ts
+import { httpCall } from "@httpc/kit";
+
+const approveTicket = httpCall(
+    Authenticated("role:admin"),   // <-- authenticated with required role
+    Validate(Number, String),      // <-- validate arguments
+    async (ticketId: number, message: string) => {
+        /** function code */
+    }
+)
+
+export default {
+    approveTicket
+}
+```
+
+You can also apply the same middlewares to a group of functions.
+```ts
+import { httpGroup } from "@httpc/kit";
+
+function join(room: string) { /** */ }
+function send(message: string) { /** */ }
+function leave() { /** */ }
+
+export default httpGroup(
+    Authenticated(),
+    Session(),
+    {
+        join,
+        send,
+        leave
+    }
+)
+```
+
+### Simplified API layout
+Functions can be composed and arranged like plain objects. No custom dsl, external code or unnatural syntax.
+
+<br />
+Define the API structure with just out-of-the box javascript esm exports.
+<CodeTabs client:idle tabs={["server.ts","client.ts"]}>
+    <Fragment slot="0">
+```ts
+function getPost(id: string) { /**  */ }
+function updatePost(id: string, data: Post) { /**  */ }
+function deletePost(id: string) { /**  */ }
+
+export default {
+    posts: {
+        get: getPost,
+        update: updatePost,
+        delete: deletePost,
+    }
+}
+```
+    </Fragment>
+    <Fragment slot="1">
+```ts
+let post = await client.posts.get("post-id");
+post.title = "new title";
+post = await client.posts.update(post.id, post);
+```
+    </Fragment>
+</CodeTabs>
+
+You can aggregate and import functions from different files and create an API layout easier to access and use.
+```ts
+import posts from "./calls/posts";
+import comments from "./calls/comments";
+
+export default {
+    posts,
+    comments,
+}
+```
+
+Because function calls are just plain objects, you can extend, merge and nest them at will.
+
+<br />
+The API structure can be defined with all the constructs javascript provides.
+<CodeTabs client:idle tabs={["server.ts","client.ts"]}>
+    <Fragment slot="0">
+```ts
+import posts from "./calls/products";
+import comments from "./calls/comments";
+
+function login(username: string, password) { /** */}
+function logout() { /** */}
+
+function addReaction(postId: string, reaction: string) { /** .. */}
+function removeReaction(id: string) { /** .. */}
+
+export default {
+    posts: {
+        ...posts, // <-- merge all posts calls
+        reactions: { // <-- nesting sub calls
+            add: addReaction,
+            remove: removeReaction
+        }
+    },
+    comments,
+    login, // <-- exposed as first level
+    logout
+}
+```
+ </Fragment>
+    <Fragment slot="1">
+```ts
+await client.login("username", "password");
+
+let post = await client.posts.get("post-id");
+await client.posts.reactions.add(post.id, "like");
+
+let comment = await client.comments.create(post.id, {
+    message: "new comment"
+});
+```
+    </Fragment>
+</CodeTabs>
+
+
+### Context always available
+Thanks to [execution context propagation](#execution-context), the the request context follows the request processing even in case of asynchronous invocations like db queries or external api calls.
+
+<br />
+You can get the context from anywhere.
+```ts
+function trace(message: string) {
+    const { requestId } = useContext();
+}
+```
+With the context always at reach, there's no need to pass parameters around and bloat function arguments with context information.
+
+<br />
+Context can be [extended](#definition-extensions) and defined to suit your need.
+
+<br />
+Context information, can be read and set with the `useContextProperty` hook.
+```ts
+// read the property
+// this is an alternative syntax for the destructuring { ... } = useContext();
+const session = useContextProperty("session");
+
+// write the property
+useContextProperty("session", session);
+```
+
+### Context hooks
+Context hooks, or simply _hooks_, provides predefined behaviors around the request context.
+```ts
+function getPrivateArea() {
+    const user = useUser();
+    // other code
+}
+```
+In the above example, the `useUser` hook returns the user associated with request if authenticated. Otherwise, it will raise an `UnauthorizedError`.
+<br />
+**@httpc/kit** provides many builtin hooks that cover common operations, like authentication, permissions management, value caching, service resolution...
+
+<Aside type="tip" title={false}>
+The Hooks goal is to minimize code duplication and consolidate behaviors. If some interaction with the request is needed and it isn't directly related to the business logic is need, there should be a hook available to fullfil the need.
+</Aside>
+
+Per convention, a hook name starts with `use`. Usually a hook can both read and write to the context, with the following pattern:
+- a hook with no arguments will read from the context
+- the same hook called with an argument will write that to the context
+```ts
+// read request authorizations
+let authorizations = useAuthorizations();
+
+authorization = authorizations.mergeWith("role:admin");
+
+// write the authorizations
+useAuthorizations(authorizations);
+```
+
+Some hooks require one or more parameters to read from the context. In that case, the write happens when an extra optional parameter is used. For example: 
+```ts
+const session = useContextProperty("session");
+
+// write the property
+useContextProperty("session", session);
+```
+Each hook has a specific behavior but, in general, the last parameter works as the set value.
+
+
+## Pursuing extensive type safety
+Writing safer code is **httpc** a major goal. Because javascript is a dynamic language, safer code is the code that gets checked while developing or during the build step.
+
+<br />
+**@httpc/kit** goes to a great length to provide safety, with a focus on the following areas:
+- [end-to-end type safety](#end-to-end-type-safe-functions-calls)
+
+    Ensuring API clients have full API definitions to make function calls actually reference exposed API function with the correct arguments and return types
+
+- [definition extensions](#definition-extensions)
+
+    Allowing builtin objects to be extended with custom attributes and keep everything type checked 
+
+- [service definitions](#service-definitions)
+
+    Providing a way to define components (and their types) that get automatically picked up by the **httpc** framework
+
+- [magic strings reduction](#magic-strings-reduction)
+
+    Minimizing the amount of _unchecked string identifiers_ while preserving flexible ways to customize them
+
+
+### End-to-end type safe functions calls
+End-to-end (e2e) type safety involves techniques to keep the API schema in sync with the client code calling it. In other words, any API change impacts the client at compile time: when the API definition updates, the client code breaks if something incompatible arises.
+
+<br />
+With e2e type safety, clients benefit a more trustworthy environment because the code is checked beforehand during the development or build phase, reducing crashes while the code runs in production.
+
+<br /> 
+**httpc** provides two ways to get e2e type safety:
+
+- **custom client generation**
+
+    With client generation, the httpc tooling creates a typed **httpc client** from the API calls exposed. The custom client has full type definitions of the API and guarantees compile type safety.
+
+    <br />
+    The custom client, the API definitions and some helper are bundled in a dedicated package. The package is a standard npm package and can be referenced and distributed as you would do with any other package.
+
+    ```ts
+    import createClient from "@your-service/api-client";
+
+    const client = createClient({
+        endpoint: "https://your-service.com/api"
+    });
+    ```
+
+    The **custom client** is a lightweight component that makes function calls to your API very easy with javascript natural syntax.
+    ```ts
+    const posts = await client.posts.getLatest();
+    const comment = await client.comments.add(posts[0].id, {
+        title: "Keep it going",
+        text: "I love this post, not because it's christmas, I just like your work."
+    });
+    const reaction = await client.reactions.add(comment.id, "like");
+    ```
+    
+    Client generation supports different configurations and provides some helpers to manage common scenarios like authentication, error handling and so on. Each component is completely _tree-shakable_, so bundlers will remove anything you don't use.
+
+    <br />
+    Detailed explanation on client generation with pro and cons, example scenarios and all configuration options are available on the [client generation page](client-generation).
+    <br />
+
+- **type definitions import**
+
+    With type import there's no tooling involved, nor artifacts generated. In hybrid projects where both api and client code are near each other, function call definitions can be directly used to have a type safe httpc client.
+
+    ```ts
+    import { createClient, ClientDef } from "@httpc/client";
+    import calls from "./api/calls";
+
+    const client = createClient<ClientDef<typeof calls>>();
+    ```
+
+    **@httpc/client** is a small wrapper around the standard `fetch`. It makes functions calls straightforward with no need to manually code the `fetch` parameters.
+    
+    <br />
+    Imported type definitions are always in sync with the API itself, so any client call is type checked and fails at compile time when it diverges from the API schema.
+
+
+### Definition extensions
+You can define custom context properties. Extending context definition allows keeping your code safe. The typescript compiler will type check your code and emit errors in case of type mismatch.
+
+<br />
+To enrich the context with new properties, just create a file called `env.d.ts` in your project:
+```ts
+/// <reference types="@httpc/kit/env" />
+
+global {
+    interface IHttpCContext {
+        // example custom property
+        environment: string
+
+        // other custom properties here
+        // ...
+    }
+}
+```
+Now you can access the property from the context as usual with the `useContext` hook:
+```ts
+const { environment }  = useContext();
+```
+
+### Service definitions
+Service types are another example of definition extensions.
+
+<br />
+When you inject or resolve a service, to keep code safe you need to know its type. But sometimes, the type is not available from the context.
+
+<br />
+Traditionally this is accomplished with a manual _cast_. But _casting_ is error prone, because you need to remember the concrete type every time the service is used. In addition, if after a refactor the service changes label, the resolution will fail at run time.
+
+<Aside type="tip" title={false} small>
+_Casting_ is an improper term for typescript. For brevity, here is used when a type is forced with explicit specification. In typescript, _casting_ is realized either with the `as` operator or a generic parameter. _Casting_ is dangerous because it overrides the typechecker, thus it should be rarely used.
+</Aside>
+
+<br />
+In **httpc**, you can define new services with the relative types, either an interface or a class.
+```ts
+/// <reference types="@httpc/kit/env" />
+import { PaymentProvider } from "./services";
+
+global {
+    interface ServiceTypes {
+        OnlinePayments: PaymentProvider
+        WirePayments: PaymentProvider
+    }
+}
+```
+Now you can resolve both payment services, with full type safe code, autocompletion support and no _casting_ needed.
+```ts
+function makePayment(data: PaymentData) {
+    const payments = useInjected("OnlinePayments"); // <-- "OnlinePayments" is suggested
+    
+    // payments here is fully typed
+    payments.make(/**  */);
+    payments.commit(/**  */);
+}
+```
+
+For details and all extension points read [Extending](kit-extending).
+
+
+### Magic strings reduction
+A magic strings is a static, predefined text value often used as identifier or a comparison value. Magic strings brings many caveats, but for some use cases they are the only choice.
+
+<br />
+**@httpc/kit** helps to keep them as minimal as possible.
+
+<br />
+For example for environment variables, you can explicitly list them in a central location:
+```ts
+/// <reference types="@httpc/kit/env" />
+
+global {
+    interface IEnvVariables {
+        LOG_LEVEL: string
+    }
+}
+```
+
+With the above definitions, you'll get editor autocompletion when you resolve an environment variable.
+```ts
+class Logger {
+    constructor (
+        @env("LOG_LEVEL") logLevel: string
+    ) {
+    }
+}
+```
+In the above example, the editor will autosuggest `LOG_LEVEL` every time an environment variable is used with no need to constantly check the name or see the list of the available ones.
+
+<br />
+Within **@httpc/kit**, strings as keys are used in other places like cache resolution. To know where magic-strings are used and can be redefined read [Extending](kit-extending).
+
+
+
+
+
+## Toolkit ready to use
+
+**@httpc/kit** provides many builtin components and utilities covering many use cases. Checkout the dedicated pages:
+- [Authentication](kit-authentication)
+- [Validation](kit-validation)
+- [Logging](kit-logging)
+- [Authorization](kit-authorization)
+- [Caching](kit-caching)
+
+
+### Dependency injection
+**@httpc/kit** leverages the [tsyringe](https://www.npmjs.com/package/tsyringe) package to use dependency injection. With tsyringe you can create containers and register services, singletons, factories with a nice typed constructor parameter resolution.
+```ts
+import { singleton } from "tsyringe";
+import { DatabaseService, LogService } from "./services";
+
+@singleton()
+export class UserService {
+    constructor(
+        private db: DatabaseService,
+        private logger: LogService,
+    ) {
+
+    }
+}
+```
+
+Tsyringe is a required peer dependency. You can find more details about tsyringe on its [repository](https://github.com/microsoft/tsyringe).
+
+<br />
+**@httpc/kit** provides additional helpers to deal better with injection or to cover use cases that tsyringe lacks. For example: optional parameters or resolving environment variables. Details on the [Services & Dependency](kit-dependency-injection) page.
+<br />
+You can find many examples on how to use dependency injection in the [tutorials](tutorial).
+
+<Aside type="tip" title="Against DI?" icon="question">
+You're not forced to use dependency injection. If you don't like it, you can totally avoid using it. Although, many **@httpc/kit** builtin components rely on it to work.
+</Aside>
+
+
+## Request context
+
+**@httpc/kit** extends the the builtin properties inherited from the [server context](server-architecture#builtin-properties) with additional properties.
+
+<div class="property-table">
+| property        | type                   | description  |
+|:----------------|:-----------------------|:-------------|
+| `container`     | `DependencyContainer`  | the service container scoped to the request       |
+| `user`          | `IUser?`               | the user identity if the request is authenticated |
+| `authorization` | `Authorization?`       | the permissions the request is granted            |
+</div>
+
+<br />
+In addition, **@httpc/kit** offers several hooks to interact with context.
+
+```ts
+import { useUser } from "@httpc/kit";
+
+async function getMyArticles() {
+    const user = useUser(); // throw Unauthorized if request is not authenticated
+    
+    return await db.select("articles").where("userId", user.id);
+)
+```

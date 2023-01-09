@@ -1,0 +1,27 @@
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**/.DS_Store": true,
+        "**/.vs": true,
+        "**/dist": true,
+        "**/build": true,
+        "**/.build": true,
+        "**/.docusaurus": true,
+        "**/.next": true,
+        "**/.vercel": true,
+        "**/.expo": true,
+        "**/.expo-shared": true,
+    },
+    "[typescriptreact]": {
+        "editor.tabSize": 2
+    },
+    "[html]": {
+        "editor.tabSize": 2
+    },
+    "[astro]": {
+        "editor.tabSize": 2
+    },
+    "typescript.tsdk": "node_modules\\typescript\\lib",
+    "jest.jestCommandLine": "pnpm test --",
+    "task.allowAutomaticTasks": "on"
+}

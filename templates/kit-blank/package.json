@@ -1,0 +1,34 @@
+{
+    "name": "@httpc/template-kit-blank",
+    "description": "Black template based on @httpc/kit",
+    "title": "Kit blank",
+    "templateType": "server",
+    "version": "0.0.1",
+    "main": "dist/index.js",
+    "license": "MIT",
+    "scripts": {
+        "start": "node dist/index.js",
+        "dev": "ts-node-dev --transpile-only src/index.ts",
+        "build": "tsc",
+        "generate:client": "httpc client generate"
+    },
+    "engines": {
+        "node": ">=16.13"
+    },
+    "dependencies": {
+        "@httpc/kit": "^0.0.1",
+        "reflect-metadata": "^0.1.13",
+        "tsyringe": "^4.7.0"
+    },
+    "devDependencies": {
+        "@httpc/cli": "^0.0.1",
+        "@types/node": "^16.18.11",
+        "ts-node-dev": "^2.0.0",
+        "typescript": "^4.9.4"
+    },
+    "httpc": {
+        "name": "client",
+        "entry": "src/calls/index.ts",
+        "dest": "client"
+    }
+}

@@ -1,0 +1,26 @@
+name: template-catalogue
+
+on:
+  push:
+    branches: [master]
+    paths: ["templates/**/package.json"]
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup node & pnpm
+        uses: ./.github/actions/setup-env
+
+      - name: Generate template catalogue
+        run: pnpm run generate:template
+
+      - name: Commit if changed
+        run: |-
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add templates/templates.json
+          git commit -m "chore: updated template-catalogue" || exit 0
+          git push

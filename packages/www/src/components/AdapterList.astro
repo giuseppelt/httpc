@@ -1,0 +1,18 @@
+---
+const items = (await Astro.glob("~/pages/docs/adapters/*.mdx"))
+  .filter(x => x.url !== "/docs/adapters") // exclude index
+  .filter(x => !x.frontmatter.draft);
+---
+
+<ul>
+  {
+    items.map(x => (
+      <li>
+        <p>
+          <a href={x.url}>{x.frontmatter.title}</a>
+        </p>
+        <small>{x.frontmatter.description}</small>
+      </li>
+    ))
+  }
+</ul>

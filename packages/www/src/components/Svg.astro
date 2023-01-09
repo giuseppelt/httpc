@@ -1,0 +1,66 @@
+---
+import { parse } from "node-html-parser";
+import { readFile } from "../utils";
+
+export interface Props extends Partial<CSSStyleDeclaration> {
+  src: string;
+  class?: string;
+  wrap?: boolean;
+}
+
+async function getSVG(src: string) {
+  const html = await readFile(src, "<svg></svg>");
+
+  const root = parse(html!);
+  const svg = root.querySelector("svg");
+  if (!svg) throw new Error("svg element not found");
+
+  // scope styles
+  let scopedClass: string | undefined = undefined;
+  const styles = svg.querySelectorAll("style");
+  if (styles.length > 0) {
+    scopedClass = "svg-" + Math.random().toString().substring(2, 8);
+    styles.forEach(x => {
+      x.textContent = x.textContent
+        .split("\n")
+        .map((line, i) => {
+          if (line.trim().endsWith("{")) {
+            line = line.substring(0, line.lastIndexOf("{")).trim();
+            line = line
+              .split(",")
+              .map(x => `.${scopedClass} ${x}`)
+              .join(",");
+            line += "{";
+          }
+          return line;
+        })
+        .join("\n");
+    });
+  }
+
+  const { attributes, innerHTML } = svg;
+
+  return {
+    attributes: {
+      viewBox: attributes.viewBox, // keep only viewBox
+      className: scopedClass,
+    },
+    innerHTML,
+  };
+}
+
+const { src, wrap, ...attributes } = Astro.props;
+const { attributes: baseAttributes, innerHTML } = await getSVG(src);
+
+const svgAttributes = { ...baseAttributes, ...attributes };
+---
+
+{
+  wrap ? (
+    <div class="svg-container">
+      <svg {...svgAttributes} set:html={innerHTML} />
+    </div>
+  ) : (
+    <svg {...svgAttributes} set:html={innerHTML} />
+  )
+}

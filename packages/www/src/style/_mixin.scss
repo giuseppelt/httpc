@@ -1,0 +1,297 @@
+// The MIT License (MIT)
+
+// Copyright (c) 2011-2022 Twitter, Inc.
+// Copyright (c) 2011-2022 The Bootstrap Authors
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+
+$enable-important-utilities: true;
+
+// Breakpoint viewport sizes and media queries.
+//
+// Breakpoints are defined as a map of (name: minimum width), order from small to large:
+//
+//    (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px, xxl: 1400px)
+//
+// The map defined in the `$grid-breakpoints` global variable is used as the `$breakpoints` argument by default.
+
+// Name of the next breakpoint, or null for the last breakpoint.
+//
+//    >> breakpoint-next(sm)
+//    md
+//    >> breakpoint-next(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px, xxl: 1400px))
+//    md
+//    >> breakpoint-next(sm, $breakpoint-names: (xs sm md lg xl xxl))
+//    md
+@function breakpoint-next($name, $breakpoints: $grid-breakpoints, $breakpoint-names: map-keys($breakpoints)) {
+    $n: index($breakpoint-names, $name);
+
+    @if not $n {
+        @error "breakpoint `#{$name}` not found in `#{$breakpoints}`";
+    }
+
+    @return if($n < length($breakpoint-names), nth($breakpoint-names, $n + 1), null);
+}
+
+// Minimum breakpoint width. Null for the smallest (first) breakpoint.
+//
+//    >> breakpoint-min(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px, xxl: 1400px))
+//    576px
+@function breakpoint-min($name, $breakpoints: $grid-breakpoints) {
+    $min: map-get($breakpoints, $name);
+    @return if($min !=0, $min, null);
+}
+
+// Maximum breakpoint width.
+// The maximum value is reduced by 0.02px to work around the limitations of
+// `min-` and `max-` prefixes and viewports with fractional widths.
+// See https://www.w3.org/TR/mediaqueries-4/#mq-min-max
+// Uses 0.02px rather than 0.01px to work around a current rounding bug in Safari.
+// See https://bugs.webkit.org/show_bug.cgi?id=178261
+//
+//    >> breakpoint-max(md, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px, xxl: 1400px))
+//    767.98px
+@function breakpoint-max($name, $breakpoints: $grid-breakpoints) {
+    $max: map-get($breakpoints, $name);
+    @return if($max and $max > 0, $max - .02, null);
+}
+
+// Returns a blank string if smallest breakpoint, otherwise returns the name with a dash in front.
+// Useful for making responsive utilities.
+//
+//    >> breakpoint-infix(xs, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px, xxl: 1400px))
+//    ""  (Returns a blank string)
+//    >> breakpoint-infix(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px, xxl: 1400px))
+//    "-sm"
+@function breakpoint-infix($name, $breakpoints: $grid-breakpoints) {
+    @return if(breakpoint-min($name, $breakpoints)==null, "", "-#{$name}");
+}
+
+// Media of at least the minimum breakpoint width. No query for the smallest breakpoint.
+// Makes the @content apply to the given breakpoint and wider.
+@mixin media-breakpoint-up($name, $breakpoints: $grid-breakpoints) {
+    $min: breakpoint-min($name, $breakpoints);
+
+    @if $min {
+        @media (min-width: $min) {
+            @content;
+        }
+    }
+
+    @else {
+        @content;
+    }
+}
+
+// Media of at most the maximum breakpoint width. No query for the largest breakpoint.
+// Makes the @content apply to the given breakpoint and narrower.
+@mixin media-breakpoint-down($name, $breakpoints: $grid-breakpoints) {
+    $max: breakpoint-max($name, $breakpoints);
+
+    @if $max {
+        @media (max-width: $max) {
+            @content;
+        }
+    }
+
+    @else {
+        @content;
+    }
+}
+
+// Media that spans multiple breakpoint widths.
+// Makes the @content apply between the min and max breakpoints
+@mixin media-breakpoint-between($lower, $upper, $breakpoints: $grid-breakpoints) {
+    $min: breakpoint-min($lower, $breakpoints);
+    $max: breakpoint-max($upper, $breakpoints);
+
+    @if $min !=null and $max !=null {
+        @media (min-width: $min) and (max-width: $max) {
+            @content;
+        }
+    }
+
+    @else if $max ==null {
+        @include media-breakpoint-up($lower, $breakpoints) {
+            @content;
+        }
+    }
+
+    @else if $min ==null {
+        @include media-breakpoint-down($upper, $breakpoints) {
+            @content;
+        }
+    }
+}
+
+// Media between the breakpoint's minimum and maximum widths.
+// No minimum for the smallest breakpoint, and no maximum for the largest one.
+// Makes the @content apply only to the given breakpoint, not viewports any wider or narrower.
+@mixin media-breakpoint-only($name, $breakpoints: $grid-breakpoints) {
+    $min: breakpoint-min($name, $breakpoints);
+    $next: breakpoint-next($name, $breakpoints);
+    $max: breakpoint-max($next, $breakpoints);
+
+    @if $min !=null and $max !=null {
+        @media (min-width: $min) and (max-width: $max) {
+            @content;
+        }
+    }
+
+    @else if $max ==null {
+        @include media-breakpoint-up($name, $breakpoints) {
+            @content;
+        }
+    }
+
+    @else if $min ==null {
+        @include media-breakpoint-down($next, $breakpoints) {
+            @content;
+        }
+    }
+}
+
+@mixin generate-utility($utility, $infix, $is-rfs-media-query: false) {
+    $values: map-get($utility, values);
+
+    // If the values are a list or string, convert it into a map
+    @if type-of($values)=="string" or type-of(nth($values, 1)) !="list" {
+        $values: zip($values, $values);
+    }
+
+    @each $key,
+    $value in $values {
+        $properties: map-get($utility, property);
+
+        // Multiple properties are possible, for example with vertical or horizontal margins or paddings
+        @if type-of($properties)=="string" {
+            $properties: append((), $properties);
+        }
+
+        // Use custom class if present
+        $property-class: if(map-has-key($utility, class), map-get($utility, class), nth($properties, 1));
+        $property-class: if($property-class ==null, "", $property-class);
+
+        // Use custom CSS variable name if present, otherwise default to `class`
+        $css-variable-name: if(map-has-key($utility, css-variable-name), map-get($utility, css-variable-name), map-get($utility, class));
+
+        // State params to generate pseudo-classes
+        $state: if(map-has-key($utility, state), map-get($utility, state), ());
+
+        $infix: if($property-class =="" and str-slice($infix, 1, 1)=="-", str-slice($infix, 2), $infix);
+
+        // Don't prefix if value key is null (e.g. with shadow class)
+        $property-class-modifier: if($key, if($property-class =="" and $infix =="", "", "-") + $key, "");
+
+        @if map-get($utility, rfs) {
+
+            // Inside the media query
+            @if $is-rfs-media-query {
+                $val: rfs-value($value);
+
+                // Do not render anything if fluid and non fluid values are the same
+                $value: if($val ==rfs-fluid-value($value), null, $val);
+            }
+
+            @else {
+                $value: rfs-fluid-value($value);
+            }
+        }
+
+        $is-css-var: map-get($utility, css-var);
+        $is-local-vars: map-get($utility, local-vars);
+        $is-rtl: map-get($utility, rtl);
+
+        @if $value !=null {
+            @if $is-rtl ==false {
+                /* rtl:begin:remove */
+            }
+
+            @if $is-css-var {
+                .#{$property-class + $infix + $property-class-modifier} {
+                    --#{$prefix}#{$css-variable-name}: #{$value};
+                }
+
+                @each $pseudo in $state {
+                    .#{$property-class + $infix + $property-class-modifier}-#{$pseudo}:#{$pseudo} {
+                        --#{$prefix}#{$css-variable-name}: #{$value};
+                    }
+                }
+            }
+
+            @else {
+                .#{$property-class + $infix + $property-class-modifier} {
+                    @each $property in $properties {
+                        @if $is-local-vars {
+
+                            @each $local-var,
+                            $variable in $is-local-vars {
+                                --#{$prefix}#{$local-var}: #{$variable};
+                            }
+                        }
+
+                        #{$property}: $value if($enable-important-utilities, !important, null);
+                    }
+                }
+
+                @each $pseudo in $state {
+                    .#{$property-class + $infix + $property-class-modifier}-#{$pseudo}:#{$pseudo} {
+                        @each $property in $properties {
+                            @if $is-local-vars {
+
+                                @each $local-var,
+                                $variable in $is-local-vars {
+                                    --#{$prefix}#{$local-var}: #{$variable};
+                                }
+                            }
+
+                            #{$property}: $value if($enable-important-utilities, !important, null);
+                        }
+                    }
+                }
+            }
+
+            @if $is-rtl ==false {
+                /* rtl:end:remove */
+            }
+        }
+    }
+}
+
+
+// Loop over each breakpoint
+@each $breakpoint in map-keys($grid-breakpoints) {
+
+    // Generate media query if needed
+    @include media-breakpoint-up($breakpoint) {
+        $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+
+        // Loop over each utility property
+        @each $key,
+        $utility in $utilities {
+
+            // The utility can be disabled with `false`, thus check if the utility is a map first
+            // Only proceed if responsive media queries are enabled or if it's the base media query
+            @if type-of($utility)=="map" and (map-get($utility, responsive) or $infix =="") {
+                @include generate-utility($utility, $infix);
+            }
+        }
+    }
+}

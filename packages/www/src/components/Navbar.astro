@@ -1,0 +1,42 @@
+---
+import BrandIcon from "./BrandIcon.astro";
+import NavbarIcons from "./NavbarIcons.astro";
+
+interface Props {
+  currentPage: string;
+  width?: "page" | "docs";
+}
+
+const { currentPage, width = "page" } = Astro.props;
+---
+
+<header id="navbar">
+  <nav class={`d-flex nav-wrapper side-spacing ${width === "docs" ? "docs-content" : "page-content"}`}>
+    <BrandIcon />
+    <div class="spacer"></div>
+    <ul class="menu d-flex mx-3">
+      <li><a class="btn header-link" href="/docs">Docs</a></li>
+      <li class="visible-large"><a class="btn header-link" href="/docs">Changelog</a></li>
+    </ul>
+    <NavbarIcons />
+  </nav>
+</header>
+
+<script>
+  const header = document.querySelector("header");
+  if (header) {
+    window.addEventListener("scroll", ev => {
+      const isScroll = window.scrollY > 0;
+      if (isScroll && !header.classList.contains("scroll-on")) {
+        header.classList.add("scroll-on");
+      } else if (!isScroll && header.classList.contains("scroll-on")) {
+        header.classList.remove("scroll-on");
+      }
+    });
+  }
+
+  const button = document.querySelector<HTMLElement>("#navbar .icon-menu");
+  if (button) {
+    button.addEventListener("click", () => {});
+  }
+</script>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 404 201">
+    <circle cx="29" cy="101" r="5"/>
+    <path d="M29,93.84A7.16,7.16,0,1,1,21.84,101,7.17,7.17,0,0,1,29,93.84M29,93a8,8,0,1,0,8,8,8,8,0,0,0-8-8Z"/>
+    <circle cx="378" cy="101" r="5"/>
+    <path d="M378,93.84a7.16,7.16,0,1,1-7.16,7.16A7.17,7.17,0,0,1,378,93.84m0-.84a8,8,0,1,0,8,8,8,8,0,0,0-8-8Z"/>
+    <text transform="translate(8.48 84.63)" font-size="10">HttpCall</text>
+    <text transform="translate(362.48 84.63)" font-size="10">Result</text>
+    <rect x="158.5" y="87.5" width="88" height="27" rx="12" fill="none" stroke="#000" stroke-miterlimit="10"/>
+    <text transform="translate(182.57 104.6)" font-size="10">Handler</text>
+    <text transform="translate(170.48 77.89)" font-size="9">Middlware N</text>
+    <text transform="translate(171.28 51.89)" font-size="9">Middlware 2</text>
+    <text transform="translate(171.28 24.89)" font-size="9">Middlware 1</text>
+    <rect x="122.5" y="67" width="160" height="68" rx="8" fill="none" stroke="gray" stroke-miterlimit="10" stroke-width="2"/>
+    <rect x="98" y="39.5" width="209" height="123" rx="8" fill="none" stroke="gray" stroke-miterlimit="10" stroke-width="2"/>
+    <rect x="71" y="14" width="263" height="174" rx="8" fill="none" stroke="gray" stroke-miterlimit="10" stroke-width="2"/>
+    <line x1="44.5" y1="100.5" x2="146.34" y2="100.5" fill="none" stroke="#000" stroke-miterlimit="10" stroke-width="1.45"/>
+    <polygon points="145.5 103.39 150.5 100.5 145.5 97.61 145.5 103.39"/>
+    <line x1="253" y1="100.5" x2="359.34" y2="100.5" fill="none" stroke="#000" stroke-miterlimit="10" stroke-width="1.45"/>
+    <polygon points="358.5 103.39 363.5 100.5 358.5 97.61 358.5 103.39"/>
+</svg>

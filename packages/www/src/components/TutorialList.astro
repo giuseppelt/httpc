@@ -1,0 +1,18 @@
+---
+const tutorials = (await Astro.glob("~/pages/docs/tutorials/*.mdx"))
+  .filter(x => x.url !== "/docs/tutorials") // exclude index
+  .filter(x => !x.frontmatter.draft);
+---
+
+<ul>
+  {
+    tutorials.map(x => (
+      <li>
+        <p>
+          <a href={x.url}>{x.frontmatter.title}</a>
+        </p>
+        <small>{x.frontmatter.description}</small>
+      </li>
+    ))
+  }
+</ul>

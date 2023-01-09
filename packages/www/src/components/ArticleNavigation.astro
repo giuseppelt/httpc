@@ -1,0 +1,93 @@
+---
+import Icon from "astro-icon";
+import { getNavLinks } from "../sidebar";
+
+export interface Props {
+  currentPage: string;
+  base?: string;
+}
+
+const { base: _base, currentPage } = Astro.props;
+
+let base = _base;
+if (base && base.startsWith("/")) base = base.substring(1);
+
+let current = currentPage;
+if (current.startsWith("/")) current = current.substring(1);
+if (base && current.startsWith(`${base}/`)) {
+  current = current.substring(base.length + 1);
+}
+
+let { prev, next } = getNavLinks(current);
+
+prev = (prev && `/${base}/${prev}`) || undefined;
+next = (next && `/${base}/${next}`) || undefined;
+
+const articles = await Astro.glob("~/pages/docs/**/*.mdx");
+const prevArticle = (prev && articles.find(x => x.url === prev)) || undefined;
+const nextArticle = (next && articles.find(x => x.url === next)) || undefined;
+---
+
+<aside class="container-grid-2col my-5">
+  {
+    prev ? (
+      <a href={prev} class="btn btn-article-nav" rel="prev">
+        <Icon className="icon" name="ic:round-chevron-left" />
+        <span>
+          <span class="label d-block">Previous</span>
+          <span class="title d-block">{prevArticle!.frontmatter.title}</span>
+        </span>
+      </a>
+    ) : (
+      <span />
+    )
+  }
+  {
+    next ? (
+      <a href={next} class="btn btn-article-nav btn-next" rel="next">
+        <Icon className="icon" name="ic:round-chevron-right" />
+        <span>
+          <span class="label d-block">Next</span>
+          <span class="title d-block">{nextArticle!.frontmatter.title}</span>
+        </span>
+      </a>
+    ) : (
+      <span />
+    )
+  }
+</aside>
+
+<style lang="scss">
+  .btn-article-nav {
+    border: 1px solid var(--color-dim);
+    align-items: center;
+    border-radius: var(--theme-rounded);
+    background-color: var(--theme-bg-color-dark);
+    flex-grow: 1;
+    display: flex;
+    text-decoration: none !important;
+    padding: 0.65rem 0 !important;
+
+    .icon {
+      width: 42px;
+      color: var(--color-dim);
+    }
+
+    .label {
+      font-weight: normal;
+      font-size: var(--theme-text-2xs);
+    }
+    .title {
+      font-size: var(--theme-text-sm);
+    }
+
+    &:hover {
+      background-color: var(--theme-color-hover);
+    }
+  }
+
+  .btn-next {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+</style>

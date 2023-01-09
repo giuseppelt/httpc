@@ -1,0 +1,28 @@
+{
+  "name": "httpc-example-netlify-functions",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "netlify dev --dir ./dist",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "~16",
+    "netlify-cli": "^12.2.9",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "@httpc/adapter-netlify": "^0.0.1",
+    "@httpc/client": "^0.0.1",
+    "@httpc/server": "^0.0.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "@httpc/cli": "link:..\\..\\packages\\cli",
+      "@httpc/client": "link:..\\..\\packages\\client",
+      "@httpc/server": "link:..\\..\\packages\\server",
+      "@httpc/adapter-netlify": "link:..\\..\\packages\\adapter-netlify"
+    }
+  }
+}

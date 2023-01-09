@@ -1,0 +1,1523 @@
+---
+layout: ~/layouts/Docs.astro
+title: Build a Personal Movie Library
+shortTitle: Build a Movie Library
+description: A step by step tutorial about building a movie catalogue API with registry and searching features
+complexity: easy
+basePackage: "@httpc/server"
+executionTime: 1h
+---
+import Aside from "~/components/Aside.astro";
+import PackageManagerTabs from "~/components/tabs/PackageManagerTabs.astro";
+import CodeTabs from "~/components/tabs/CodeTabs.tsx";
+
+
+## About this tutorial
+This is article is a step-by-step tutorial about building a simple function-based API server and a client to consume it.
+
+<br />
+The _Personal Movie Library_ is a movie catalogue service that allows the user to browse movies, get movie details and search movies by actor and director.
+
+<br />
+The project will feature:
+- the Movie Library **API server** (the service provider)
+  <small>
+  The server application that exposes the library functionalities like movie details and searching
+  </small>
+  
+- the Movie Library **Console** (the service consumer)
+  <small>
+  The client application that talks to the server to get the data, shows movie info on screen and interact with the user
+  </small>
+
+
+This project is build upon **@httpc/server**.
+<br />
+This project will use typescript.
+
+<Aside type="info">
+For more advanced tutorials, you can check the ones based on **@httpc/kit**, which cover more complex topics like authentication, validations, etc...
+</Aside>
+
+
+## What you'll learn
+
+**Phase 1**
+
+1. Set up a monorepo with 2 packages, the _API server_ and the _Console client_
+2. Build a simple **httpc** API with minimal code
+3. Call the _API_ functions from the _Console_ with ease thanks to autocompletion and typing definitions
+
+**Phase 2**
+
+4. Evolving the _API_ with new functionalities and modifications
+5. Experience the immediate changes available on the _Console_, getting new functions to call and breaking at compile time when the _API_ functions have changed
+
+
+
+## Chapters
+
+### Chapter 1: Setup the monorepo
+This project will use the following monorepo structure:
+```
+project/
+├─ api/
+├─ console/
+└─ package.json
+```
+Let's begin!
+
+<br />
+Please, create a new folder and inside it create a `package.json`. 
+```json
+{
+    "name": "movie-library-monorepo",
+    "version": "1.0.0",
+    "private": true
+}
+```
+You can name it as you want. You can also use package initializer like `npm init` that will create the `package.json` in an automatic fashion.
+
+<PackageManagerTabs>
+    <Fragment slot="npm">
+If you use **npm**, to create a workspace, please edit the `package.json` with:
+```json title="package.json" add=3-6
+{
+    "name": "movie-library-monorepo",
+    "workspaces": [
+        "api",
+        "console"
+    ],
+    "version": "1.0.0",
+    "private": true
+}
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+If you use **pnpm**, alongside the `package.json`, please create the a new file `pnpm-workspace.yaml`.
+```yaml title="pnpm-workspace.yaml"
+packages:
+  - api
+  - console
+```
+    </Fragment>
+    <Fragment slot="yarn">
+If you use **yarn**, to create a workspace, please edit the `package.json` with:
+```json title="package.json" add=3-6
+{
+    "name": "movie-library-monorepo",
+    "workspaces": [
+        "api",
+        "console"
+    ],
+    "version": "1.0.0",
+    "private": true
+}
+```
+    </Fragment>
+</PackageManagerTabs>
+
+This folder will be the root of your project.
+
+<Aside type="tip" title="Info" small>
+This tutorial will cover only the essential aspects about monorepos needed for this project to work. You can learn how to setup one and how to manage it in the documentation of the package manager of your choice.
+</Aside>
+
+
+
+### Chapter 2: Create the API server
+
+#### Setup the API server package
+Now, we can create the API server package. Let's start from a template to have something ready quickly.
+
+<br />
+Open a new terminal and inside the project root, please run:
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+mkdir api
+cd api
+npm create @httpc
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+mkdir api
+cd api
+pnpm create @httpc
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+mkdir api
+cd api
+yarn create @httpc
+```
+    </Fragment>
+</PackageManagerTabs>
+
+In the **@httpc** setup wizard, please pick the _Server Blank_ template. Then, you can name it `movie-library-api`.
+
+<br />
+Now let's install all the dependencies.
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm install
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm install
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn install
+```
+    </Fragment>
+</PackageManagerTabs>
+
+The template will create something like:
+```
+project/
+├─ api/
+│  ├─ src/
+│  │  ├─ calls/
+│  │  │  └─ index.ts
+│  │  └─ index.ts
+│  ├─ package.json
+│  └─ tsconfig.json
+├─ console/
+└─ package.json
+```
+
+The main files are:
+- `api/src/index.ts`
+
+  The entry point of the API server where the configuration and bootstrap happen
+
+- `api/src/calls/index.ts`
+
+  The _Call file_ which includes all the functions that will be exposed.
+
+
+#### Writing the first function
+Let's start coding! Let's build the first function.
+
+<br />
+As the first function, we can create a little utility that returns info about the API server: it's name and version.
+
+```ts title="api/src/calls/index.ts"
+import fs from "fs/promises";
+import { httpCall } from "@httpc/server";
+
+
+const info = httpCall(async () => {
+    const packageJson = JSON.parse(await fs.readFile("package.json", "utf8"));
+
+    return {
+        name: "Movie Library",
+        version: packageJson.version as string
+    };
+});
+
+export default {
+    info
+}
+```
+
+The _Call file_ contains the `info` function. It returns the API name and version read from the `package.json`. Finally, the `info` function is exported.
+<br />
+Exported functions will be exposed and callable by clients.
+
+
+#### Startup the API
+Now let's run the server and check if everything is ok.
+<br />
+In the `api` folder, please run:
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm run dev
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm dev
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn run dev
+```
+    </Fragment>
+</PackageManagerTabs>
+
+You should see something like:
+
+<div class="container-terminal">
+Server started: http//localhost:3000
+</div>
+
+Everything works! The API is up and running!
+
+You can change the listening port by setting a PORT env variable.
+
+#### Test the API
+Let's test the `info` function. While the server is running, open another terminal, navigate to the api folder and run
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm run httpc call info
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm httpc call info
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn run httpc call info
+```
+    </Fragment>
+</PackageManagerTabs>
+
+You should see something like:
+
+<div class="container-terminal">
+{`{
+    "name": "Movie Library",
+    "version": "1.0.0"
+}`}
+</div>
+
+
+### Chapter 3: Create the Console
+
+#### Setup the Console package
+In the project root, please create a `console` folder and inside create a `package.json`.
+```json title=console/package.json
+{
+    "name": "movie-library-console",
+    "version": "1.0.0"
+}
+```
+
+Now let's install some dependency needed to code the Console. On the terminal, in the `console` folder please run:
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm install typescript ts-node @types/node --save-dev
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm add typescript ts-node @types/node --save-dev
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn add typescript ts-node @types/node --dev
+```
+    </Fragment>
+</PackageManagerTabs>
+
+Let's configure typescript. In the `console` folder, please create a `tsconfig.json` file.
+```json title=console/tsconfig.json
+{
+    "compilerOptions": {
+        "outDir": "dist",
+        "module": "commonjs",
+        "skipLibCheck": true,
+        "strict": true,
+        "target": "es2022",
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "resolveJsonModule": true
+    },
+    "include": [
+        "src"
+    ]
+}
+```
+
+Now we need to create the entry point of the Console, i.e. the code that will run.
+
+<br />
+In the `console` folder, add an `index.ts` file inside the `src` folder.
+```ts title=console/src/index.ts
+console.log("Movie library console client");
+```
+
+Now we can set the start script. Open the console `package.json` and write.
+```json title=console/package.json add=4-6
+{
+    "name": "movie-library-console",
+    "version": "1.0.0",
+    "scripts": {
+        "dev": "ts-node src/index.ts"
+    }
+}
+```
+With the `dev` command, you can run the _Console_ during the development.
+
+<br />
+You should have the following files:
+```
+project/
+│  ├─ api/ ...
+│  └─ console/
+│     ├─ src/
+│     │  └─ index.ts
+│     ├─ package.json
+│     └─ tsconfig.json
+└─ ...
+```
+
+#### Test run
+Let's run it! On the terminal, in the `console` folder please run:
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm run dev
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm dev
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn run dev
+```
+    </Fragment>
+</PackageManagerTabs>
+
+You should see something like:
+
+<div class="container-terminal">
+Movie library console client
+</div>
+
+
+#### Generate the API client 
+To call the API, the Console needs to _import_ it. Import, means including the API **httpc client**.
+
+<br />
+An **httpc client** is a small chunk of code auto generated from an **httpc server**. The _client_ allows to call the function on the _server_ with a smooth experience thanks to autocompletion and typing awareness.
+
+<Aside type="tip">
+You can read [Client generation](../client-generation) for extensive details about the **httpc client**, the generation process and advanced usage.
+</Aside>
+
+<br />
+Since we never generated the client for our Movie Library API, first of all we need to generate it.
+
+<br />
+To generate the client, on the terminal, navigate into the `api` folder and run:
+
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm run generate:client
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm generate:client
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn run generate:client
+```
+    </Fragment>
+</PackageManagerTabs>
+
+
+With the default settings, the _client_ will be generated into the `api/client` folder.
+
+<br />
+Because the generated _client_ is just a standard package, we need to update the workspace to let the package manager know its existence.
+
+<PackageManagerTabs>
+    <Fragment slot="npm">
+Edit the **root** `package.json` and include the api client.
+```json title="package.json" add=5
+{
+    "name": "movie-library-monorepo",
+    "workspaces": [
+        "api",
+        "api/client",
+        "console"
+    ],
+    "version": "1.0.0",
+    "private": true
+}
+```
+And because we added a new package to the workspace, let's refresh the dependencies. Please run:
+```bash
+npm install
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+Edit workspace file and include the api client.
+```yaml title=pnpm-workspace.yaml add=3
+packages:
+  - api
+  - api/client
+  - console
+```
+And because we added a new package to the workspace, let's refresh the dependencies. Please run:
+```bash
+pnpm install
+```
+    </Fragment>
+    <Fragment slot="yarn">
+Edit the **root** `package.json` and include the api client.
+```json title="package.json" add=5
+{
+    "name": "movie-library-monorepo",
+    "workspaces": [
+        "api",
+        "api/client",
+        "console"
+    ],
+    "version": "1.0.0",
+    "private": true
+}
+```
+And because we added a new package to the workspace, let's refresh the dependencies. Please run:
+```bash
+yarn install
+```
+    </Fragment>
+</PackageManagerTabs>
+
+
+#### Import the API client 
+With the _client_ now generated, we can finally _import_ it into the Console.
+
+On the terminal, navigate to the `console` folder and run:
+
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm install ../api/client
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm add movie-library-api-client
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn add ../api/client
+```
+    </Fragment>
+</PackageManagerTabs>
+
+The _client_ depends on the `fetch` to be globally available. If you using node 18+, you're ready to go. Otherwise you need to install a polyfill.
+
+<details>
+<summary>
+Install a polyfill for node 16.
+</summary>
+
+In the `console` folder, please run:
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm install cross-fetch
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm add cross-fetch
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn add cross-fetch
+```
+    </Fragment>
+</PackageManagerTabs>
+
+And import it into the Console `index.ts`.
+
+```ts title=console/src/index.ts add=1
+import "cross-fetch/polyfill";
+
+console.log("Movie library console client");
+```
+</details>
+
+Now we can import the api client into the main Console file.
+
+```ts title=console/src/index.ts add=2-6
+import "cross-fetch/polyfill"; // only for node16
+import createClient from "movie-library-api-client";
+
+const client = createClient({
+    endpoint: process.env.API_ENDPOINT || "http://localhost:3000"
+});
+
+console.log("Movie library console client");
+```
+The client will connect to the `API_ENDPOINT` environment variable if found, otherwise will default to `localhost`.
+
+
+#### First function call
+Now we're ready to make our first call to the server.
+
+<br/>
+Let's call the `info` function and print the results the to the screen.
+
+```ts title=console/src/index.ts mark=9
+import createClient from "movie-library-api-client";
+
+const client = createClient({
+    endpoint: process.env.API_ENDPOINT || "http://localhost:3000"
+});
+
+
+async function main(){
+    const info = await client.info();
+    console.log(`Connected to the API: ${api.name} v${api.version}`);
+}
+
+main();
+```
+In the above code, the **httpc** call is highlighted.
+
+<Aside type="info" title="Editor experience">
+In an advanced code editor like vscode, you'll see full typing information. If you manually typed the line, you'll get autocompletion with all functions available.
+</Aside>
+
+
+All is ready to try it. In the `console` folder, run.
+
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm run dev
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm dev
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn run dev
+```
+    </Fragment>
+</PackageManagerTabs>
+
+You should see:
+
+<div class="container-terminal">
+Connected to the API: Movie Library v0.0.1
+</div>
+
+It works! The function call executed smoothly.
+
+#### Make it more colorful
+Let's add some spark. We'll use the [kleur](https://www.npmjs.com/packages/kleur) package to bring colors to the terminal.
+
+<br/>
+In the `console` folder, please run:
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm install kleur
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm add kleur
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn add kleur
+```
+    </Fragment>
+</PackageManagerTabs>
+
+And now some refactoring:
+- Create a `printWelcome` function to display the welcome message
+- Decorate with some color to make it stand out
+
+```ts title=console/src/index.ts add=2-11,16 del=14-15
+import createClient from "movie-library-api-client";
+import kleur from "kleur";
+
+async function printWelcome() {
+    const info = await client.info();
+    console.log(kleur.bold(
+        kleur.bgGreen(` ${info.name} `) +
+        kleur.bgWhite(` v${info.version}`) +
+        "\n"
+    ));
+}
+
+async function main(){
+    const info = await client.info();
+    console.log(`Connected to the API: ${api.name} v${api.version}`);
+    await printWelcome();
+}
+
+main();
+```
+
+Try it! In the `console` folder, run:
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm run dev
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm dev
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn run dev
+```
+    </Fragment>
+</PackageManagerTabs>
+
+You should see a more colorful output!
+<div class="container-terminal">
+<strong style="color:black"><span style="background-color:#1ca160"> Movie Library </span><span style="background-color:white"> v0.0.1 </span></strong>
+</div>
+
+
+
+
+### Chapter 4: Create the Movie Library
+Both the _API_ and the _Console_ are ready and talk each other nicely.
+
+Now we can build the core stuff: the Movie library.
+
+#### Import the movie catalogue
+For our library, let's use a pre-made movie catalogue. We'll use a simple json file.
+
+Download the [`movie-db.json`](https://github.com/giuseppelt/httpc/examples/movie-personal-library/api/data/movie-db.json) and place it in the `data` folder inside your _API_.
+```
+project/
+│  ├─ api/
+│  │  ├─ data/
+│  │  │  └─ movie-db.json  <-- put it here
+│  │  ├─ src/
+│  │  │  └─ index.ts
+│  │  ├─ package.json
+│  │  └─ tsconfig.json
+│  └─ console/ ...
+└─ ...
+```
+
+The file has a flat structure of movie information:
+{/*cspell:disable*/}
+```json
+[
+  { ... },
+  {
+      "id": 671,
+    "original_language": "English",
+    "overview": "Harry Potter has lived under the stairs at his aunt and uncle's house his whole life. But on his 11th birthday, he learns he's a powerful wizard -- with a place waiting for him at the Hogwarts School of Witchcraft and Wizardry. As he learns to harness his newfound powers with the help of the school's kindly headmaster, Harry uncovers the truth about his parents' deaths -- and about the villain who's to blame.",
+    "genres": [
+      "Adventure",
+      "Fantasy"
+    ],
+    "release_date": "2001-11-16",
+    "runtime": 152,
+    "tagline": "Let the Magic Begin.",
+    "title": "Harry Potter and the Philosopher's Stone",
+    "directors": [
+      {
+        "id": 10965,
+        "name": "Chris Columbus"
+      }
+    ],
+    "cast": [
+      {
+        "id": 10980,
+        "name": "Daniel Radcliffe"
+      },
+      {
+        "id": 10989,
+        "name": "Rupert Grint"
+      },
+      {
+        "id": 10990,
+        "name": "Emma Watson"
+      }
+    ]
+  },
+  { ... },
+]
+```
+{/*cspell:enable*/}
+
+Now, let's create a module to handle basic operations against the db. Create a `db.ts` in the api folder.
+```ts title=api/src/db.ts
+import fs from "fs/promises";
+
+
+async function load() {
+    return JSON.parse(await fs.readFile("data/movie-db.json", "utf8"));
+}
+
+export default {
+    load,
+}
+```
+
+For now, the `db.ts` module will just load all the movies.
+
+Let's add some type information so we can code safely in our the _API_. In addition, the type info will be available to clients to benefit from it as well.
+
+```ts title=api/src/db.ts mark=4-20 del=22 add=23
+import fs from "fs/promises";
+
+
+export type Movie = Readonly<{
+    id: number
+    original_language: string
+    overview: string
+    release_date: string
+    runtime: number
+    tagline: string
+    title: string
+    genres: readonly string[]
+    directors: readonly Person[]
+    cast: readonly Person[]
+}>
+
+export type Person = Readonly<{
+    id: number
+    name: string
+}>
+
+async function load() {
+async function load(): Promise<readonly Movie[]> {
+    return JSON.parse(await fs.readFile("data/movie-db.json", "utf8"));
+}
+
+
+export default {
+    load,
+}
+```
+
+<Aside type="tip">
+In typescript, you can use <code>Readonly{"<>"}</code> and `readonly []` for arrays to make sure data cannot be changed.
+</Aside>
+
+
+#### Build the `stats` function
+Let's start with a function that returns some overall information about our db. We'll create a `stats` function that returns some aggregate statistics like how many movies our catalogue is composed of, which genres and how many actors and directors are listed.
+
+<br />
+Add a new `stats` function inside the call file.
+
+```ts title=api/src/calls/index.ts add=24 mark=8-20
+import fs from "fs/promises";
+import { httpCall } from "@httpc/server";
+import db from "../db";
+
+
+const info = httpCall(/** omitted  */);
+
+const stats = httpCall(async () => {
+    const movies = await db.load();
+    const genres = [...new Set(movies.flatMap(x => x.genres))];
+    const actors = [...new Set(movies.flatMap(x => x.cast.map(x => x.id)))];
+    const directors = [...new Set(movies.flatMap(x => x.directors.map(x => x.id)))];
+
+    return {
+        count: movies.length,
+        genres,
+        actorCount: actors.length,
+        directorCount: directors.length,
+    };
+});
+
+export default {
+    info,
+    stats,
+}
+```
+
+The new `stats` function is ready to be called. 
+<br />
+**No extra code is needed**.
+<br />
+You just write the function and export it. The **httpc server** will do the hard work of figuring out how to execute it when a new request arrives.
+
+<br />
+We can test the new `stats` function and see if anything works. On the terminal, in the `api` folder, please run:
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm run httpc call stats
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm httpc call stats
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn run httpc call stats
+```
+    </Fragment>
+</PackageManagerTabs>
+
+The terminal will show something like:
+<div class="container-terminal">
+{`{
+    "count": 2000,
+    "genres": [
+        "Action",
+        "Science Fiction",
+        ...
+    ],
+    "actorCount": 3698,
+    "directorCount": 1222
+}`}
+</div>
+
+
+#### Bring the stats to Console
+Now let's display the summary info within our Console.
+
+<br />
+Because the API changed, we need to update the typing information, so the code editor can provide updated autocompletion and the typescript compiler can ensure type safety with the new state.
+
+<br />
+Into the `api` folder, please run:
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm run generate:client
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm generate:client
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn run generate:client
+```
+    </Fragment>
+</PackageManagerTabs>
+
+Since the _api client_ is already imported into our _Console_ package, no further action is needed.
+
+<br />
+Now, switch to the Console and let's show the stats.
+
+<br />
+Add a new function to print the db stats on screen.
+```ts title=console/src/index.ts mark=2
+async function printStats() {
+    const stats = await client.stats();
+    console.log(`${kleur.bold("Movies:")}\t\t${stats.count}`);
+    console.log(`${kleur.bold("Genres:")}\t\t${stats.genres.length}`);
+    console.log(`${kleur.bold("Actors:")}\t\t${stats.actorCount}`);
+    console.log(`${kleur.bold("Directors:")}\t${stats.directorCount}`);
+    console.log("\n");
+}
+```
+The highlighted line shows the new function call to the API server.
+
+<Aside type="tip" small>
+Sometime code editors lag to update when a package changes under the hood (we regenerated the _api client_). If you're in vscode, just execute `F1 > TypesScript: Reload project`, and you're good to go.
+</Aside>
+
+<br />
+The Console will call the new `printStats` function form the `main`.
+```ts title=console/src/index.ts add=7
+// previous code here
+
+async function printStats() { /** see above */ }
+
+async function main(){
+    await printWelcome();
+    await printStats();
+}
+
+main();
+```
+Now, let's run the Console end see the result. From the `console` folder, run:
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm run dev
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm dev
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn run dev
+```
+    </Fragment>
+</PackageManagerTabs>
+
+You should see something like:
+
+<div class="container-terminal">
+<strong style="color:black"><span style="background-color:#1ca160"> Movie Library </span><span style="background-color:white"> v0.0.1 </span></strong>
+<br/><br/>
+<strong>Movies:</strong>         2000
+<strong>Genres:</strong>         18
+<strong>Actors:</strong>         3698
+<strong>Directors:</strong>      1222    
+</div>
+
+
+
+### Chapter 5: Build the movie search
+#### Create a search function
+Let's build a simple search movie functionality. The new `search` function will allow the user to look for movies with a search term. If the movie title contains the term, then that movie will be added to the search results.
+
+<br />
+For the term-title comparison we'll use the `lowercase` text, so capital letters match as well.
+
+<br/>
+For this case, we'll add a simple validation, requiring at least 3 characters to perform the search.
+
+<br />
+In the _Call_ file, add a new `search` function:
+```ts title=api/src/calls/index.ts add=30
+import { httpCall, BadRequestError } from "@httpc/server";
+
+// previous code here
+
+const search = httpCall(async (text: string) => {
+    // validation
+    if(typeof text !== "string" || text.length < 3) {
+        throw new BadRequestError();
+    }
+    
+    // use lowercase to search
+    text = text && text.toLowerCase();
+
+    const movies = await db.load();
+
+    const filtered = movies.filter(x => {
+        if (text && x.title.toLowerCase().includes(text)) {
+            return true;
+        }
+
+        return false;
+    });
+
+    return filtered.slice(0, 10);
+});
+
+export default {
+    info,
+    stats,
+    search,
+}
+```
+
+Remember to export the `search` function.
+<br />
+Let's test it. Let's look for Harry Potter movies, with the search term `harry`.
+
+<br />
+On the terminal, in the `api` folder, please run:
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm run httpc call search harry
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm httpc call search harry
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn run httpc call search harry
+```
+    </Fragment>
+</PackageManagerTabs>
+
+You should see something like:
+<div class="container-terminal">
+{`[
+    {
+        "id": 671,
+        "title": "Harry Potter and the Philosopher's Stone",
+        ...
+    },
+    {
+        "id": 674,
+        "title": "Harry Potter and the Goblet of Fire",
+        ...
+    },
+    ...
+]`}
+</div>
+
+#### Search form the Console
+Because the _API_ changed with the new `search` function, we need to regenerate the api client.
+<br />
+Into the `api` folder, please run:
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm run generate:client
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm generate:client
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn run generate:client
+```
+    </Fragment>
+</PackageManagerTabs>
+
+
+<br />
+Because the _Console_ is getting bigger with many functionalities, let's add a simple menu to help the user pick what operation he want to do.
+
+<br />
+To aid with user interactions, like asking questions, we'll use the [prompts](https://www.npmjs.com/package/prompts) package.
+
+In the `console` folder, install it.
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm install prompts
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm add prompts
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn add prompts
+```
+    </Fragment>
+</PackageManagerTabs>
+
+Now, let's create a quick menu to handle witch action the user want to execute.
+
+```ts title=console/src/index.ts
+import prompts from "prompts";
+
+// previous code here
+
+async function main() {
+    await printWelcome();
+
+    do {
+        const action = await prompts({
+            name: "menu",
+            type: "select",
+            message: "What would you like to do?",
+            choices: [
+                { title: "View library stats", value: "stats" },
+                { title: "View a movie info", value: "view" },
+                { title: "Exit", value: "exit" },
+            ]
+        });
+
+        switch (action.menu) {
+            case "stats": await printStats(); break;
+            case "view": await viewMovieInfo(); break;
+            case "exit": return;
+        }
+    } while (true);
+}
+```
+
+Let's implement the `viewMovieInfo` function to allow the user to look up for a movie and see its details.
+
+<br />
+The search feature involves 4 steps:
+- Ask the user the search term
+- Use the term to perform the API call `search` and get the search results
+- Ask the user to pick a movie from the search results we printed on screen
+- Display the movie details for the one selected by the user
+
+```ts title=console/src/index.ts
+async function viewMovieInfo() {
+    let term: string;
+    do {
+        ({ term } = await prompts({
+            name: "term",
+            type: "text",
+            message: "Search a movie by title (min 3 chars):"
+        }));
+    } while (!term || term.length <= 2);
+
+    const results = await client.search(term);
+    if (results.length === 0) {
+        console.log("No movie found for: %s", term);
+        return;
+    }
+
+
+    const { movieId } = await prompts({
+        name: "movieId",
+        type: "select",
+        message: "Please select",
+        choices: results.map(x => ({
+            title: x.title,
+            value: x.id
+        }))
+    });
+
+    const movie = results.find(x => x.id === movieId)!;
+    console.log(
+        "\n" +
+        kleur.bold(movie.title) + "\n" +
+        movie.tagline + "\n\n" +
+        kleur.gray("Genres: ") + movie.genres.join(", ") + "\n" +
+        kleur.gray("Directors: ") + movie.directors.map(x => x.name).join(", ") + "\n" +
+        kleur.gray("Cast: ") + movie.cast.map(x => x.name).join(", ") + "\n"
+    );
+}
+```
+
+Let's test the new search feature.
+
+In the `console` folder run the following command and pick `"view"` from the menu.
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm run dev
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm dev
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn run dev
+```
+    </Fragment>
+</PackageManagerTabs>
+
+
+
+
+### Chapter 6: Build the person search
+
+Our Movie Library will allow the user to see movies with a specific actor or a director.
+To do so, we'll implement a search movie by person functionality.
+
+<br />
+A user-friendly application cannot pretend the user to write correctly the full actor name. Therefore, we need to build a search person functionality first.
+
+#### Create the search person function
+A new `searchPerson` function will look for both actors and directors.
+
+<br />
+Like the `search` movie function, we'll
+- use the `lowercase` term to match also with capital letters
+- add a simple validation requiring the term to be at least 3 characters
+
+<br />
+Edit the _Call_ files and add the `searchPerson` function:
+```ts title=api/src/calls/index.ts
+// previous code here
+
+const searchPerson = httpCall(async (text: string) => {
+    // validation
+    if (typeof text !== "string" || text.length < 3) {
+        throw new BadRequestError();
+    }
+
+    // use lowercase to search    
+    text = text.toLowerCase();
+
+    const movies = await db.load();
+
+    const persons = movies.reduce((persons, movie) => {
+        movie.cast.forEach(x => {
+            if (x.name.toLowerCase().includes(text)) {
+                persons.set(x.id, x);
+            }
+        });
+
+        movie.directors.forEach(x => {
+            if (x.name.toLowerCase().includes(text)) {
+                persons.set(x.id, x);
+            }
+        });
+
+        return persons;
+    }, new Map<number, Person>())
+
+    return [...persons.values()].slice(0, 10);
+});
+
+export default {
+    version,
+    stats,
+    search,    
+    searchPerson,
+}
+```
+
+#### Evolve `search` with the person filter
+Now we need to modify the `search` function to include the person as a filter.
+<br />
+In addition, let's rename the `search` to `searchMovie` to avoid ambiguity and keep consistent naming with `searchPerson`.
+
+```ts title=api/src/calls/index.ts del=6,41 add=1-4,7,12-14,25-30,42
+type SearchMovieOptions = {
+    text?: string
+    person?: number
+}
+
+const search = httpCall(async (text: string) => {
+const searchMovie = httpCall(async ({ text, person }: SearchMovieOptions = {}) => {
+    // validation
+    if (text !== undefined && (typeof text !== "string" || text.length < 3)) {
+        throw new BadRequestError();
+    }
+    if (person !== undefined && typeof person !== "number") {
+        throw new BadRequestError();
+    }
+
+
+    text = text && text.toLowerCase();
+
+    const movies = await db.load();
+
+    const filtered = movies.filter(x => {
+        if (text && x.title.toLowerCase().includes(text)) {
+            return true;
+        }
+        if (person && (
+            x.cast.some(x => x.id === person) ||
+            x.directors.some(x => x.id === person)
+        )) {
+            return true;
+        }
+
+        return false;
+    });
+
+    return filtered.slice(0, 10);
+})
+
+export default {
+    version,
+    stats,
+    search,
+    searchMovie,    
+    searchPerson,
+}
+```
+
+Now we can regenerate the client, with the new changes.
+
+<br />
+Into the `api` folder please run:
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm run generate:client
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm generate:client
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn run generate:client
+```
+    </Fragment>
+</PackageManagerTabs>
+
+#### Update the Console
+Switch to the Console. We need to update the search functionality to address the API changes.
+
+<br />
+Because the `search` API function changed naming and parameter type, your code editor should complain and show an error on the following line.
+
+```ts title=console/src/index.ts mark=4
+async function viewMovieInfo() {
+    // other code 
+
+    const results = await client.search(term);
+
+    // other code 
+}
+```
+<Aside type="tip" small>
+Sometime code editors lag to update when a package changes under the hood (we regenerated the _api client_). If you're in vscode, just execute `F1 > TypesScript: Reload project`, and you're good to go.
+</Aside>
+
+Let's update the Console code to address the new API function.
+
+```ts title=console/src/index.ts del=4 add=5-7
+async function viewMovieInfo() {
+    // other code 
+
+    const results = await client.search(term);
+    const results = await client.searchMovie({
+        text: term
+    });
+
+    // other code 
+}
+```
+
+#### Implement show movie by person
+Now we can allow the user to search movies by an actor or a director.
+
+The search movie by person feature involves 5 steps:
+- Ask the user for the search term, used to search a person first
+- Use the term to perform the API call `searchPerson` and get the search results
+- Ask the user to pick a person from the search results we printed on screen
+- Use the person selected to perform the API call `searchMovie` to get movies with that person
+- Display the movies returned to the user
+
+```ts title=console/src/index.ts
+async function viewMovieByPerson() {
+    let term: string;
+    do {
+        ({ term } = await prompts({
+            name: "term",
+            type: "text",
+            message: "Search for a person (min 3 chars):"
+        }));
+    } while (!term || term.length <= 2);
+
+    const results = await client.searchPerson(term);
+    if (results.length === 0) {
+        console.log("No person found for: %s", term);
+        return;
+    }
+
+    const { personId } = await prompts({
+        name: "personId",
+        type: "select",
+        message: "Please select",
+        choices: results.map(x => ({
+            title: x.name,
+            value: x.id
+        }))
+    });
+    console.log("\n");
+
+    const person = results.find(x => x.id === personId)!;
+
+
+    const movies = await client.searchMovie({
+        person: personId
+    });
+    if (movies.length === 0) {
+        console.log("No movie found with: %s", person.name);
+        return;
+    }
+
+    console.log(kleur.gray("Movies with: ") + kleur.bold(person.name) + "\n");
+    // sort by release_date descending
+    movies.sort((x, y) => new Date(y.release_date).getTime() - new Date(x.release_date).getTime())
+        .forEach(x => console.log(`(${x.release_date.substring(0, 4)}) ${x.title}`));
+
+    console.log("\n");
+}
+```
+
+And finally, let's add the new `viewMovieByPerson` into the main menu:
+```ts title=console/src/index.ts add=11,19
+async function main() {
+    // other code
+
+        const action = await prompts({
+            name: "menu",
+            type: "select",
+            message: "What would you like to do?",
+            choices: [
+                { title: "View library stats", value: "stats" },
+                { title: "View a movie info", value: "view" },
+                { title: "View all movies of someone", value: "by-person" },
+                { title: "Exit", value: "exit" },
+            ]
+        });
+
+        switch (action.menu) {
+            case "stats": await printStats(); break;
+            case "view": await viewMovieInfo(); break;
+            case "by-person": await viewMovieByPerson(); break;
+            case "exit": return;
+        }
+
+    // other code
+}
+```
+
+To test it, run the Console. In the `console` folder:
+<PackageManagerTabs>
+    <Fragment slot="npm">
+```bash
+npm run dev
+```
+    </Fragment>
+    <Fragment slot="pnpm">
+```bash
+pnpm dev
+```
+    </Fragment>
+    <Fragment slot="yarn">
+```bash
+yarn run dev
+```
+    </Fragment>
+</PackageManagerTabs>
+
+
+
+## Conclusions
+Here this tutorial comes to an end. Hopefully everything was smooth and clear.
+
+<br />
+Now, you should have familiarity with:
+- Creating a function-based API based on **@httpc/server** just with plain natural functions
+- Generating the _httpc client_ for your API
+- Importing the client into a consumer application and call the API function with a natural syntax
+
+
+## Next Steps
+- Checkout the [Getting started](getting-started) if you're ready to create something with **httpc**
+- Join the community on [external:Discord](/discord) or participate in our [external:discussions](/discuss)
+- Read the [Architecture](server-architecture) if you want a deep dive on how the httpc server works and how to customize it

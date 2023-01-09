@@ -1,0 +1,31 @@
+{
+  "name": "@httpc/monorepo",
+  "version": "0.0.1",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "generate:template": "ts-node -T scripts/generateTemplateCatalogue",
+    "test": "pnpm run -r test",
+    "watch:ts": "tsc --build tsconfig.dev.json --watch --incremental --force"
+  },
+  "devDependencies": {
+    "@types/node": "^16.18.11",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.4"
+  },
+  "engines": {
+    "node": ">=16.13.0",
+    "pnpm": "^7.14"
+  },
+  "packageManager": "pnpm@7.14.0",
+  "pnpm": {
+    "peerDependencyRules": {
+      "ignoreMissing": [
+        "rollup"
+      ]
+    },
+    "patchedDependencies": {
+      "astro@1.9.1": "patches/astro@1.9.1.patch"
+    }
+  }
+}

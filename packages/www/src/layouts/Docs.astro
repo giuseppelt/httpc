@@ -1,0 +1,75 @@
+---
+import { MarkdownHeading, MarkdownContent } from "astro";
+import Rightbar from "../components/Rightbar.astro";
+import Sidebar from "../components/Sidebar.astro";
+import Layout from "./Layout.astro";
+import ArticleNavigation from "../components/ArticleNavigation.astro";
+import TagList from "../components/TagList.astro";
+import Tag from "../components/Tag.astro";
+
+interface Props {
+  url: string;
+  navbar?: boolean;
+  headings?: MarkdownHeading[];
+  frontmatter?: Frontmatter;
+  content: MarkdownContent;
+}
+
+const { content, url: currentPage, frontmatter, headings } = Astro.props;
+
+const title = frontmatter?.title ? `Docs > ${frontmatter.title} | httpc` : `Docs | httpc`;
+
+// ensure no h1 is present
+if (headings?.some(x => x.depth === 1)) {
+  throw new Error(`H1 not allowed in docs(${currentPage})`);
+}
+---
+
+<Layout {frontmatter} title={title} width="docs" navbar={false}>
+  <main class="docs-content">
+    <Sidebar base="docs" {...{ currentPage, content, frontmatter, headings}} />
+    <article class="content side-spacing">
+      <header class="mb-3">
+        {frontmatter && <h1 class="page-title mb">{frontmatter.title}</h1>}
+        {
+          frontmatter && frontmatter.status && (
+            <TagList className="mt-1">
+              <Tag prefix="status:" text={frontmatter.status} className={`tag-status-${frontmatter.status.replaceAll(" ", "-")}`} />
+            </TagList>
+          )
+        }
+      </header>
+      <slot />
+      <ArticleNavigation base="docs" {...{currentPage}} />
+    </article>
+    <Rightbar {...{ currentPage, content, frontmatter, headings}} />
+  </main>
+</Layout>
+
+<style lang="scss" is:global>
+  main {
+    display: grid;
+    grid-template-columns: var(--left-sidebar-width) auto var(--right-sidebar-width);
+    min-height: 100%;
+  }
+  .content {
+    padding: calc(var(--navbar-height) + 1rem) 3rem 1rem;
+    width: calc(var(--content-text-width) - var(--side-spacing) * 2);
+  }
+  .page-title {
+    font-size: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    main {
+      display: block;
+    }
+
+    .content {
+      padding-left: 0;
+      padding-right: 0;
+      padding-top: calc(var(--navbar-height) + var(--right-sidebar-compact-height) + 1.5rem);
+      width: 100%;
+    }
+  }
+</style>

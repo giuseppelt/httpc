@@ -1,0 +1,22 @@
+---
+layout: ~/layouts/Docs.astro
+title: Vercel Adapter
+description: Host an httpc api with Vercel serverless functions
+status: work in progress
+---
+
+import Aside from "~/components/Aside.astro";
+
+## Quick usage
+Create a `[[...slug]].ts` file inside your `pages/api` directory.
+
+```ts
+import { createHttpCVercelAdapter } from "@httpc/adapter-vercel";
+import calls from "./_calls";
+
+export default createHttpCVercelAdapter({
+    calls: 
+    log: true
+})
+```
+

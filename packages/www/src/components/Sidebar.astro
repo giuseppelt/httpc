@@ -1,0 +1,270 @@
+---
+import { Icon } from "astro-icon";
+import links, { SidebarHeaderSection } from "../sidebar";
+import BrandIcon from "./BrandIcon.astro";
+
+interface Props {
+  currentPage: string;
+  base?: string;
+}
+
+const { base: _base, currentPage } = Astro.props;
+let base = !!_base ? `${_base}/` : "";
+
+function path(href: string) {
+  return `/${base}${href}`;
+}
+
+function isActive(href: string) {
+  return path(href) === currentPage;
+}
+
+function isHeaderOpen(header: SidebarHeaderSection) {
+  return header.links.some(x => isActive(x.href));
+}
+---
+
+<nav id="sidebar">
+  <div class="wrap custom-scroll">
+    <header>
+      <div class="brand">
+        <BrandIcon />
+        <span class="brand-section">DOCS</span>
+      </div>
+      <div class="hstack menu">
+        <a class="icon-link" title="Github repository" href="/repository" target="_blank"><Icon name="mdi:github" className="icon" /></a>
+        <Icon name="ic:round-menu" class="icon-menu" />
+      </div>
+    </header>
+    <div class="body d-flex-column">
+      {
+        links.map(x =>
+          "header" in x ? (
+            <details class="sidebar-section d-flex-column" open={isHeaderOpen(x)}>
+              <summary class="sidebar-header">
+                {x.header} <Icon class="icon" name="ic:round-chevron-right" />{" "}
+              </summary>
+              {x.links.map(x => (
+                <a href={path(x.href)} class={`btn btn-sidebar ${isActive(x.href) ? "active" : ""}`}>
+                  {x.text}
+                </a>
+              ))}
+            </details>
+          ) : (
+            <a href={path(x.href)} class={`btn btn-sidebar ${isActive(x.href) ? "active" : ""}`}>
+              {x.text}
+            </a>
+          )
+        )
+      }
+    </div>
+  </div>
+</nav>
+
+<script>
+  const body = document.querySelector<HTMLElement>("#sidebar .body");
+  const button = document.querySelector<HTMLElement>("#sidebar .icon-menu");
+
+  if (body && button) {
+    button.addEventListener("click", () => {
+      body.style.display = "flex";
+      document.body.classList.add("no-scroll");
+
+      function onClick(e: MouseEvent) {
+        if (!body!.contains(e.target as HTMLElement)) {
+          document.body.classList.remove("no-scroll");
+          body!.style.display = "none";
+
+          e.stopPropagation();
+          e.preventDefault();
+          document.removeEventListener("click", onClick, { capture: true });
+        }
+      }
+
+      document.addEventListener("click", onClick, { capture: true });
+    });
+  }
+</script>
+
+<style lang="scss">
+  #sidebar {
+    width: var(--left-sidebar-width);
+    position: relative;
+    top: 0;
+
+    &::before {
+      content: "";
+      background-color: var(--theme-sidebar-bg-color);
+      position: absolute;
+      height: 100%;
+      // z-index: 0;
+      right: 0;
+      left: min(calc(var(--side-spacing) * -1), calc((100vw - var(--content-width)) / -2 - 1.25rem));
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      margin-bottom: 2rem;
+    }
+
+    .menu {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      position: fixed;
+      width: 100%;
+      left: 0;
+      top: 0;
+      z-index: 20;
+      background-color: var(--theme-sidebar-bg-color);
+
+      header {
+        position: static;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: var(--navbar-height);
+        margin-bottom: 0;
+        padding: 0 var(--side-spacing);
+      }
+
+      .wrap {
+        height: auto;
+        padding: 0;
+        scrollbar-gutter: initial;
+      }
+
+      .brand {
+        padding: 0 var(--side-spacing);
+      }
+
+      .menu {
+        display: flex;
+      }
+
+      .body {
+        padding: 1rem var(--side-spacing) 0;
+        display: none;
+        border-bottom: 1px solid var(--color-dim);
+        max-height: calc(100vh - var(--navbar-height));
+        max-height: calc(100dvh - var(--navbar-height));
+        overflow-y: auto;
+      }
+    }
+  }
+
+  .icon-link {
+    width: 32px;
+    color: currentColor;
+    &:hover {
+      color: var(--theme-color-accent);
+    }
+  }
+
+  .icon-menu {
+    width: 32px;
+  }
+
+  .wrap {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    padding-left: var(--side-spacing);
+
+    &::-webkit-scrollbar-thumb {
+      border-color: var(--theme-sidebar-bg-color) !important;
+    }
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 1rem var(--side-spacing);
+    margin-left: calc(var(--side-spacing) * -1);
+    background-color: var(--theme-sidebar-bg-color);
+  }
+
+  .brand-section {
+    font-family: var(--font-mono);
+    font-size: 24px;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+    position: relative;
+    top: 2px;
+  }
+
+  .sidebar-section {
+    margin-bottom: 1rem;
+
+    &[open] {
+      margin-bottom: 2rem;
+
+      .icon {
+        transform: rotateZ(90deg);
+      }
+    }
+  }
+
+  .btn-sidebar + .sidebar-section {
+    margin-top: 1rem;
+  }
+
+  .sidebar-header {
+    cursor: pointer;
+    list-style-type: none;
+    padding: 0;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: var(--color-dim);
+    font-size: 0.85rem;
+    position: relative;
+
+    .icon {
+      width: 22px;
+      display: inline-block;
+      position: relative;
+      top: -1px;
+    }
+
+    &:hover {
+      color: var(--theme-color-accent);
+    }
+  }
+
+  .btn-sidebar {
+    font-size: var(--theme-text-sm) !important;
+    margin-bottom: 0.125rem;
+    margin-left: -0.75rem;
+    padding: 0.2rem 0.75rem !important;
+    line-height: 1.5rem;
+    font-weight: 500 !important;
+    color: var(--color-black);
+    position: relative;
+
+    &:hover {
+      background-color: var(--theme-color-hover);
+    }
+    &:active {
+      color: var(--theme-color-accent);
+    }
+    &.active {
+      color: var(--theme-btn-primary-hover);
+      &::before {
+        content: "";
+        position: absolute;
+        width: 3px;
+        height: 16px;
+        top: 50%;
+        left: 2px;
+        transform: translateY(-50%);
+        background-color: var(--theme-btn-primary-hover);
+      }
+    }
+  }
+</style>

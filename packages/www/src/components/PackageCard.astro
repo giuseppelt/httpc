@@ -1,0 +1,73 @@
+---
+import { Icon } from "astro-icon";
+import { Package, packageMeta } from "../constants";
+
+export interface Props {
+  href: string;
+  title: Package;
+  description?: string;
+}
+
+const { href, title, description = packageMeta[title].description } = Astro.props;
+const { icon } = packageMeta[title];
+---
+
+<a class="button-card">
+  <div class="package-card">
+    <div class="d-flex">
+      {icon && <Icon class="icon" name={icon} />}
+      <div class="wrap ms-3">
+        <p class="text-md fw-bold mb-1">{title}</p>
+        <p class="desc text-xs">{description}</p>
+      </div>
+    </div>
+    {
+      Astro.slots.has("default") && (
+        <>
+          <hr class="my-3" />
+          <div class="text-xs">
+            <slot />
+          </div>
+        </>
+      )
+    }
+  </div>
+</a>
+
+<style lang="scss">
+  .button-card {
+    color: var(--color-black);
+    text-decoration: none !important;
+    font-weight: normal !important;
+    &:hover {
+      color: var(--color-black) !important;
+    }
+  }
+
+  .icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    color: var(--theme-color-accent);
+  }
+
+  .package-card {
+    height: 100%;
+    padding: 1rem;
+    border: 1px solid #cdd5db;
+    border-radius: var(--theme-rounded);
+    background-color: var(--theme-bg-color-dark);
+
+    .desc {
+      line-height: 1.2em;
+    }
+
+    // &:hover {
+    //   border-color: #76b3d0;
+    //   background-color: rgba($color: #b7dff2, $alpha: 0.85);
+    //   .icon {
+    //     color: var(--color-black);
+    //   }
+    // }
+  }
+</style>

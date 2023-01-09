@@ -1,0 +1,12 @@
+{
+    "name": "@httpc/template-client",
+    "templateType": "client",
+    "version": "0.0.1",
+    "main": "index.cjs",
+    "module": "index.mjs",
+    "license": "MIT",
+    "sideEffects": false,
+    "dependencies": {
+        "@httpc/client": "^0.0.1"
+    }
+}

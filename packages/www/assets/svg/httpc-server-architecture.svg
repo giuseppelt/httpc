@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 394 277">
+	<defs>
+		<style>
+      .c, .d, .e, .f {
+        fill: none;
+        stroke-miterlimit: 10;
+        stroke: var(--color-dim);
+      }
+
+      .c {
+		stroke-dasharray: 2;
+		stroke: var(--color-dim);
+      }
+
+	  .d {
+		fill: white;
+	  }
+
+      .i {
+        font-size: 9px !important;
+      }
+
+      .e {
+        stroke-width: 1.45px;
+      }
+
+      .j, .j tspan {
+        font-size: 9px !important;
+      }
+
+      .f {
+        stroke-linecap: round;
+        stroke-width: 1.8px;
+      }
+
+	  .p {
+		fill: var(--color-dim);
+	  }
+
+	  .d-f {
+		fill: #717b89;
+	  }
+		</style>
+	</defs>
+	<rect class="c" x="47" y="142" width="336" height="40.5" rx="3.58" ry="3.58"/>
+	<g>
+		<circle class="d-f" cx="96.94" cy="19" r="5"/>
+		<path class="d-f" d="M96.94,11.84c3.95,0,7.16,3.21,7.16,7.16s-3.21,7.16-7.16,7.16-7.16-3.21-7.16-7.16,3.21-7.16,7.16-7.16m0-.84c-4.42,0-8,3.58-8,8s3.58,8,8,8,8-3.58,8-8-3.58-8-8-8h0Z"/>
+	</g>
+	<g>
+		<circle class="d-f" cx="97" cy="260" r="5"/>
+		<path class="d-f" d="M97,252.84c3.95,0,7.16,3.21,7.16,7.16s-3.21,7.16-7.16,7.16-7.16-3.21-7.16-7.16,3.21-7.16,7.16-7.16m0-.84c-4.42,0-8,3.58-8,8s3.58,8,8,8,8-3.58,8-8-3.58-8-8-8h0Z"/>
+	</g>
+	<text class="j" transform="translate(113.42 22.63)">http request</text>
+	<text class="j" transform="translate(113.48 263.63)">http response</text>
+	<rect class="d" x="52.94" y="49.5" width="88" height="27" rx="12" ry="12"/>
+	<text class="j" transform="translate(81.65 66.18)">Parsing</text>
+	<rect class="d" x="53.5" y="149.5" width="88" height="27" rx="12" ry="12"/>
+	<text class="j" transform="translate(69.14 166.18)">Middleware 1</text>
+	<rect class="d" x="169.5" y="149.5" width="88" height="27" rx="12" ry="12"/>
+	<text class="j" transform="translate(184.41 166.18)">Middleware N</text>
+	<rect class="d" x="288.5" y="149.5" width="88" height="27" rx="12" ry="12"/>
+	<text class="j" transform="translate(315.91 166.18)">Handler</text>
+	<text class="i" transform="translate(9.86 165.18)">pipeline</text>
+	<rect class="d" x="52.94" y="202.5" width="88" height="27" rx="12" ry="12"/>
+	<text class="j" transform="translate(75.23 219.18)">Rendering</text>
+	<rect class="d" x="52.94" y="95.5" width="88" height="27" rx="12" ry="12"/>
+	<text class="j" transform="translate(74.42 112.18)">Preprocess</text>
+	<g>
+		<line class="e" x1="144.5" y1="158.5" x2="163.34" y2="158.5"/>
+		<polygon class="p" points="162.5 161.39 167.5 158.5 162.5 155.61 162.5 161.39"/>
+	</g>
+	<g>
+		<line class="e" x1="262" y1="158.5" x2="280.84" y2="158.5"/>
+		<polygon class="p" points="280 161.39 285 158.5 280 155.61 280 161.39"/>
+	</g>
+	<g>
+		<line class="e" x1="284" y1="167.5" x2="265.16" y2="167.5"/>
+		<polygon class="p" points="266 164.61 261 167.5 266 170.39 266 164.61"/>
+	</g>
+	<g>
+		<line class="e" x1="167" y1="167.5" x2="148.16" y2="167.5"/>
+		<polygon class="p" points="149 164.61 144 167.5 149 170.39 149 164.61"/>
+	</g>
+	<path class="f" d="M91,35l5.92,5.33s.12,.04,.16,0l5.92-5.33"/>
+	<path class="f" d="M91,83l5.92,5.33s.12,.04,.16,0l5.92-5.33"/>
+	<path class="f" d="M91,129l5.92,5.33s.12,.04,.16,0l5.92-5.33"/>
+	<path class="f" d="M91,189l5.92,5.33s.12,.04,.16,0l5.92-5.33"/>
+	<path class="f" d="M91,239l5.92,5.33s.12,.04,.16,0l5.92-5.33"/>
+</svg>

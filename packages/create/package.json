@@ -1,0 +1,17 @@
+{
+    "name": "@httpc/create",
+    "version": "0.0.1",
+    "main": "index.mjs",
+    "scripts": {
+        "start": "node index.mjs"
+    },
+    "bin": {
+        "create": "index.mjs"
+    },
+    "dependencies": {
+        "@httpc/cli": "workspace:*"
+    },
+    "engines": {
+        "node": ">=16.13"
+    }
+}

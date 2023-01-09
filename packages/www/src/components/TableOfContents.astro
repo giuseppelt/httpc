@@ -1,0 +1,168 @@
+---
+import { MarkdownHeading } from "astro";
+
+interface Props {
+  headings: readonly MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+
+function processTitle(value: string) {
+  if (value.includes(": ")) {
+    return value.split(": ").join(":\n");
+  }
+
+  return value;
+}
+---
+
+<nav id="toc">
+  <p role="heading" class="text-sm fw-bold">On this page</p>
+  <div class="wrap">
+    <span class="indicator-toc"></span>
+    {
+      headings
+        .filter(x => x.depth <= 3)
+        .map(x => (
+          <a href={`#${x.slug}`} class={`toc-link toc-depth-${x.depth}`}>
+            <span>{processTitle(x.text)}</span>
+          </a>
+        ))
+    }
+  </div>
+</nav>
+
+<style lang="scss">
+  .wrap {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .toc-link {
+    margin: 0.1rem 0;
+    color: var(---color-black);
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+
+    &:hover {
+      color: var(--theme-btn-primary-hover);
+    }
+    &.active {
+      color: var(--theme-btn-primary-hover);
+    }
+    @media (max-width: 768px) {
+      margin: 0.35rem 0;
+      -webkit-line-clamp: 1;
+    }
+  }
+
+  .toc-depth-2 {
+  }
+  .toc-depth-3 {
+    padding-left: 0.75rem;
+    font-size: 0.85em;
+
+    span {
+      @media (min-width: 768.01px) {
+        white-space: pre-wrap;
+      }
+    }
+  }
+</style>
+
+<script>
+  type Entry = {
+    id: string;
+    element: HTMLElement;
+  };
+
+  requestAnimationFrame(() => {
+    const indicator = document.querySelector<HTMLElement>("#toc .indicator-toc");
+    const headings = [...document.querySelectorAll<HTMLElement>("article :is(h2,h3)")].map<Entry>(element => ({
+      id: element.id,
+      element,
+    }));
+    const tocHeadings = Object.fromEntries([...document.querySelectorAll<HTMLAnchorElement>("#toc .toc-link")].map(x => [x.href.split("#")[1], x]));
+
+    if (headings.length == 0 || Object.keys(tocHeadings).length === 0 || !indicator) {
+      return;
+    }
+
+    const visible = new Set<string>();
+
+    let previous: HTMLElement | undefined;
+    let previousId: string | undefined;
+
+    const VISIBLE_THRESHOLD = innerHeight / 4;
+
+    function select(targetId: string, force = false) {
+      const current = tocHeadings[targetId];
+      if (!current || (current === previous && !force)) return;
+
+      if (previous && current !== previous) {
+        previous.classList.remove("active");
+      }
+      previous = current;
+      previousId = targetId;
+
+      // get indicator again, because can be hidden
+      const indicator = document.querySelector<HTMLElement>("#toc .indicator-toc");
+      if (!indicator) return;
+
+      const indicatorHeight = indicator.clientHeight;
+      if (current.offsetTop === 0) return; //is hidden, exit
+
+      const { height } = current.getBoundingClientRect();
+      current.classList.add("active");
+      indicator!.style.transform = `translateY(${current.offsetTop + (height - indicatorHeight) / 2 /** line height correction */}px)`;
+    }
+
+    document.addEventListener("rightbar-open", () => {
+      if (previousId) {
+        select(previousId, true);
+      }
+    });
+
+    const observer = new IntersectionObserver(
+      entries => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            visible.add(entry.target.id);
+          } else {
+            visible.delete(entry.target.id);
+          }
+        }
+
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            if (innerHeight + scrollY - (entry.target as HTMLElement).offsetTop > VISIBLE_THRESHOLD) {
+              select(entry.target.id);
+            }
+            return;
+          }
+        }
+
+        // if no match, and the current is outside the screen ...
+        if (previousId && !visible.has(previousId)) {
+          // .. try to select the first visible
+          if (visible.size > 0) {
+            const targetId = visible.values().next().value;
+            select(targetId);
+            return;
+          }
+        }
+      },
+      {
+        threshold: 1,
+      }
+    );
+
+    headings.forEach(x => {
+      observer.observe(x.element);
+    });
+  });
+</script>

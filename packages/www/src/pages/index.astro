@@ -1,0 +1,312 @@
+---
+import { Icon } from "astro-icon";
+import Lottie from "astro-integration-lottie/Lottie.astro";
+import Layout from "../layouts/Layout.astro";
+import HomeSamples from "../components/HomeSamples.astro";
+import PackageButton from "../components/PackageButton.astro";
+import Svg from "../components/Svg.astro";
+//cspell:ignore teenyicons, typesafe, typesafety
+---
+
+<Layout title="httpc - function-based API made easy">
+  <div class="pattern-bg2"></div>
+  <main>
+    <div class="page-content">
+      <h1 style="font-size: 2.6em; font-weight: 900; letter-spacing: -1px;" class="mb-2">Just call a <span style="font-family: var(--font-mono);">function()</span></h1>
+      <p class="mb-2 text-2xl mb-4">Build function-based API with minimal code and end-to-end type safety</p>
+      <p class="mb-5"><a class="btn btn-primary" href="/docs">Get Started</a></p>
+      <p class="text-2xs mb-1">For javascript/typescript</p>
+      <div class="hstack">
+        <Icon name="teenyicons:javascript-outline" class="hero-language-icon" />
+        <Icon name="teenyicons:typescript-outline" class="hero-language-icon" />
+      </div>
+    </div>
+    <div class="hero-code">await call(x,y)</div>
+    <div class="hero-code-mobile">http://(f)</div>
+  </main>
+
+  <section class="page-content section-spacing" style="padding-top: 12px">
+    <HomeSamples />
+  </section>
+
+  <section class="page-content section-spacing">
+    <div class="container-features">
+      <div class="feature">
+        <Icon name="mdi:code-parentheses-box" className="feature-icon" />
+        <h2 class="mb-3">Speaks functions</h2>
+        <p class="text mb-2">Don't worry about <em>raw</em> <abbr title="Hypertext Transfer Protocol (HTTP): the communication rules the World Wide Web is built upon">HTTP</abbr>. No path binding, no http verbs, no headers, no data serialization.</p>
+        <p class="text mb-3">With <strong>httpc</strong> you deal just with functions, arguments and return values.</p>
+        <Svg src="assets/svg/httpc-functions.svg" />
+        <a href="/docs/kit-introduction" class="feature-link">See how to design a function-based API</a>
+      </div>
+      <div class="feature">
+        <Icon name="mdi:code-braces-box" className="feature-icon" />
+        <h2 class="mb-3">No boilerplate code</h2>
+        <p class="text mb-2">Handle requests with idiomatic code with no complex wiring and unnatural syntax.</p>
+        <p class="text mb-3">Less code, translates in less effort to produce, evolve, test, refactor and maintain.</p>
+        <img class="feature-image" alt="httpc - no boilerplate code" src="/assets/httpc-no-boilerplate.png" />
+        <a href="/docs/kit-introduction#writing-less-code-minimizing-repetition-redundancy-and-boilerplate" class="feature-link">See how you reduce your code with httpc</a>
+      </div>
+      <div class="feature">
+        <Icon name="mdi:heart-box" className="feature-icon" />
+        <h2 class="mb-3">Typesafe & autocomplete</h2>
+        <p class="text mb-2">Break things when you like to happen. No more missing parameter, type mismatch...</p>
+        <p class="text mb-3">Type definitions provide autocompletion and keep your more productive avoiding frequent doc lookups.</p>
+        <img class="feature-image" alt="httpc - type safe" src="/assets/httpc-typesafe.png" />
+        <a href="/docs/kit-introduction#pursuing-extensive-type-safety" class="feature-link">Learn more about e2e typesafety</a>
+      </div>
+      <div class="feature">
+        <Icon name="mdi:drawing-box" className="feature-icon" />
+        <h2 class="mb-3">Feature packed</h2>
+        <p class="text mb-2">Use builtin components with sensible defaults for common concerns like authentication, authorization, logging...</p>
+        <p class="text mb-3"><strong>@httpc/kit</strong> provides a toolbox with many utilities that cover lots of use cases out of the box.</p>
+        <div class="hstack" style="aspect-ratio: 662/123;">
+          <Icon name="fluent:key-32-filled" class="little-icon" />
+          <Icon name="mdi:shield-check" class="little-icon" />
+          <Icon name="mdi:file-document" class="little-icon" />
+          <Icon name="ic:round-transform" class="little-icon" />
+          <Icon name="clarity:storage-solid" class="little-icon" />
+        </div>
+        <a href="/docs/kit-introduction#toolkit-ready-to-use" class="feature-link">See about @httpc/kit features</a>
+      </div>
+      <div class="feature">
+        <Icon name="mdi:pencil-box" className="feature-icon" />
+        <h2 class="mb-3">Highly customizable</h2>
+        <p class="text mb-2">Rich modular architecture, you can plug into anything and model any behavior.</p>
+        <p class="text mb-2">You can go beyond <strong>httpc</strong> and manage form submissions, web hooks, rest requests...</p>
+        <div class="anim-container">
+          <div class="anim-pipeline">
+            <Lottie src="/animations/anim-pipeline.json" />
+          </div>
+        </div>
+        <a href="/docs/server-architecture" class="feature-link">Read the Architecture and Extensions</a>
+      </div>
+      <div class="feature">
+        <Icon name="mdi:arrow-top-right-bold-box" className="feature-icon" />
+        <h2 class="mb-3">Distribute the client</h2>
+        <p class="text mb-2">You can generate and publish a client to provide a ready-to-go experience for 3rd parties.</p>
+        <p class="text mb-2">With a standard package you can easily share the client, manage versions and backward compatibility.</p>
+        <div class="anim-container">
+          <div class="anim-publish">
+            <Lottie src="/animations/anim-publish.json" />
+          </div>
+        </div>
+        <a href="/docs/kit-introduction" class="feature-link">Checkout Generate and Publish</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-spacing section-family relative">
+    <Icon name="gg:menu-grid-o" class="family-bg-ico" />
+    <div class="page-content">
+      <h2>httpc family</h2>
+      <p class="text mb-4">Meet the tools making a function-based API an easy task</p>
+      <div class="container-grid-2col">
+        <PackageButton href="/docs/httpc-family#server" title="@httpc/server" />
+        <PackageButton href="/docs/httpc-family#client" title="@httpc/client" />
+        <PackageButton href="/docs/httpc-family#kit" title="@httpc/kit" />
+        <PackageButton href="/docs/httpc-family#cli" title="@httpc/cli" />
+      </div>
+    </div>
+    <div class="family-code">npm install @httpc/server</div>
+  </section>
+
+  <footer class="section-spacing">
+    <div class="page-content"></div>
+  </footer>
+</Layout>
+
+<style lang="scss">
+  main {
+    background-color: rgba(49, 78, 101, 0.03);
+    padding-top: 10rem;
+    padding-bottom: 4em;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-language-icon {
+    height: 26px;
+    opacity: 0.4;
+  }
+
+  .hero-code,
+  .hero-code-mobile {
+    user-select: none;
+    position: absolute;
+    opacity: 0.06;
+    font-family: var(--font-mono);
+    font-size: 200px;
+    bottom: -18%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    white-space: pre;
+    letter-spacing: -1rem;
+  }
+  .hero-code {
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+  .hero-code-mobile {
+    display: none;
+
+    @media (max-width: 768px) {
+      display: block;
+      left: -23%;
+      font-size: 120px;
+      bottom: -9%;
+      letter-spacing: -4px;
+    }
+  }
+
+  .section-spacing {
+    padding-top: 96px;
+    padding-bottom: 96px;
+
+    @media (max-width: 768px) {
+      padding-top: 46px;
+      padding-bottom: 46px;
+    }
+  }
+
+  .pattern-bg2 {
+    background-image: linear-gradient(112.5deg, rgb(214, 214, 214) 0%, rgb(214, 214, 214) 10%, rgb(195, 195, 195) 10%, rgb(195, 195, 195) 53%, rgb(176, 176, 176) 53%, rgb(176, 176, 176) 55%, rgb(157, 157, 157) 55%, rgb(157, 157, 157) 60%, rgb(137, 137, 137) 60%, rgb(137, 137, 137) 88%, rgb(118, 118, 118) 88%, rgb(118, 118, 118) 91%, rgb(99, 99, 99) 91%, rgb(99, 99, 99) 100%);
+    position: fixed;
+    z-index: -1;
+    opacity: 0.2;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    filter: brightness(1.25) sepia() saturate(0);
+  }
+
+  .container-features {
+    display: grid;
+    gap: 2rem 6rem;
+    grid-template-columns: 1fr 1fr;
+
+    @media (max-width: 1024px) {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .feature {
+    padding-bottom: 4rem;
+  }
+
+  .feature-icon {
+    height: 48px;
+    margin-left: -5px;
+  }
+
+  .feature-image {
+    border-radius: var(--theme-rounded-sm);
+    width: 100%;
+  }
+
+  .little-icon {
+    height: 36px;
+    color: var(--color-dim);
+  }
+
+  .feature-link {
+    margin-top: 1rem;
+    display: inline-block;
+    color: currentColor;
+    // font-size: 0.9em;
+
+    &:hover {
+      text-decoration: underline;
+      text-decoration-line: underline;
+      text-underline-offset: 2px;
+    }
+
+    &::after {
+      content: "";
+      display: inline-block;
+      background-size: cover;
+      width: 1.2em;
+      height: 1.2em;
+      vertical-align: bottom;
+      //cspell:disable
+      background: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M8.7 17.3q-.275-.275-.275-.7q0-.425.275-.7l3.9-3.9l-3.9-3.9q-.275-.275-.275-.7q0-.425.275-.7q.275-.275.7-.275q.425 0 .7.275l4.6 4.6q.15.15.213.325q.062.175.062.375t-.062.375q-.063.175-.213.325l-4.6 4.6q-.275.275-.7.275q-.425 0-.7-.275Z"%2F%3E%3C%2Fsvg%3E') no-repeat center;
+      //cspell:enable
+    }
+  }
+
+  .anim-container {
+    min-height: 40px;
+    @media (max-width: 768px) {
+      margin: 0 calc(var(--side-spacing) * -1);
+      padding: 0 var(--side-spacing);
+      overflow: hidden;
+    }
+  }
+  .anim-pipeline {
+    margin: -9% -17%;
+    @media (max-width: 768px) {
+      margin: -9% -20%;
+    }
+  }
+  .anim-publish {
+    margin: -9% 0;
+  }
+
+  .section-family {
+    // background-color: rgba(49, 78, 101, 0.03);
+    // background-color: #d8dae1;
+    background-color: #e6e9ee;
+    z-index: 0;
+    overflow: hidden;
+    padding-top: 66px;
+  }
+
+  .family-bg-ico {
+    position: absolute;
+    z-index: -1;
+    top: -40%;
+    right: 17%;
+    width: 366px;
+    opacity: 0;
+  }
+
+  .family-code {
+    @extend .hero-code;
+    bottom: unset;
+    top: -19%;
+    font-size: 150px;
+
+    @media (max-width: 768px) {
+      display: block;
+      top: -7%;
+      font-size: 80px;
+      left: -5%;
+      letter-spacing: -4px;
+    }
+  }
+  // .section-family-bg {
+  //   --pad: 0;
+  //   position: absolute;
+  //   left: var(--pad);
+  //   bottom: var(--pad);
+  //   top: var(--pad);
+  //   right: var(--pad);
+  //   z-index: -1;
+  //   background-image: linear-gradient(112.5deg, rgb(240, 240, 246) 0%, rgb(240, 240, 246) 13%, rgb(234, 234, 238) 13%, rgb(234, 234, 238) 38%, rgb(228, 228, 233) 38%, rgb(228, 228, 233) 55%, rgb(214, 214, 222) 55%, rgb(214, 214, 222) 80%, rgb(202, 202, 212) 80%, rgb(202, 202, 212) 100%);
+  //   border-top: 1px solid rgba($color: #002244, $alpha: 0.05);
+  //   border-bottom: 1px solid rgba($color: #002244, $alpha: 0.05);
+  //   opacity: 0;
+  // }
+
+  footer {
+    background-color: #dee2e9;
+  }
+</style>

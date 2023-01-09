@@ -1,0 +1,231 @@
+---
+layout: ~/layouts/Docs.astro
+title: Getting started 
+description: Quick start guide to develop an httpc API from a template or manual installation scripts
+---
+
+import Aside from "~/components/Aside.astro";
+import PackageCard from "~/components/PackageCard.astro";
+import PackageManagerTabs from "~/components/tabs/PackageManagerTabs.astro";
+import CodeTabs from "~/components/tabs/CodeTabs.tsx";
+
+
+## Before you start
+You need to pick the base library you want to create your project with.
+
+<div class="container-grid-2col my-3">
+<PackageCard title="@httpc/server"
+  description="Essential approach to function calls over httpc">
+- Un-opinionated
+- No predefined design or structure
+- Direct approach to handle the requests
+- No dependency
+</PackageCard>
+
+<PackageCard title="@httpc/kit"
+  description="Structured approach with many components read-to-go">
+- Highly opinionated
+- Builtin authentication, validation, caching etc..
+- Rich utilities to aid with common business concerns: logging, transactions, etc..
+- Service oriented with dependency injection
+</PackageCard>
+</div>
+
+
+If your project consists of few simple functions and you're comfortable dealing with raw http requests, you can start with **@httpc/server**.
+Otherwise, it's strongly suggested to build upon **@httpc/kit** as it offers lots of features you'll end up using anyway.
+
+<Aside type="tip">
+If you start with **@httpc/server**, you can move to **@httpc/kit** with very little effort
+</Aside>
+
+
+## Installation
+
+### Requirements
+- node v16.13+
+- npm or equivalent package manager
+
+
+### Start from a template
+You can quickly setup a project from a template.
+
+<PackageManagerTabs>
+  <Fragment slot="npm">
+  ```shell
+  npm create @httpc
+  ```
+  </Fragment>
+  <Fragment slot="pnpm">
+  ```shell
+  pnpm create @httpc
+  ```
+  </Fragment>
+  <Fragment slot="yarn">
+  ```shell
+  yarn create @httpc
+  ```
+  </Fragment>
+</PackageManagerTabs>
+
+
+### Manual setup
+If you already have a package, you can manually add **httpc** to your project.
+<PackageManagerTabs>
+  <Fragment slot="npm">
+  ```shell
+  # for server-based projects
+  npm install @httpc/server
+  # for kit-based projects
+  npm install @httpc/kit tsyringe reflect-metadata
+
+  # used in both, for development tasks
+  npm install @httpc/cli --save-dev
+  ```
+  </Fragment>
+  <Fragment slot="pnpm">
+  ```shell
+  # for server-based projects
+  pnpm add @httpc/server
+  # for kit-based projects
+  pnpm add @httpc/kit tsyringe reflect-metadata
+
+  # used in both, for development tasks
+  pnpm add @httpc/cli --save-dev
+  ```
+  </Fragment>
+  <Fragment slot="yarn">
+  ```shell
+  # for server-based projects
+  yarn add @httpc/server
+  # for kit-based projects
+  yarn add @httpc/kit tsyringe reflect-metadata
+
+  # used in both, for development tasks
+  yarn add @httpc/cli --dev
+  ```
+  </Fragment>
+</PackageManagerTabs>
+
+
+### Start the server
+If you used a template, you can start the development server. Enter the project directory and run:
+
+<PackageManagerTabs>
+  <Fragment slot="npm">
+  ```shell
+  npm run dev
+  ```
+  </Fragment>
+  <Fragment slot="pnpm">
+  ```shell
+  pnpm dev
+  ```
+  </Fragment>
+  <Fragment slot="yarn">
+  ```shell
+  yarn run dev
+  ```
+  </Fragment>
+</PackageManagerTabs>
+
+### Generate the client
+After you wrote some functions, you can generate the client package. In a project directory, just run:
+
+<PackageManagerTabs>
+  <Fragment slot="npm">
+  ```shell
+  npm run generate:client
+  ```
+  </Fragment>
+  <Fragment slot="pnpm">
+  ```shell
+  pnpm generate:client
+  ```
+  </Fragment>
+  <Fragment slot="yarn">
+  ```shell
+  yarn run generate:client
+  ```
+  </Fragment>
+</PackageManagerTabs>
+
+Underneath it runs the **@httpc/cli** with `httpc client generate`.
+You can checkout more about [client generation](client-generation) with all the advanced options.
+
+## Project structure
+The minimal project is composed by:
+```
+project/
+├─ src/
+│  ├─ calls/
+│  │  └─ index.ts
+│  └─ index.ts
+├─ httpc.json
+├─ package.json
+└─ tsconfig.json
+```
+<CodeTabs client:idle tabs={["src/index.ts", "src/calls/index.ts", "httpc.json"]}>
+  <Fragment slot="0">
+    ```ts
+    import { createHttpCServer } from "@httpc/server";
+    import calls from "./calls";
+
+
+    const server = createHttpCServer({
+      calls,
+      cors: true
+    });
+
+    server.listen();
+    ```
+  </Fragment>
+  <Fragment slot="1">
+    ```ts
+    function echo(message: string) {
+        return message;
+    }
+
+    function greet(name: string) {
+        return `Hello ${name}`;
+    }
+
+
+    export default {
+        echo,
+        greet,
+    }
+    ```
+  </Fragment>
+  <Fragment slot="2">
+    ```json
+    {
+      "name": "@service/api-client",
+      "entry": "./src/calls/index.ts",
+      "dest": "./client",
+    }
+    ```
+  </Fragment>
+</CodeTabs>
+
+The core files:
+- **src/index.ts**
+  <small>
+  The entry point of your application, where you setup the **httpc server**. Here you can specify parsers, global middlewares and in general application-wide settings.
+  </small>
+
+- **src/calls/index.ts**
+  <small>
+  The functions you want to expose. You can organize and group your calls in multiple files. Call files are easily composed and nested as they are standard javascript objects.
+  </small>
+
+- **httpc.json**
+  <small>
+  The configuration used to generate the client of your API. In addition to the `httpc.json` file, you can specify the configuration in [other ways](client-generation#configuration).
+  </small>
+
+{/* You can read more about [organizing your project](tutorials/guide-project-organization) with detailed explanation on how to layout a real-world project. */}
+
+## Next steps
+- Read the [Tutorial](tutorials)
+- Checkout the [client generation](client-generation)

@@ -1,0 +1,13 @@
+{
+  "name": "movie-personal-library-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "pnpm": {
+    "overrides": {
+      "@httpc/cli": "link:..\\..\\packages\\cli",
+      "@httpc/client": "link:..\\..\\packages\\client",
+      "@httpc/server": "link:..\\..\\packages\\server"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+@host = http://localhost:8888
+
+###
+GET {{host}}/api/add?$p=[1,3]
+
+###
+POST {{host}}/api/greet
+content-type: application/json
+
+"walter"
+

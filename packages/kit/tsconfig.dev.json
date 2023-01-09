@@ -1,0 +1,16 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./dist/cjs",
+        "rootDir": "src",
+        "composite": true,
+        "tsBuildInfoFile": "./dist/cjs.tsBuildInfoFile",
+        "noEmit": false,
+        "sourceMap": true,
+        "declaration": true,
+        "declarationMap": true
+    },
+    "include": [
+        "src"
+    ]
+}

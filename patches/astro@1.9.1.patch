@@ -1,0 +1,30 @@
+diff --git a/dist/core/build/vite-plugin-internals.js b/dist/core/build/vite-plugin-internals.js
+index d6a1c2ca51c7a7bdc8d29246f696b1ea20eb87b8..c2911258e4c2aa01000e73894b222a8c81f5274c 100644
+--- a/dist/core/build/vite-plugin-internals.js
++++ b/dist/core/build/vite-plugin-internals.js
+@@ -29,7 +29,11 @@ function vitePluginInternals(input, internals) {
+         promises.push(
+           this.resolve(specifier).then((result) => {
+             if (result) {
+-              mapping.set(result.id, specifier);
++              if (mapping.has(result.id)) {
++                mapping.get(result.id).push(specifier);
++              } else {
++                mapping.set(result.id, [specifier]);
++              }
+             }
+           })
+         );
+@@ -37,8 +41,10 @@ function vitePluginInternals(input, internals) {
+       await Promise.all(promises);
+       for (const [, chunk] of Object.entries(bundle)) {
+         if (chunk.type === "chunk" && chunk.facadeModuleId) {
+-          const specifier = mapping.get(chunk.facadeModuleId) || chunk.facadeModuleId;
+-          internals.entrySpecifierToBundleMap.set(specifier, chunk.fileName);
++          const specifiers = mapping.get(chunk.facadeModuleId) || [chunk.facadeModuleId];
++          specifiers.forEach(x => {
++            internals.entrySpecifierToBundleMap.set(x, chunk.fileName);
++          });
+         } else if (chunk.type === "chunk") {
+           for (const id of Object.keys(chunk.modules)) {
+             const pageData = internals.pagesByViteID.get(id);

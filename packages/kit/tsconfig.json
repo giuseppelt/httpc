@@ -1,0 +1,16 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "module": "commonjs",
+        "sourceMap": true,
+        "declaration": true,
+        "declarationMap": true,
+        "lib": [
+            "ES2022"
+        ]
+    },
+    "include": [
+        "src",
+        "tests"
+    ]
+}

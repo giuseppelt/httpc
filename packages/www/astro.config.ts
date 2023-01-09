@@ -1,0 +1,70 @@
+import "dotenv/config";
+import path from "path";
+import { defineConfig } from "astro/config";
+import mdx from "@astrojs/mdx";
+import preact from "@astrojs/preact";
+import lottie from "astro-integration-lottie";
+import compress from "astro-compress";
+import rehypeLinkProcessor from "rehype-link-processor";
+import { remarkPreserveCodeMeta, rehypeCodeBlockDecorator } from "./src/plugins/codeBlockDecorator";
+
+
+export default defineConfig({
+  site: "https://httpc.dev",
+  server: {
+    port: Number(process.env.PORT || 3000)
+  },
+  integrations: [
+    mdx({
+      remarkPlugins: [remarkPreserveCodeMeta()],
+      rehypePlugins: [rehypeCodeBlockDecorator(), rehypeLinkProcessor()]
+    }),
+    preact(),
+    lottie(),
+    compress({
+      html: {
+        removeAttributeQuotes: false,
+      }
+    })
+  ],
+  markdown: {
+    shikiConfig: {
+      theme: "nord"
+    },
+  },
+  vite: {
+    plugins: [
+      {
+        name: "watch-assets",
+        enforce: "post",
+        handleHotUpdate({ file, server }) {
+          if (file.includes("/assets/")) {
+            server.ws.send({
+              type: "full-reload",
+              path: "*"
+            });
+          }
+        }
+      }
+    ],
+    build: {
+      rollupOptions: {
+        plugins: [
+          {
+            name: "alias",
+            resolveId(imported, importer, options) {
+              if (!imported.startsWith("~/")) return null;
+
+              return path.join(path.resolve("./src"), imported.substring(2)).replaceAll("\\", "/");
+            }
+          }
+        ]
+      }
+    },
+    resolve: {
+      alias: {
+        "~": path.resolve("./src").replaceAll("\\", "/")
+      }
+    }
+  }
+});

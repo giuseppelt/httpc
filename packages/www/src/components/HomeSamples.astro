@@ -1,0 +1,79 @@
+---
+import Tabs from "./tabs/Tabs";
+import CodeBlock from "./CodeBlock.astro";
+---
+
+<Tabs client:load className="tab-samples" initial="panel.basic" tabs={["Basic", "Middlewares", "Context", "Services", "Transaction", "Vercel/Next"]}>
+  <Fragment slot="panel.basic">
+    <div class="container-grid-2col gap-2">
+      <CodeBlock title="server.ts" src={`assets/code-snippets/hero-basic-server.ts`} />
+      <CodeBlock title="client.ts" src={`assets/code-snippets/hero-basic-client.ts`} />
+    </div>
+  </Fragment>
+  <Fragment slot="panel.middlewares">
+    <div class="container-grid-2col gap-2">
+      <CodeBlock title="server.ts" src={`assets/code-snippets/hero-middlewares-server.ts`} />
+      <CodeBlock title="client.ts" src={`assets/code-snippets/hero-middlewares-client.ts`} />
+    </div>
+  </Fragment>
+  <Fragment slot="panel.context">
+    <div class="bleed-box">
+      <div class="container-grid-3col gap-2">
+        <CodeBlock title="middlewares.ts" src={`assets/code-snippets/hero-context-session.ts`} />
+        <CodeBlock title="server.ts" src={`assets/code-snippets/hero-context-server.ts`} />
+        <CodeBlock title="client.ts" src={`assets/code-snippets/hero-context-client.ts`} />
+      </div>
+    </div>
+  </Fragment>
+  <Fragment slot="panel.services">
+    <div class="bleed-box">
+      <div class="container-grid-2col gap-2">
+        <CodeBlock title="server.ts" src={`assets/code-snippets/hero-services-server.ts`} />
+        <CodeBlock title="client.ts" src={`assets/code-snippets/hero-services-client.ts`} />
+      </div>
+    </div>
+  </Fragment>
+  <Fragment slot="panel.transaction">
+    <div class="bleed-box">
+      <div class="container-grid-2col gap-2">
+        <CodeBlock title="server.ts" src={`assets/code-snippets/hero-transaction-server.ts`} />
+        <CodeBlock title="client.ts" src={`assets/code-snippets/hero-transaction-client.ts`} />
+      </div>
+    </div>
+  </Fragment>
+  <Fragment slot="panel.vercel/next">
+    <div class="bleed-box">
+      <div class="container-grid-3col gap-2">
+        <CodeBlock title="calls.ts" src={`assets/code-snippets/hero-vercel-server.ts`} />
+        <CodeBlock title="api/index.ts" src={`assets/code-snippets/hero-vercel-api.ts`} />
+        <CodeBlock title="pages/home.tsx" src={`assets/code-snippets/hero-vercel-client.tsx`} />
+      </div>
+    </div>
+  </Fragment>
+
+  <style lang="scss">
+    :global(.code-sample) {
+      display: flex;
+      flex-direction: column;
+      overflow-x: auto;
+
+      @media (max-width: 768px) {
+        margin-left: calc(var(--side-spacing) * -1);
+        margin-right: calc(var(--side-spacing) * -1);
+        --border-size: 0;
+        --theme-rounded: 0;
+      }
+    }
+
+    :global(.code-sample .astro-code) {
+      flex-grow: 1;
+      margin: 0;
+    }
+
+    @media (max-width: 768px) {
+      :global(.tab-samples .tab-header) {
+        margin-bottom: 0 !important;
+      }
+    }
+  </style>
+</Tabs>

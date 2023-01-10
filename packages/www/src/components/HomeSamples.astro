@@ -50,30 +50,30 @@ import CodeBlock from "./CodeBlock.astro";
       </div>
     </div>
   </Fragment>
+</Tabs>
 
-  <style lang="scss">
-    :global(.code-sample) {
-      display: flex;
-      flex-direction: column;
-      overflow-x: auto;
-
-      @media (max-width: 768px) {
-        margin-left: calc(var(--side-spacing) * -1);
-        margin-right: calc(var(--side-spacing) * -1);
-        --border-size: 0;
-        --theme-rounded: 0;
-      }
-    }
-
-    :global(.code-sample .astro-code) {
-      flex-grow: 1;
-      margin: 0;
-    }
+<style lang="scss">
+  :global(.code-sample) {
+    display: flex;
+    flex-direction: column;
+    overflow-x: auto;
 
     @media (max-width: 768px) {
-      :global(.tab-samples .tab-header) {
-        margin-bottom: 0 !important;
-      }
+      margin-left: calc(var(--side-spacing) * -1);
+      margin-right: calc(var(--side-spacing) * -1);
+      --border-size: 0;
+      --theme-rounded: 0;
     }
-  </style>
-</Tabs>
+  }
+
+  :global(.code-sample .astro-code) {
+    flex-grow: 1;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    :global(.tab-samples .tab-header) {
+      margin-bottom: 0 !important;
+    }
+  }
+</style>

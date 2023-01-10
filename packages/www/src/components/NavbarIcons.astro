@@ -5,7 +5,6 @@ import { Icon } from "astro-icon";
 <div class="hstack">
   <a class="icon icon-link" title="Github repository" href="/repository" target="_blank"><Icon name="github" className="icon" /></a>
   <a class="icon icon-link visible-large" title="Discord community" href="/discord" target="_blank"><Icon name="discord" className="icon" /></a>
-  <Icon name="ic:round-menu" className="icon icon-menu d-none" />
 </div>
 
 <style lang="scss">
@@ -18,14 +17,6 @@ import { Icon } from "astro-icon";
     color: currentColor;
     &:hover {
       color: var(--theme-color-accent);
-    }
-  }
-
-  .icon-menu {
-    display: none;
-
-    @media (max-width: 768px) {
-      display: inline-block;
     }
   }
 </style>

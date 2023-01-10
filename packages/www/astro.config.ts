@@ -24,7 +24,8 @@ export default defineConfig({
     compress({
       html: {
         removeAttributeQuotes: false,
-      }
+      },
+      css: false
     })
   ],
   markdown: {

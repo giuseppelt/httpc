@@ -28,14 +28,14 @@ You can resolve a service instance with an alias if previously set.
 ```ts
 const logger = useInjected("ApplicationLogger");
 ```
-You can type-check aliases with [custom service definitions](kit-extending).
+You can type-check aliases with [custom service definitions](/docs/kit-extending).
 
 #### Environment variables
 You can resolve environment variables with the [`KEY`](#key) helper.
 ```ts
 const secret = useInjected(KEY("ENV", "SERVICE-SECRET"));
 ```
-You can type-check environment variables with [explicit definitions](kit-extending).
+You can type-check environment variables with [explicit definitions](/docs/kit-extending).
 
 
 #### Multiple injection
@@ -172,7 +172,7 @@ class MyService {
     }
 }
 ```
-Detailed information and advanced usage on the [Logging page](kit-logging).
+Detailed information and advanced usage on the [Logging page](/docs/kit-logging).
 
 ### `noInject`
 `noInject` is a parameter decorator. It allows the resolution to skip a parameter.
@@ -204,7 +204,7 @@ Now, you can resolve the provider with the `string`:
 ```ts
 const payments = useInjected("Payments");
 ```
-The `alias` decorator is used to register a class to an expected implementation. For example, the [bearer authentication](kit-authentication#bearer-authentication) expects a `"BearerAuthentication"` service to be registered to customize advanced behaviors.
+The `alias` decorator is used to register a class to an expected implementation. For example, the [bearer authentication](/docs/kit-authentication#bearer-authentication) expects a `"BearerAuthentication"` service to be registered to customize advanced behaviors.
 
 ### `initializer`
 `initializer` is a class decorator. It signals the class has an initializer method, which will run during the application startup.

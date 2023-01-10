@@ -87,7 +87,7 @@ const getPostById = httpCall(
     }
 );
 ```
-[@httpc/kit](kit-introduction) provides many builtin middlewares covering authentication, validation, logging, etc... Or, you can [create](server-extending) a custom one according your use case.
+[@httpc/kit](/docs/kit-introduction) provides many builtin middlewares covering authentication, validation, logging, etc... Or, you can [create](/docs/server-extending) a custom one according your use case.
 
 
 ### Context ubiquity
@@ -114,7 +114,7 @@ export default {
     getPosts
 }
 ```
-You can [extend](server-extending) the context with your own info with full type safety and autocompletion support.
+You can [extend](/docs/server-extending) the context with your own info with full type safety and autocompletion support.
 
 ### Hooks
 Hooks encapsulate common logic around the request context. By convention hooks adopt the `use` prefix.
@@ -134,7 +134,7 @@ async function addNewComment(postId: string, message: string) {
 }
 ```
 
-[@httpc/kit](kit-introduction) offers several builtin hooks to cache data, to perform authorization checks, to make transactions...
+[@httpc/kit](/docs/kit-introduction) offers several builtin hooks to cache data, to perform authorization checks, to make transactions...
 
 
 ### Serverless
@@ -303,6 +303,6 @@ All contribution are welcome. Any PR, issue and feedback is appreciated. Checkou
 
 
 ## Next steps
-- Proceed to [Getting started](getting-started) if you're ready to create something with **httpc**
-- Checkout [Tutorials](tutorials) to see guides or complete applications built with **httpc**
-- Read the [Architecture](server-architecture) if you want a deep dive on how the httpc server works and how to customize it
+- Proceed to [Getting started](/docs/getting-started) if you're ready to create something with **httpc**
+- Checkout [Tutorials](/docs/tutorials) to see guides or complete applications built with **httpc**
+- Read the [Architecture](/docs/server-architecture) if you want a deep dive on how the httpc server works and how to customize it

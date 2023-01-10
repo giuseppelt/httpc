@@ -97,7 +97,7 @@ const environment  = useContextProperty("environment");
 The context extension allows keeping your code safe, as the typescript compiler will type check your code and emit errors in case of type mismatch.
 
 ## Custom Parser
-A parser is typed by `HttpCServerCallParser`. It transforms an _http request_ into an [`HttpCall`](server-architecture#parsing). A parser can skip the processing if it doesn't support the request. The server will try the next parser in the list.
+A parser is typed by `HttpCServerCallParser`. It transforms an _http request_ into an [`HttpCall`](/docs/server-architecture#parsing). A parser can skip the processing if it doesn't support the request. The server will try the next parser in the list.
 
 <Aside type="info" title={false}>
 Usually, custom parsers are needed when the server must handle requests **from clients you don't control**. A custom parser can map those requests to function calls.
@@ -190,7 +190,7 @@ server.start();
 ```
 
 <Aside type="tip">
-By default the server includes the builtin [HttpCCallParser](package-httpc-server) that parses the request following the [httpc call convention](httpc-call-convention). The `HttpCCallParser` is added last, so any parser defined takes precedence.
+By default the server includes the builtin [HttpCCallParser](/docs/package-httpc-server) that parses the request following the [httpc call convention](/docs/httpc-call-convention). The `HttpCCallParser` is added last, so any parser defined takes precedence.
 </Aside>
 
 
@@ -204,9 +204,9 @@ const body = await Parser.readBodyAsString(req);
 ```
 
 <Aside type="tip">
-[@httpc/server](package-httpc-server) offers some [builtin parsers](package-httpc-server#parsers) like the `FormUrlEncodedParser` to handle browser form submission, or the `RawBodyParser` to handle binary payloads.
+[@httpc/server](/docs/package-httpc-server) offers some [builtin parsers](/docs/package-httpc-server#parsers) like the `FormUrlEncodedParser` to handle browser form submission, or the `RawBodyParser` to handle binary payloads.
 ***
-Before implementing a new parser, please check if a [builtin parser](package-httpc-server#parsers) covers use case.
+Before implementing a new parser, please check if a [builtin parser](/docs/package-httpc-server#parsers) covers use case.
 </Aside>
 
 
@@ -253,7 +253,7 @@ const server = createHttpCServer({
 server.start();
 ```
 
-Additional examples are available in the [tutorials](tutorials).
+Additional examples are available in the [tutorials](/docs/tutorials).
 
 
 

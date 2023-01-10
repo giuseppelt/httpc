@@ -11,7 +11,7 @@ import CodeTabs from "~/components/tabs/CodeTabs.tsx";
 **@httpc/kit** is a highly opinionated framework to build function-based API with minimal boilerplate code and e2e type safety.
 
 <br />
-**@httpc/kit** is built on top of [@httpc/server](package-httpc-server) and provides many ready-to-go components covering concerns like authentication, validation, caching and so on...
+**@httpc/kit** is built on top of [@httpc/server](/docs/package-httpc-server) and provides many ready-to-go components covering concerns like authentication, validation, caching and so on...
 
 <br />
 **@httpc/kit** major goals are:
@@ -297,7 +297,7 @@ With e2e type safety, clients benefit a more trustworthy environment because the
     Client generation supports different configurations and provides some helpers to manage common scenarios like authentication, error handling and so on. Each component is completely _tree-shakable_, so bundlers will remove anything you don't use.
 
     <br />
-    Detailed explanation on client generation with pro and cons, example scenarios and all configuration options are available on the [client generation page](client-generation).
+    Detailed explanation on client generation with pro and cons, example scenarios and all configuration options are available on the [client generation page](/docs/client-generation).
     <br />
 
 - **type definitions import**
@@ -377,7 +377,7 @@ function makePayment(data: PaymentData) {
 }
 ```
 
-For details and all extension points read [Extending](kit-extending).
+For details and all extension points read [Extending](/docs/kit-extending).
 
 
 ### Magic strings reduction
@@ -410,7 +410,7 @@ class Logger {
 In the above example, the editor will autosuggest `LOG_LEVEL` every time an environment variable is used with no need to constantly check the name or see the list of the available ones.
 
 <br />
-Within **@httpc/kit**, strings as keys are used in other places like cache resolution. To know where magic-strings are used and can be redefined read [Extending](kit-extending).
+Within **@httpc/kit**, strings as keys are used in other places like cache resolution. To know where magic-strings are used and can be redefined read \[Extending](/docs/kit-extending).
 
 
 
@@ -419,11 +419,11 @@ Within **@httpc/kit**, strings as keys are used in other places like cache resol
 ## Toolkit ready to use
 
 **@httpc/kit** provides many builtin components and utilities covering many use cases. Checkout the dedicated pages:
-- [Authentication](kit-authentication)
-- [Validation](kit-validation)
-- [Logging](kit-logging)
-- [Authorization](kit-authorization)
-- [Caching](kit-caching)
+- [Authentication](/docs/kit-authentication)
+- [Validation](/docs/kit-validation)
+- [Logging](/docs/kit-logging)
+- [Authorization](/docs/kit-authorization)
+- [Caching](/docs/kit-caching)
 
 
 ### Dependency injection
@@ -446,9 +446,9 @@ export class UserService {
 Tsyringe is a required peer dependency. You can find more details about tsyringe on its [repository](https://github.com/microsoft/tsyringe).
 
 <br />
-**@httpc/kit** provides additional helpers to deal better with injection or to cover use cases that tsyringe lacks. For example: optional parameters or resolving environment variables. Details on the [Services & Dependency](kit-dependency-injection) page.
+**@httpc/kit** provides additional helpers to deal better with injection or to cover use cases that tsyringe lacks. For example: optional parameters or resolving environment variables. Details on the [Services & Dependency](/docs/kit-dependency-injection) page.
 <br />
-You can find many examples on how to use dependency injection in the [tutorials](tutorial).
+You can find many examples on how to use dependency injection in the [tutorials](/docs/tutorial).
 
 <Aside type="tip" title="Against DI?" icon="question">
 You're not forced to use dependency injection. If you don't like it, you can totally avoid using it. Although, many **@httpc/kit** builtin components rely on it to work.
@@ -457,7 +457,7 @@ You're not forced to use dependency injection. If you don't like it, you can tot
 
 ## Request context
 
-**@httpc/kit** extends the the builtin properties inherited from the [server context](server-architecture#builtin-properties) with additional properties.
+**@httpc/kit** extends the the builtin properties inherited from the [server context](/docs/server-architecture#builtin-properties) with additional properties.
 
 <div class="property-table">
 | property        | type                   | description  |

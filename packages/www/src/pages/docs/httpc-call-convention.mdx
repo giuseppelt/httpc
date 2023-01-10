@@ -21,9 +21,9 @@ The **httpc call convention** provides a simple way to build function-based APIs
 
 
 <Aside type="info">
-The **httpc call convention** is implemented by the builtin `HttpCCallParser` which is included by default with any [httpc server](server-architecture) configuration.
+The **httpc call convention** is implemented by the builtin `HttpCCallParser` which is included by default with any [httpc server](/docs/server-architecture) configuration.
 *** 
-An **httpc server** can handle any _http request_, even when non **httpc** compliant, with [custom parsers](server-extending#custom-parser).
+An **httpc server** can handle any _http request_, even when non **httpc** compliant, with [custom parsers](/docs/server-extending#custom-parser).
 </Aside>
 
 <br />
@@ -32,7 +32,7 @@ The **httpc call convention** defines two [Conformity Levels](#conformity-level)
 - [Strict](#strict-mode)
 
   A request must conform to all _convention rules_, otherwise it will be rejected.
-  This is useful when receiving requests from _httpc-aware_ clients like `HttpCClient` or the custom client [generated](client-generation) from an API.
+  This is useful when receiving requests from _httpc-aware_ clients like `HttpCClient` or the custom client [generated](/docs/client-generation) from an API.
 
 - [Loose](#loose-mode)
 
@@ -160,7 +160,7 @@ The names `"read"` and `"write"` are just a convention and don't define differen
 
 <Aside type="info">
 **http caching** is a concern somewhat _external_ to the function invocation per se.
-The httpc framework provides [helpers](kit-caching) to set http caching headers with flexible configurations.
+The httpc framework provides [helpers](/docs/kit-caching) to set http caching headers with flexible configurations.
 </Aside>
 
 

@@ -16,13 +16,13 @@ The main task of an **httpc server** is to:
 3. translate the result back into a _standard http response_ (rendering)
 
 <br />
-The default translation is performed according the [httpc call convention](httpc-call-convention), which defines simple rules to identify which server function to call and extract the eventual arguments.
+The default translation is performed according the [httpc call convention](/docs/httpc-call-convention), which defines simple rules to identify which server function to call and extract the eventual arguments.
 
 <br />
 Any incoming request must match a function, otherwise the _HTTP 404_ is returned.
 
 <Aside type="info">
-httpc-aware clients make requests already compliant to the [call convention](httpc-call-convention) so no configuration is needed server side.<br/>
+httpc-aware clients make requests already compliant to the [call convention](/docs/httpc-call-convention) so no configuration is needed server side.<br/>
 ***
 An **httpc server** can handle also standard requests, usually made by clients you don't control, like form submissions by browsers or webhook calls by service providers.
 </Aside>
@@ -112,7 +112,7 @@ There's no need to pass context data as function parameters in your logic. This 
 
 <Aside type="warn" title="Important">
 The **@httpc/server** heavy relies on the execution context and its propagation to work property.
-Read a deep dive with detailed explanation at [Request context](server-request-context).
+Read a deep dive with detailed explanation at [Request context](/docs/server-request-context).
 </Aside>
 
 
@@ -129,7 +129,7 @@ Read a deep dive with detailed explanation at [Request context](server-request-c
 <Aside type="info">
 The **@httpc/server** provides a basic context, because it follows a non-opinionated, universal approach, with no imposition on how to define or arrange your information. 
 ********
-If you need a more opinionated approach, you should check [@httpc/kit](kit-introduction) which offers builtin support for a broad range of business concerns like authentication, authorization, validation, caching, ...
+If you need a more opinionated approach, you should check [@httpc/kit](/docs/kit-introduction) which offers builtin support for a broad range of business concerns like authentication, authorization, validation, caching, ...
 </Aside>
 
 
@@ -139,7 +139,7 @@ The context isn't limited to the predefined properties. Additional properties ca
 Usually middlewares process the request and populate the context with common business data like authentication, session info, cached values, ... which will be available later in the function handler.
 
 <br />
-See [Extending](./server-extending) for details.
+See [Extending](/docs/server-extending) for details.
 
 
 
@@ -160,7 +160,7 @@ A _httpc request_ is an `HttpCall` object defined with
 
 A parser extracts the required info from the _http request_ and creates the `HttpCall` object.
 <br />
-By default, the **@httpc/server** uses the builtin [`HttpCCallParser`](#httpccallparser), which follows the [httpc call convention](httpc-call-convention) to make calling a server function very easy.
+By default, the **@httpc/server** uses the builtin [`HttpCCallParser`](#httpccallparser), which follows the [httpc call convention](/docs/httpc-call-convention) to make calling a server function very easy.
 <br />
 The server is not limited to _httpc calls_ only. It can handle browser form submissions, rest requests, web hooks or any raw _http request_, with custom parsers.
 You can have an hybrid server that, in addition to _httpc calls_, can respond to any _http requests_.
@@ -176,14 +176,14 @@ The [`HttpCCallParser`](#httpccallparser) is defined last in the chain, thus any
 
 ### HttpCCallParser
 The builtin `HttpCCallParser` provides a straightforward way to expose a json-like API.
-It transforms an _http request_ into an `HttpCall` by following the [httpc call convention](httpc-call-convention). 
+It transforms an _http request_ into an `HttpCall` by following the [httpc call convention](/docs/httpc-call-convention). 
 <br/>
-Details and configuration options are available in [reference](package-httpc-server).
+Details and configuration options are available in [reference](/docs/package-httpc-server).
 
 ### Builtin parsers
-In addition to json API, the [@httpc/server](package-httpc-server) package offers several parsers covering additional use cases. For example, `FormUrlEncodedParser` to handle form submissions, or `RawBodyParser` to handle binary data.
+In addition to json API, the [@httpc/server](/docs/package-httpc-server) package offers several parsers covering additional use cases. For example, `FormUrlEncodedParser` to handle form submissions, or `RawBodyParser` to handle binary data.
 <br/>
-You can check the [reference](package-httpc-server) for details.
+You can check the [reference](/docs/package-httpc-server) for details.
 
 ### Custom parsers
 You can define a custom parser to handle a scenario not covered by the builtin parsers. You can define any number of parsers. The order by which the parsers are listed determines the priority.
@@ -212,7 +212,7 @@ export function CustomParser(options: CustomerParserOptions) : HttpCServerCallPa
 }
 ```
 
-See [Extending](server-extending) for details.
+See [Extending](/docs/server-extending) for details.
 
 
 ## Preprocessing
@@ -417,7 +417,7 @@ server.start();
 
 
 <Aside type="info">
-The [@httpc/kit](kit) provides many middlewares ready to use for different use cases like authentication, validation, catching ...
+The [@httpc/kit](/docs/kit-introduction) provides many middlewares ready to use for different use cases like authentication, validation, catching ...
 </Aside>
 
 ### Call nesting and composition
@@ -535,7 +535,7 @@ const friend = await client.users.friends.add(userId, friendId, "friend-list-2")
 ```
 
 ### Result
-Anything a function handler returns will be the result. An handler can also throw an error to halt the execution. There are several [builtin errors](package-httpc-server#errors) that map to the relative http error like `BadRequestError`, `UnauthorizedError` and so on.
+Anything a function handler returns will be the result. An handler can also throw an error to halt the execution. There are several [builtin errors](/docs/package-httpc-server#errors) that map to the relative http error like `BadRequestError`, `UnauthorizedError` and so on.
 <br/>
 
 If an error is thrown, the server will catch it, stop the pipeline execution and the error itself will be the result.

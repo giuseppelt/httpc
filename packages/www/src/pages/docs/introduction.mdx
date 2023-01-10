@@ -5,10 +5,12 @@ description: Introduction on httpc framework, the whys and the hows to develop a
 ---
 
 import Aside from "~/components/Aside.astro";
+import CodeTabs from "~/components/tabs/CodeTabs.tsx";
+
 
 ## What is httpc?
 
-**httpc** is a javascript/typescript framework to build function-based API with minimal code and end-to-end type safety.
+**httpc** is a javascript/typescript framework for building function-based API with minimal code and end-to-end type safety.
 
 ### Why?
 There are scenarios where an API is just a fancy way to expose functions. Likewise, most of the time a client just wants to call a function on the server.
@@ -133,6 +135,77 @@ async function addNewComment(postId: string, message: string) {
 ```
 
 [@httpc/kit](kit-introduction) offers several builtin hooks to cache data, to perform authorization checks, to make transactions...
+
+
+### Serverless
+You can host a full **httpc** API inside a serverless environment like Vercel, AWS Lambda or Netlify functions.
+This gives the advantage to deploy a single serverless function handling the whole API.
+
+<br />
+For example with Vercel, you can expose all your API functions and call them from pages with full type checking:
+<CodeTabs client:idle tabs={["api/index.ts", "calls/index.ts", "pages/index.tsx"]}>
+  <Fragment slot="0">
+```ts
+import { createHttpCVercelAdapter } from "@httpc/adapter-vercel";
+import calls from "../calls";
+
+export default createHttpCVercelAdapter({
+    calls,
+    log: "info"
+});
+```
+  </Fragment>
+  <Fragment slot="1">
+```ts
+import db from "./db";
+
+async function getLatest() {
+    return db.select("posts").take(10)
+        .orderBy("created_at", "desc");
+}
+
+async function addLike(postId: string) {
+    return db.update("posts").where("id", postId)
+        .increase("likes", 1);
+}
+
+export default {
+    posts: {
+        getLatest,
+        addLike,
+    }
+}
+```    
+  </Fragment>
+  <Fragment slot="2">
+```ts
+import { createClient, ClientDef } from "@httpc/client";
+import { useQuery, useMutation } from "react-query";
+import type calls from "../calls";
+
+
+const client = createClient<ClientDef<typeof calls>>();
+
+export default function Home() {
+  const posts = useQuery(["posts"], () => client.posts.getLatest());
+  const addLike = useMutation((postId: string) => client.posts.addLike(postId), {
+    onSuccess: () => queryClient.invalidateQueries(["posts"])
+  });
+
+  return (
+    <div class="container">
+      {posts.data.map(post =>
+        <div class="post">
+          <h2>{post.title}</h2>
+          <button onClick={() => addLike.mutate(post.id)}>Like</button>
+        </div>
+      )}
+    </div>
+  );
+}
+```    
+  </Fragment>
+</CodeTabs>
 
 
 ### Client generation

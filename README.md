@@ -103,6 +103,49 @@ async function addNewComment(postId: string, message: string) {
 ```
 **@httpc/kit** offers several builtin hooks to cache data, to perform authorization checks, to make transactions…
 
+### Serverless
+You can host a full **httpc** API inside a serverless environment like Vercel, AWS Lambda or Netlify functions.
+This gives the advantage to deploy a single serverless function handling the whole API.
+
+For example with Vercel, you can expose all your API functions:
+```ts
+//file: api/index.ts
+
+import { createHttpCVercelAdapter } from "@httpc/adapter-vercel";
+import calls from "../calls";
+
+export default createHttpCVercelAdapter({
+    calls,
+    log: "info"
+});
+```
+
+Then, you can call API functions from pages with full type checking:
+```ts
+//file: pages/home.tsx
+
+import { createClient, ClientDef } from "@httpc/client";
+import { useQuery, useMutation } from "react-query";
+import type calls from "../calls"; // <-- import calls definition
+
+// create a typed client
+const client = createClient<ClientDef<typeof calls>>();
+
+export default function Home() {
+  const posts = useQuery(["posts"], () => client.posts.getLatest());
+
+  return (
+    <div class="container">
+      {posts.data.map(post =>
+        <div class="post">
+          <h2>{post.title}</h2>
+          <p>{post.text}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+```    
 
 ### Extensive type safety
 Customize builtin objects to fit your needs, while keeping autocompletion and type checking working.

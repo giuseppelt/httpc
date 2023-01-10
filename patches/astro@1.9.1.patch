@@ -1,3 +1,16 @@
+diff --git a/components/Code.astro b/components/Code.astro
+index 8bd3476a1133b515b68eab90fab078b3d5bece3b..15aa21e27b8962d10d4f70678c9bf8e75f19a477 100644
+--- a/components/Code.astro
++++ b/components/Code.astro
+@@ -37,7 +37,7 @@ const { code, lang = 'plaintext', theme = 'github-dark', wrap = false } = Astro.
+ /** Replace the shiki class name with a custom astro class name. */
+ function repairShikiTheme(html: string): string {
+ 	// Replace "shiki" class naming with "astro"
+-	html = html.replace('<pre class="shiki"', '<pre class="astro-code"');
++	html = html.replace(/<pre class="(.*)shiki(.*)"/, '<pre class="$1astro-code$2"');
+ 	// Handle code wrapping
+ 	// if wrap=null, do nothing.
+ 	if (wrap === false) {
 diff --git a/dist/core/build/vite-plugin-internals.js b/dist/core/build/vite-plugin-internals.js
 index d6a1c2ca51c7a7bdc8d29246f696b1ea20eb87b8..c2911258e4c2aa01000e73894b222a8c81f5274c 100644
 --- a/dist/core/build/vite-plugin-internals.js

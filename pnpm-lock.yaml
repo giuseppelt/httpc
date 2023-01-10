@@ -2,7 +2,7 @@ lockfileVersion: 5.4
 
 patchedDependencies:
   astro@1.9.1:
-    hash: sxl3rtincuwubgmy5h5lsg7vga
+    hash: d7bryvdu3wfuj2yjoleyq2wxna
     path: patches/astro@1.9.1.patch
 
 importers:
@@ -202,7 +202,7 @@ importers:
       '@astrojs/mdx': 0.14.0
       '@astrojs/preact': 1.2.0_preact@10.11.3
       '@fontsource/mulish': 4.5.13
-      astro: 1.9.1_sxl3rtincuwubgmy5h5lsg7vga_iwdbj4p7tcybw7crwxzyorlhpu
+      astro: 1.9.1_d7bryvdu3wfuj2yjoleyq2wxna_iwdbj4p7tcybw7crwxzyorlhpu
       astro-compress: 1.1.25
       astro-integration-lottie: 0.1.1_lottie-web@5.10.1
       lottie-web: 5.10.1
@@ -1657,7 +1657,7 @@ packages:
       lottie-web: 5.10.1
     dev: false
 
-  /astro/1.9.1_sxl3rtincuwubgmy5h5lsg7vga_iwdbj4p7tcybw7crwxzyorlhpu:
+  /astro/1.9.1_d7bryvdu3wfuj2yjoleyq2wxna_iwdbj4p7tcybw7crwxzyorlhpu:
     resolution: {integrity: sha512-aQ6rvAP4w4VCgipVYA/zPmnkuTbFrMZ/+x/sAv2W1uJHWU2iQmrVRrrjUFJl+i1TuYYlHAuC2vKK7aRyXCjD4A==}
     engines: {node: ^14.18.0 || >=16.12.0, npm: '>=6.14.0'}
     hasBin: true

@@ -1,0 +1,5 @@
+# cloudflare pages bug -> force content-type
+/*.js
+  Content-Type: application/javascript
+/*.woff2
+  Content-Type: font/woff2

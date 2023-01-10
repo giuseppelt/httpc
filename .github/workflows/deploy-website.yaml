@@ -1,0 +1,29 @@
+name: deploy-website
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "packages/www/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup node & pnpm
+        uses: ./.github/actions/setup-env
+
+      - name: Build website
+        run: pnpm run --filter @httpc/www build
+
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 78edf5165d1814cb77465c26ca14b1b2
+          projectName: httpc-www
+          directory: packages/www/dist
+          branch: main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}

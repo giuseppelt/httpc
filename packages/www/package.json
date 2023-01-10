@@ -1,13 +1,14 @@
 {
   "name": "@httpc/www",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "astro dev --host",
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "deploy": "wrangler pages publish dist --project-name httpc-www",
     "astro": "astro"
   },
   "dependencies": {

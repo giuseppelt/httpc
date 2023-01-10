@@ -9,7 +9,7 @@ runs:
 
     - uses: pnpm/action-setup@v2.2.4
       with:
-        version: 7.14
+        version: 7.23
         run_install: false
 
     - name: Cache pnpm modules

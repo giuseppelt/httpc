@@ -3,6 +3,7 @@ import path from "path";
 import { defineConfig } from "astro/config";
 import mdx from "@astrojs/mdx";
 import preact from "@astrojs/preact";
+import sitemap from "@astrojs/sitemap";
 import lottie from "astro-integration-lottie";
 import compress from "astro-compress";
 import rehypeLinkProcessor from "rehype-link-processor";
@@ -26,6 +27,11 @@ export default defineConfig({
         removeAttributeQuotes: false,
       },
       css: false
+    }),
+    sitemap({
+      filter: page => ![
+        "/docs/"
+      ].includes(new URL(page).pathname)
     })
   ],
   markdown: {

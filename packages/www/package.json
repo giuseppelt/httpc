@@ -14,6 +14,7 @@
   "dependencies": {
     "@astrojs/mdx": "^0.14.0",
     "@astrojs/preact": "^1.2.0",
+    "@astrojs/sitemap": "^1.0.0",
     "@fontsource/mulish": "^4.5.13",
     "astro": "^1.9.1",
     "astro-compress": "^1.1.25",

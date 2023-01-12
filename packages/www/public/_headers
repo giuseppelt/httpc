@@ -3,3 +3,5 @@
   Content-Type: application/javascript
 /*.woff2
   Content-Type: font/woff2
+/*.svg
+  Content-Type: image/svg+xml

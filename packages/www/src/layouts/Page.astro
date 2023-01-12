@@ -1,0 +1,81 @@
+---
+import { MarkdownHeading, MarkdownContent } from "astro";
+import Layout from "./Layout.astro";
+
+interface Props {
+  url: string;
+  navbar?: boolean;
+  headings?: MarkdownHeading[];
+  frontmatter?: Frontmatter;
+  content: MarkdownContent;
+}
+
+const { content, url: currentPage, frontmatter, headings } = Astro.props;
+
+const title = frontmatter?.title ? `${frontmatter.title} | httpc` : `httpc`;
+
+// ensure no h1 is present
+if (headings?.some(x => x.depth === 1)) {
+  throw new Error(`H1 not allowed in docs(${currentPage})`);
+}
+---
+
+<Layout {frontmatter} title={title}>
+  <main class="page-content">
+    <article class="content">
+      <div class="bleed-box">
+        <header class="page-content mb-3">
+          {
+            frontmatter && (
+              <h1 class="page-title">
+                <span class="page-title-text">{frontmatter.title}</span>
+              </h1>
+            )
+          }
+        </header>
+      </div>
+      <slot />
+    </article>
+  </main>
+</Layout>
+
+<style lang="scss" is:global>
+  main {
+    min-height: 100%;
+  }
+
+  .content {
+    padding-top: calc(var(--navbar-height) + 0rem);
+    padding-bottom: 3rem;
+  }
+
+  .bleed-box {
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+    background-color: var(--theme-bg-color-dark2);
+  }
+
+  .page-title {
+    font-size: 2rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .page-title-text {
+    --title-padding: 12px;
+    display: inline-block;
+    margin: 0 calc(var(--title-padding) * -1);
+    padding: 0 var(--title-padding);
+    background: var(--theme-bg-color);
+  }
+
+  @media (max-width: 768px) {
+    .content {
+      padding-top: calc(var(--navbar-height) + 0.5rem);
+    }
+
+    .page-title-text {
+      --title-padding: 8px;
+    }
+  }
+</style>

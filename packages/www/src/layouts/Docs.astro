@@ -30,7 +30,7 @@ if (headings?.some(x => x.depth === 1)) {
     <Sidebar base="docs" {...{ currentPage, content, frontmatter, headings}} />
     <article class="content side-spacing">
       <header class="mb-3">
-        {frontmatter && <h1 class="page-title mb">{frontmatter.title}</h1>}
+        {frontmatter && <h1 class="page-title">{frontmatter.title}</h1>}
         {
           frontmatter && frontmatter.status && (
             <TagList className="mt-1">

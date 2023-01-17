@@ -1,9 +1,9 @@
 lockfileVersion: 5.4
 
 patchedDependencies:
-  astro@1.9.1:
+  astro@1.9.2:
     hash: d7bryvdu3wfuj2yjoleyq2wxna
-    path: patches/astro@1.9.1.patch
+    path: patches/astro@1.9.2.patch
 
 importers:
 
@@ -25,8 +25,8 @@ importers:
       '@types/jest': ^29.2.5
       jest: ^29.3.1
       reflect-metadata: ^0.1.13
-      rimraf: ^3.0.2
-      ts-jest: ^29.0.3
+      rimraf: ^4.1.1
+      ts-jest: ^29.0.5
       tsyringe: ^4.7.0
       typescript: ^4.9.4
     devDependencies:
@@ -36,8 +36,8 @@ importers:
       '@types/jest': 29.2.5
       jest: 29.3.1
       reflect-metadata: 0.1.13
-      rimraf: 3.0.2
-      ts-jest: 29.0.3_p6ekqnroyms5nhqbfxosryz7rm
+      rimraf: 4.1.1
+      ts-jest: 29.0.5_p6ekqnroyms5nhqbfxosryz7rm
       tsyringe: 4.7.0
       typescript: 4.9.4
 
@@ -51,8 +51,8 @@ importers:
       jest: ^29.3.1
       node-mocks-http: ^1.12.1
       reflect-metadata: ^0.1.13
-      rimraf: ^3.0.2
-      ts-jest: ^29.0.3
+      rimraf: ^4.1.1
+      ts-jest: ^29.0.5
       tsyringe: ^4.7.0
       typescript: ^4.9.4
     devDependencies:
@@ -64,8 +64,8 @@ importers:
       jest: 29.3.1_@types+node@16.18.11
       node-mocks-http: 1.12.1
       reflect-metadata: 0.1.13
-      rimraf: 3.0.2
-      ts-jest: 29.0.3_p6ekqnroyms5nhqbfxosryz7rm
+      rimraf: 4.1.1
+      ts-jest: 29.0.5_p6ekqnroyms5nhqbfxosryz7rm
       tsyringe: 4.7.0
       typescript: 4.9.4
 
@@ -74,18 +74,18 @@ importers:
       '@httpc/client': workspace:^0.1.0
       '@types/node': ^16.18.11
       '@types/prompts': ^2.4.2
-      commander: ^9.5.0
+      commander: ^10.0.0
       cross-fetch: ^3.1.5
       giget: ^1.0.0
       kleur: ^4.1.5
       prompts: ^2.4.2
       reflect-metadata: ^0.1.13
-      rimraf: ^3.0.2
+      rimraf: ^4.1.1
       ts-node: ^10.9.1
       typescript: ^4.9.4
     dependencies:
       '@httpc/client': link:../client
-      commander: 9.5.0
+      commander: 10.0.0
       cross-fetch: 3.1.5
       giget: 1.0.0
       kleur: 4.1.5
@@ -95,19 +95,19 @@ importers:
     devDependencies:
       '@types/node': 16.18.11
       '@types/prompts': 2.4.2
-      rimraf: 3.0.2
+      rimraf: 4.1.1
       ts-node: 10.9.1_qacynw5b4krdzzrloasmebsynu
 
   packages/client:
     specifiers:
       '@types/node': ^16.18.11
       '@types/node-fetch': ^2.6.2
-      rimraf: ^3.0.2
+      rimraf: ^4.1.1
       typescript: ^4.9.4
     devDependencies:
       '@types/node': 16.18.11
       '@types/node-fetch': 2.6.2
-      rimraf: 3.0.2
+      rimraf: 4.1.1
       typescript: 4.9.4
 
   packages/create:
@@ -129,8 +129,8 @@ importers:
       jws: ^4.0.0
       lru-cache: ^7.14.1
       reflect-metadata: ^0.1.13
-      rimraf: ^3.0.2
-      ts-jest: ^29.0.3
+      rimraf: ^4.1.1
+      ts-jest: ^29.0.5
       tsyringe: ^4.7.0
       typescript: ^4.9.4
       winston: ^3.8.2
@@ -148,8 +148,8 @@ importers:
       jest: 29.3.1_@types+node@16.18.11
       lru-cache: 7.14.1
       reflect-metadata: 0.1.13
-      rimraf: 3.0.2
-      ts-jest: 29.0.3_p6ekqnroyms5nhqbfxosryz7rm
+      rimraf: 4.1.1
+      ts-jest: 29.0.5_p6ekqnroyms5nhqbfxosryz7rm
       tsyringe: 4.7.0
       typescript: 4.9.4
       winston: 3.8.2
@@ -161,8 +161,8 @@ importers:
       '@types/node': ^16.18.11
       jest: ^29.3.1
       path-to-regexp: ^6.2.1
-      rimraf: ^3.0.2
-      ts-jest: ^29.0.3
+      rimraf: ^4.1.1
+      ts-jest: ^29.0.5
       typescript: ^4.9.4
     dependencies:
       path-to-regexp: 6.2.1
@@ -170,8 +170,8 @@ importers:
       '@types/jest': 29.2.5
       '@types/node': 16.18.11
       jest: 29.3.1_@types+node@16.18.11
-      rimraf: 3.0.2
-      ts-jest: 29.0.3_p6ekqnroyms5nhqbfxosryz7rm
+      rimraf: 4.1.1
+      ts-jest: 29.0.5_p6ekqnroyms5nhqbfxosryz7rm
       typescript: 4.9.4
 
   packages/www:
@@ -184,8 +184,8 @@ importers:
       '@types/hast': ^2.3.4
       '@types/mdast': ^3.0.10
       '@types/node': ^16.18.11
-      astro: ^1.9.1
-      astro-compress: ^1.1.25
+      astro: ^1.9.2
+      astro-compress: ^1.1.27
       astro-icon: ^0.8.0
       astro-integration-lottie: ^0.1.1
       dotenv: ^16.0.3
@@ -204,8 +204,8 @@ importers:
       '@astrojs/preact': 1.2.0_preact@10.11.3
       '@astrojs/sitemap': 1.0.0
       '@fontsource/mulish': 4.5.13
-      astro: 1.9.1_d7bryvdu3wfuj2yjoleyq2wxna_iwdbj4p7tcybw7crwxzyorlhpu
-      astro-compress: 1.1.25
+      astro: 1.9.2_d7bryvdu3wfuj2yjoleyq2wxna_iwdbj4p7tcybw7crwxzyorlhpu
+      astro-compress: 1.1.27
       astro-integration-lottie: 0.1.1_lottie-web@5.10.1
       lottie-web: 5.10.1
       preact: 10.11.3
@@ -1649,8 +1649,8 @@ packages:
     hasBin: true
     dev: false
 
-  /astro-compress/1.1.25:
-    resolution: {integrity: sha512-67AZL1cQ/GF0bEEOpzSRzJiHVHUExSy0mCt3kbh4maWP5ikdBmv4I4BlFhlBWOmS/POukSwtxHbkP2l9bALdbQ==}
+  /astro-compress/1.1.27:
+    resolution: {integrity: sha512-7H7mfp4/BECckQGtyNJVYBI9jwWYX3rBcbL1EbhlgyDRbs3/thtJKDwW8xEaUvxox4R2bnNyzIET4XF/zGbozg==}
     dependencies:
       '@types/csso': 5.0.0
       '@types/html-minifier-terser': 7.0.0
@@ -1679,8 +1679,8 @@ packages:
       lottie-web: 5.10.1
     dev: false
 
-  /astro/1.9.1_d7bryvdu3wfuj2yjoleyq2wxna_iwdbj4p7tcybw7crwxzyorlhpu:
-    resolution: {integrity: sha512-aQ6rvAP4w4VCgipVYA/zPmnkuTbFrMZ/+x/sAv2W1uJHWU2iQmrVRrrjUFJl+i1TuYYlHAuC2vKK7aRyXCjD4A==}
+  /astro/1.9.2_d7bryvdu3wfuj2yjoleyq2wxna_iwdbj4p7tcybw7crwxzyorlhpu:
+    resolution: {integrity: sha512-L+Ma0eR0Aa6QZg7RF0lEs+106Ye1/zukvtq3KtsYIogAojltlwllwU9X5CwMBzFwA55NxpNp4gSRh5US/xb+8Q==}
     engines: {node: ^14.18.0 || >=16.12.0, npm: '>=6.14.0'}
     hasBin: true
     dependencies:
@@ -2174,6 +2174,11 @@ packages:
 
   /comma-separated-tokens/2.0.3:
     resolution: {integrity: sha512-Fu4hJdvzeylCfQPp9SGWidpzrMs7tTrlu6Vb8XGaRGck8QSNZJJp538Wrb60Lax4fPwR64ViY468OIUTbRlGZg==}
+
+  /commander/10.0.0:
+    resolution: {integrity: sha512-zS5PnTI22FIRM6ylNW8G4Ap0IEOyk62fhLSD0+uHRT9McRCLGpkVNvao4bjimpK/GShynyQkFFxHhwMcETmduA==}
+    engines: {node: '>=14'}
+    dev: false
 
   /commander/2.20.3:
     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
@@ -5705,11 +5710,10 @@ packages:
       glob: 7.2.3
     dev: true
 
-  /rimraf/3.0.2:
-    resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
+  /rimraf/4.1.1:
+    resolution: {integrity: sha512-Z4Y81w8atcvaJuJuBB88VpADRH66okZAuEm+Jtaufa+s7rZmIz+Hik2G53kGaNytE7lsfXyWktTmfVz0H9xuDg==}
+    engines: {node: '>=14'}
     hasBin: true
-    dependencies:
-      glob: 7.2.3
     dev: true
 
   /roarr/2.15.4:
@@ -6212,8 +6216,8 @@ packages:
   /trough/2.1.0:
     resolution: {integrity: sha512-AqTiAOLcj85xS7vQ8QkAV41hPDIJ71XJB4RCUrzo/1GM2CQwhkJGaf9Hgr7BOugMRpgGUrqRg/DrBDl4H40+8g==}
 
-  /ts-jest/29.0.3_p6ekqnroyms5nhqbfxosryz7rm:
-    resolution: {integrity: sha512-Ibygvmuyq1qp/z3yTh9QTwVVAbFdDy/+4BtIQR2sp6baF2SJU/8CKK/hhnGIDY2L90Az2jIqTwZPnN2p+BweiQ==}
+  /ts-jest/29.0.5_p6ekqnroyms5nhqbfxosryz7rm:
+    resolution: {integrity: sha512-PL3UciSgIpQ7f6XjVOmbi96vmDHUqAyqDr8YxzopDqX3kfgYtX1cuNeBjP+L9sFXi6nzsGGA6R3fP3DDDJyrxA==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     hasBin: true
     peerDependencies:

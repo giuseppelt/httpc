@@ -1,7 +1,7 @@
 ---
-const items = (await Astro.glob("~/pages/docs/adapters/*.mdx"))
-  .filter(x => x.url !== "/docs/adapters") // exclude index
-  .filter(x => !x.frontmatter.draft);
+import { getDocs } from "../content";
+
+const items = (await getDocs()).filter(x => x.url.startsWith("/docs/adapters/"));
 ---
 
 <ul>

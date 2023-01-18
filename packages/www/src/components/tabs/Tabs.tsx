@@ -89,7 +89,7 @@ export default function Tabs({ label, sharedStore, className, initial, tabs: _ta
 
 	return (
 		<div className={`tab mb-3 ${noTopMargin ? "" : "mt-3"} ${className || ""}`}>
-			<div className="tab-header hstack spacing-1 mb-2 relative" role="tablist" onKeyDown={moveFocus}>
+			<div className="tab-header hstack gap-1 mb-2 relative" role="tablist" onKeyDown={moveFocus}>
 				{label && <div><span class="text-sm fw-bold me-3">{label}</span></div>}
 				<span ref={activeTabIndicatorRef} class="indicator-tab" />
 				{tabs.map(([key, content]) => (

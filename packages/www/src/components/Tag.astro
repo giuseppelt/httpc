@@ -3,12 +3,22 @@ export interface Props {
   className?: string;
   prefix?: string;
   text: string;
+  href?: string;
 }
 
-const { className, prefix, text } = Astro.props;
+const { className, prefix, text, href } = Astro.props;
 ---
 
-<span class={`tag-badge ${className || ""}`}>
-  {prefix && <span class="prefix">{prefix}</span>}
-  <span class="value">{text}</span>
-</span>
+{
+  href ? (
+    <a href={href} class={`tag-badge ${className || ""}`}>
+      {prefix && <span class="prefix">{prefix}</span>}
+      <span class="value">{text}</span>
+    </a>
+  ) : (
+    <span class={`tag-badge ${className || ""}`}>
+      {prefix && <span class="prefix">{prefix}</span>}
+      <span class="value">{text}</span>
+    </span>
+  )
+}

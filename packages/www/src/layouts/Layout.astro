@@ -9,10 +9,12 @@ export interface Props {
   navbar?: boolean;
   frontmatter?: Frontmatter;
   title?: string;
-  width?: "page" | "docs";
+  description?: string;
+  width?: "page" | "docs" | "blog";
 }
 
-const { frontmatter, title = frontmatter?.title, navbar = true, url: currentPage, width = "page" } = Astro.props;
+const { frontmatter, title = frontmatter?.title, description = frontmatter?.description || frontmatter?.summary, navbar = true, width = "page" } = Astro.props;
+const currentPage = Astro.url.pathname;
 
 if (!title) {
   throw new Error("Title required");
@@ -28,7 +30,7 @@ if (!title) {
     <link rel="preload" as="font" type="font/woff2" href={fontBody} crossorigin />
     <link rel="preload" as="font" type="font/woff2" href={fontMono} crossorigin />
     <title>{title}</title>
-    {frontmatter?.description && frontmatter.description !== "description" && <meta name="description" content={frontmatter.description} />}
+    {description && description !== "description" && <meta name="description" content={description} />}
   </head>
   <body>
     {navbar && <Navbar currentPage={currentPage} width={width} />}

@@ -1,12 +1,19 @@
+import { BlogTags, getDocs, getPosts } from "./content";
+
 
 type Link = Readonly<{
     text: string
     href: string
+    frontmatter?: Frontmatter
+    navigable?: "disabled"
 }>
 
 export type SidebarHeaderSection = {
+    open?: boolean
+    className?: string
     header: string
     links: readonly Link[]
+    navigable?: "disabled"
 }
 
 export type SidebarLink = Readonly<
@@ -15,78 +22,133 @@ export type SidebarLink = Readonly<
 >
 
 
-export function getNavLinks(current: string) {
-    const allLinks = sidebar.flatMap((x) => ("header" in x ? x.links : x));
-    const index = allLinks.findIndex(x => x.href === current);
+async function createSidebar(links: SidebarLink[] | (() => (SidebarLink[] | Promise<SidebarLink[]>))) {
+    if (typeof links === "function") {
+        links = await links();
+    }
+
+
+    const pages = links.filter(x => x.navigable !== "disabled")
+        .flatMap((x) => ("header" in x ? x.links : x))
+        .filter(x => x.navigable !== "disabled");
 
     return {
-        prev: index >= 0 && allLinks[index - 1]?.href || undefined,
-        next: index >= 0 && allLinks[index + 1]?.href || undefined,
-    };
+        entries: links,
+        getNavLinks(current: string) {
+            const idx = pages.findIndex(x => x.href === current);
+
+            return {
+                prev: idx >= 0 && pages[idx - 1] || undefined,
+                next: idx >= 0 && pages[idx + 1] || undefined,
+            };
+        }
+    } as const;
 }
 
-const entries = import.meta.glob("~/pages/docs/tutorials/*.mdx");
-const tutorials = (await Promise.all(
-    Object.entries(entries)
-        .filter(([key]) => !key.includes("tutorials/index.mdx")) // exclude index
-        .map(([, loader]) => loader())
-)).filter((x: any) => !x.frontmatter.draft);
+export type Sidebar = Awaited<ReturnType<typeof createSidebar>>
 
-const sidebar: readonly SidebarLink[] = [
-    { text: "Introduction", href: "introduction" },
-    { text: "Getting started", href: "getting-started" },
-    {
-        header: "Guides", links: [
-            { text: "Index", href: "tutorials" },
-            ...tutorials.map((x: any) => ({
-                text: x.frontmatter.shortTitle || x.frontmatter.title,
-                href: x.url.replace("/docs/", "")
-            }))
-        ]
-    },
-    {
-        header: "Server", links: [
-            { text: "Architecture", href: "server-architecture" },
-            { text: "Extend functionality", href: "server-extending" },
-            { text: "Request context", href: "server-request-context" },
-            { text: "Call convention", href: "httpc-call-convention" },
-            { text: "Testing", href: "server-testing" },
-        ]
-    },
-    {
-        header: "Kit", links: [
-            { text: "Introduction", href: "kit-introduction" },
-            { text: "Services & Dependency", href: "kit-dependency-injection" },
-            { text: "Authentication", href: "kit-authentication" },
-            { text: "Validation", href: "kit-validation" },
-            { text: "Authorization", href: "kit-authorization" },
-            { text: "Logging", href: "kit-logging" },
-            { text: "Caching", href: "kit-caching" },
-            { text: "Extending", href: "kit-extending" },
-        ]
-    },
-    {
-        header: "Client", links: [
-            { text: "Generation", href: "client-generation" },
-            { text: "Usage", href: "client-usage" },
-            { text: "Publishing", href: "client-publishing" },
-        ]
-    },
-    {
-        header: "Adapters", links: [
-            { text: "Vercel", href: "adapters/vercel" },
-            { text: "Next", href: "adapters/next" },
-            { text: "Netlify", href: "adapters/netlify" },
-        ]
-    },
-    {
-        header: "Packages", links: [
-            { text: "@httpc/server", href: "package-httpc-server" },
-            { text: "@httpc/client", href: "package-httpc-client" },
-            { text: "@httpc/kit", href: "package-httpc-kit" },
-            { text: "@httpc/cli", href: "package-httpc-cli" },
-        ]
+const DocsSidebar = () => createSidebar(async () => {
+    const articles = await getDocs();
+    const tutorials = articles.filter(x => x.url.includes("/tutorials/"));
+
+    function docLink(path: string): Link {
+        path = "/docs/" + path;
+        const item = articles.find(x => x.url === path);
+        if (!item) throw new Error(`Sidebar: doc(${path}) not found`);
+
+        return {
+            text: item.frontmatter.shortTitle || item.frontmatter.title,
+            href: path,
+            frontmatter: item.frontmatter
+        };
     }
-];
 
-export default sidebar;
+    return [
+        docLink("introduction"),
+        docLink("getting-started"),
+        {
+            header: "Guides", links: [
+                { text: "Index", href: "/docs/tutorials", frontmatter: { title: "Guides & Tutorials" } },
+                ...(tutorials.map(x => ({
+                    text: x.frontmatter.shortTitle || x.frontmatter.title,
+                    href: x.url,
+                })))
+            ]
+        },
+        {
+            header: "Server", links: [
+                docLink("server-architecture"),
+                docLink("server-extending"),
+                docLink("server-request-context"),
+                docLink("httpc-call-convention"),
+                docLink("server-testing"),
+            ]
+        },
+        {
+            header: "Kit", links: [
+                docLink("kit-introduction"),
+                docLink("kit-dependency-injection"),
+                docLink("kit-authentication"),
+                docLink("kit-validation"),
+                docLink("kit-authorization"),
+                docLink("kit-logging"),
+                docLink("kit-caching"),
+                docLink("kit-extending"),
+            ]
+        },
+        {
+            header: "Client", links: [
+                docLink("client-generation"),
+                docLink("client-usage"),
+                docLink("client-publishing"),
+            ]
+        },
+        {
+            header: "Adapters", links: [
+                docLink("adapters/vercel"),
+                docLink("adapters/next"),
+                docLink("adapters/netlify"),
+            ]
+        },
+        {
+            header: "Packages", links: [
+                docLink("package-httpc-server"),
+                docLink("package-httpc-client"),
+                docLink("package-httpc-kit"),
+                docLink("package-httpc-cli"),
+            ]
+        }
+    ];
+});
+
+
+const BlogSidebar = () => createSidebar(async () => {
+    const posts = await getPosts();
+    const latest = posts.slice(0, 5);
+
+    return [
+        { text: "Index", href: "/blog/", navigable: "disabled" },
+        {
+            header: "Latest", open: true, links: latest.map(x => ({
+                text: x.frontmatter.shortTitle || x.frontmatter.title,
+                href: x.url,
+                frontmatter: x.frontmatter,
+            }))
+        },
+        {
+            header: "Tags", open: true, className: "tag-cloud", navigable: "disabled", links: BlogTags.map(x => ({
+                text: x, href: `/blog/tags/${x}`
+            }))
+        }
+    ];
+});
+
+const _sidebars = {} as any;
+export async function getSidebar(which: "docs" | "blog"): Promise<Sidebar> {
+    if (_sidebars[which]) return await (_sidebars[which]);
+
+    if (which === "docs") return await (_sidebars[which] = DocsSidebar());
+    if (which === "blog") return await (_sidebars[which] = BlogSidebar());
+
+    throw new Error("Invalid sidebar: " + which);
+}

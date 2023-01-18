@@ -31,9 +31,10 @@ const { currentPage, headings, content, frontmatter } = Astro.props;
       {headings && headings.length > 0 && <TableOfContents headings={headings} />}
     </section>
 
-    <section class="mt-4">
+    <section class="mt-4 vstack gap-1">
       <p role="heading" class="text-sm fw-bold">Meta</p>
       <a class="bar-link" target="_blank" href={getGithubEditLink(currentPage)}><Icon name="mdi:pencil" class="icon" /> Edit this page</a>
+      <a class="bar-link share-link" href="#"><Icon name="ic:baseline-share" class="icon" /> Share</a>
     </section>
   </div>
 </div>
@@ -79,6 +80,29 @@ const { currentPage, headings, content, frontmatter } = Astro.props;
 
     document.addEventListener("click", onClick, { capture: true });
   });
+
+  const cannotShare = !navigator.share && !import.meta.env.DEV;
+  const shareLink = document.querySelector<HTMLElement>("#rightbar .share-link");
+  if (shareLink) {
+    if (cannotShare) {
+      shareLink.style.display = "none";
+    } else {
+      shareLink.addEventListener("click", e => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        navigator
+          .share({
+            title: document.title,
+            text: document.head.querySelector("meta[name='description']")?.getAttribute("content") || undefined,
+            url: location.href.toString(),
+          })
+          .catch(() => {
+            /*do nothing*/
+          });
+      });
+    }
+  }
 </script>
 
 <style lang="scss">
@@ -114,6 +138,7 @@ const { currentPage, headings, content, frontmatter } = Astro.props;
         display: block;
         padding: 0 var(--side-spacing);
       }
+
       .btn-selector {
         font-size: 1em;
       }

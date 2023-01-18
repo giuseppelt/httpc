@@ -6,6 +6,7 @@ import Layout from "./Layout.astro";
 import ArticleNavigation from "../components/ArticleNavigation.astro";
 import TagList from "../components/TagList.astro";
 import Tag from "../components/Tag.astro";
+import { BlogTags } from "../sidebar";
 
 interface Props {
   url: string;
@@ -18,26 +19,20 @@ const { content, url: currentPage, frontmatter, headings } = Astro.props;
 
 // ensure no h1 is present
 if (headings?.some(x => x.depth === 1)) {
-  throw new Error(`H1 not allowed in docs(${currentPage})`);
+  throw new Error(`H1 not allowed in blog(${currentPage})`);
 }
 ---
 
-<Layout {frontmatter} title={`${frontmatter.title} | httpc documentation`} width="docs" navbar={false}>
-  <main class="docs-content">
-    <Sidebar page="docs" title="Docs" {...{ currentPage, content, frontmatter, headings}} />
+<Layout {frontmatter} title={`${frontmatter.title} | httpc Blog`} width="blog" navbar={false}>
+  <main class="blog-content">
+    <Sidebar page="blog" title="Blog" {...{ currentPage, content, frontmatter, headings}} />
     <article class="content side-spacing">
       <header class="mb-3">
-        {frontmatter && <h1 class="page-title">{frontmatter.title}</h1>}
-        {
-          frontmatter && frontmatter.status && (
-            <TagList className="mt-1">
-              <Tag prefix="status:" text={frontmatter.status} className={`tag-status-${frontmatter.status.replaceAll(" ", "-")}`} />
-            </TagList>
-          )
-        }
+        <h1 class="page-title">{frontmatter.title}</h1>
+        <TagList className="mt-1" items={frontmatter.tags.map(x => ({ text: x, href: `/blog/tags/${x}` }))} />
       </header>
       <slot />
-      <ArticleNavigation page="docs" {...{currentPage}} />
+      <ArticleNavigation page="blog" {...{currentPage}} />
     </article>
     <Rightbar {...{ currentPage, content, frontmatter, headings}} />
   </main>

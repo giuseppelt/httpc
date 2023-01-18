@@ -1,0 +1,29 @@
+---
+import { BlogTags, getPosts } from "../../../content";
+import Layout from "../../../layouts/Layout.astro";
+import Sidebar from "../../../components/Sidebar.astro";
+import PostList from "../../../components/PostList.astro";
+
+export function getStaticPaths() {
+  return BlogTags.map(tag => ({
+    params: { tag },
+  }));
+}
+
+const { tag } = Astro.params;
+const items = (await getPosts()).filter(x => x.frontmatter.tags?.includes(tag!));
+---
+
+<Layout title="Blog | httpc" width="blog" navbar={false}>
+  <main class="blog-content">
+    <Sidebar page="blog" title="Blog" currentPage={`/blog/tags/${tag}`} />
+    <article class="content content-no-sidebar side-spacing">
+      <header class="mb-5">
+        <h1 class="page-title">Posts / {tag}</h1>
+        <p class="text-sm">{items.length} {items.length > 1 ? "posts" : "post"} tagged</p>
+      </header>
+
+      <PostList items={items} />
+    </article>
+  </main>
+</Layout>

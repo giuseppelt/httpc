@@ -1,0 +1,17 @@
+---
+interface Props {
+  currentPage: string;
+}
+
+const { currentPage = "/" } = Astro.props;
+
+function isSection(prefix: string) {
+  return currentPage.startsWith(prefix);
+}
+---
+
+<div class="sidebar-links hstack mb-3 visible-mobile">
+  <a class={`btn navbar-link ${isSection("/docs") ? "active" : ""}`} href="/docs">Docs</a>
+  <a class={`btn navbar-link ${isSection("/blog") ? "active" : ""}`} href="/blog">Blog</a>
+  <a class={`btn navbar-link ${isSection("/changelog") ? "active" : ""}`} href="/changelog">Changelog</a>
+</div>

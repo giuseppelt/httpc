@@ -1,0 +1,38 @@
+---
+import { Icon } from "astro-icon";
+
+interface Props {
+  container: string;
+  className?: string;
+}
+
+const { container, className } = Astro.props;
+---
+
+<Icon name="ic:round-menu" class={`icon-menu ${className || ""}`} data-container={container} />
+
+<script>
+  const button = document.querySelector<HTMLElement>(".icon-menu");
+  const container = button?.getAttribute("data-container");
+  const body = (container && document.querySelector<HTMLElement>(`#${container} .body`)) || undefined;
+
+  if (body && button) {
+    button.addEventListener("click", () => {
+      body.style.display = "block";
+      document.body.classList.add("no-scroll");
+
+      function onClick(e: MouseEvent) {
+        if (!body!.contains(e.target as HTMLElement)) {
+          document.body.classList.remove("no-scroll");
+          body!.style.display = "none";
+
+          e.stopPropagation();
+          e.preventDefault();
+          document.removeEventListener("click", onClick, { capture: true });
+        }
+      }
+
+      document.addEventListener("click", onClick, { capture: true });
+    });
+  }
+</script>

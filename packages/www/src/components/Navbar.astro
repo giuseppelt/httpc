@@ -1,25 +1,34 @@
 ---
 import BrandIcon from "./BrandIcon.astro";
+import IconMenu from "./IconMenu.astro";
 import NavbarIcons from "./NavbarIcons.astro";
+import NavbarLinks from "./NavbarLinks.astro";
 
 interface Props {
   currentPage: string;
-  width?: "page" | "docs";
+  width?: "page" | "docs" | "blog";
 }
 
 const { currentPage, width = "page" } = Astro.props;
 ---
 
 <header id="navbar">
-  <nav class={`d-flex nav-wrapper side-spacing ${width === "docs" ? "docs-content" : "page-content"}`}>
+  <nav class={`d-flex nav-wrapper side-spacing ${width}-content`}>
     <BrandIcon />
     <div class="spacer"></div>
     <ul class="menu d-flex mx-3">
-      <li><a class="btn header-link" href="/docs">Docs</a></li>
-      <li class="visible-large"><a class="btn header-link" href="/changelog">Changelog</a></li>
+      <li><a class="btn navbar-link" href="/docs">Docs</a></li>
+      <li class="visible-large"><a class="btn navbar-link" href="/blog">Blog</a></li>
+      <li class="visible-large"><a class="btn navbar-link" href="/changelog">Changelog</a></li>
     </ul>
     <NavbarIcons />
+    <IconMenu className="ms-2 visible-mobile" container="navbar" />
   </nav>
+  <div class="body side-spacing d-none">
+    <div style="margin-top: 1.25rem">
+      <NavbarLinks currentPage={currentPage} />
+    </div>
+  </div>
 </header>
 
 <script>
@@ -33,10 +42,5 @@ const { currentPage, width = "page" } = Astro.props;
         header.classList.remove("scroll-on");
       }
     });
-  }
-
-  const button = document.querySelector<HTMLElement>("#navbar .icon-menu");
-  if (button) {
-    button.addEventListener("click", () => {});
   }
 </script>

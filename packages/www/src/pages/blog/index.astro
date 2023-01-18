@@ -1,0 +1,21 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Sidebar from "../../components/Sidebar.astro";
+import PostList from "../../components/PostList.astro";
+import { getPosts } from "../../content";
+
+const posts = await getPosts();
+---
+
+<Layout title="Blog | httpc" description="Articles, blog posts and best practices about httpc framework, node, typescript and API design" width="blog" navbar={false}>
+  <main class="blog-content">
+    <Sidebar page="blog" title="Blog" currentPage="/blog/" />
+    <article class="content content-no-sidebar side-spacing">
+      <header class="mb-5">
+        <h1 class="page-title">Posts</h1>
+      </header>
+
+      <PostList items={posts} />
+    </article>
+  </main>
+</Layout>

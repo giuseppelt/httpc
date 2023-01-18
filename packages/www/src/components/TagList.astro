@@ -1,11 +1,21 @@
 ---
+import Tag from "./Tag.astro";
+
+interface TagItem {
+  text: string;
+  href?: string;
+}
+
 export interface Props {
+  items?: (string | TagItem)[];
   className?: string;
 }
 
-const { className } = Astro.props;
+const { className, items: _items } = Astro.props;
+const items = _items?.map(x => (typeof x === "string" ? { text: x } : x));
 ---
 
-<div class={`hstack ${className || ""}`}>
+<div class={`tag-list hstack gap-1 ${className || ""}`}>
+  {items && items.map(x => <Tag text={x.text} href={x.href} />)}
   <slot />
 </div>

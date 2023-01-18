@@ -1,26 +1,26 @@
 ---
 import { Icon } from "astro-icon";
-import links, { SidebarHeaderSection } from "../sidebar";
+import { getSidebar, SidebarHeaderSection } from "../sidebar";
 import BrandIcon from "./BrandIcon.astro";
+import IconMenu from "./IconMenu.astro";
+import NavbarLinks from "./NavbarLinks.astro";
 
 interface Props {
+  title: string;
   currentPage: string;
-  base?: string;
+  page: "docs" | "blog";
 }
 
-const { base: _base, currentPage } = Astro.props;
-let base = !!_base ? `${_base}/` : "";
+const { page, title, currentPage } = Astro.props;
 
-function path(href: string) {
-  return `/${base}${href}`;
-}
+const sidebar = await getSidebar(page);
 
 function isActive(href: string) {
-  return path(href) === currentPage;
+  return href === currentPage;
 }
 
 function isHeaderOpen(header: SidebarHeaderSection) {
-  return header.links.some(x => isActive(x.href));
+  return header.open || header.links.some(x => isActive(x.href));
 }
 ---
 
@@ -29,62 +29,43 @@ function isHeaderOpen(header: SidebarHeaderSection) {
     <header>
       <div class="brand">
         <BrandIcon />
-        <span class="brand-section">DOCS</span>
+        <span class="brand-section">{title}</span>
       </div>
-      <div class="hstack menu">
+      <div class="hstack gap-2 menu">
         <a class="icon-link" title="Github repository" href="/repository" target="_blank"><Icon name="mdi:github" className="icon" /></a>
-        <Icon name="ic:round-menu" class="icon-menu" />
+        <IconMenu container="sidebar" />
       </div>
     </header>
-    <div class="body d-flex-column">
-      {
-        links.map(x =>
-          "header" in x ? (
-            <details class="sidebar-section d-flex-column" open={isHeaderOpen(x)}>
-              <summary class="sidebar-header">
-                {x.header} <Icon class="icon" name="ic:round-chevron-right" />{" "}
-              </summary>
-              {x.links.map(x => (
-                <a href={path(x.href)} class={`btn btn-sidebar ${isActive(x.href) ? "active" : ""}`}>
-                  {x.text}
-                </a>
-              ))}
-            </details>
-          ) : (
-            <a href={path(x.href)} class={`btn btn-sidebar ${isActive(x.href) ? "active" : ""}`}>
-              {x.text}
-            </a>
+    <div class="body">
+      <div class="d-flex-column">
+        <NavbarLinks currentPage={currentPage} />
+
+        {
+          sidebar.entries.map(x =>
+            "header" in x ? (
+              <details class={`sidebar-section ${x.className || ""}`} open={isHeaderOpen(x)}>
+                <summary class="sidebar-header">
+                  {x.header} <Icon class="icon" name="ic:round-chevron-right" />{" "}
+                </summary>
+                <div class="sidebar-section-links d-flex-column">
+                  {x.links.map(x => (
+                    <a href={x.href} class={`btn btn-sidebar ${isActive(x.href) ? "active" : ""}`}>
+                      {x.text}
+                    </a>
+                  ))}
+                </div>
+              </details>
+            ) : (
+              <a href={x.href} class={`btn btn-sidebar ${isActive(x.href) ? "active" : ""}`}>
+                {x.text}
+              </a>
+            )
           )
-        )
-      }
+        }
+      </div>
     </div>
   </div>
 </nav>
-
-<script>
-  const body = document.querySelector<HTMLElement>("#sidebar .body");
-  const button = document.querySelector<HTMLElement>("#sidebar .icon-menu");
-
-  if (body && button) {
-    button.addEventListener("click", () => {
-      body.style.display = "flex";
-      document.body.classList.add("no-scroll");
-
-      function onClick(e: MouseEvent) {
-        if (!body!.contains(e.target as HTMLElement)) {
-          document.body.classList.remove("no-scroll");
-          body!.style.display = "none";
-
-          e.stopPropagation();
-          e.preventDefault();
-          document.removeEventListener("click", onClick, { capture: true });
-        }
-      }
-
-      document.addEventListener("click", onClick, { capture: true });
-    });
-  }
-</script>
 
 <style lang="scss">
   #sidebar {
@@ -162,10 +143,6 @@ function isHeaderOpen(header: SidebarHeaderSection) {
     &:hover {
       color: var(--theme-color-accent);
     }
-  }
-
-  .icon-menu {
-    width: 32px;
   }
 
   .wrap {
@@ -246,6 +223,16 @@ function isHeaderOpen(header: SidebarHeaderSection) {
     font-weight: 500 !important;
     color: var(--color-black);
     position: relative;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+
+    @media (max-width: 768px) {
+      -webkit-line-clamp: 1;
+      margin-right: -0.75rem;
+    }
 
     &:hover {
       background-color: var(--theme-color-hover);
@@ -264,6 +251,31 @@ function isHeaderOpen(header: SidebarHeaderSection) {
         left: 2px;
         transform: translateY(-50%);
         background-color: var(--theme-btn-primary-hover);
+      }
+    }
+  }
+
+  .sidebar-section.tag-cloud > .sidebar-section-links {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px;
+
+    & > a {
+      margin: 0;
+      background: var(--theme-bg-color-dark2);
+      font-size: var(--theme-text-xs) !important;
+
+      &:hover {
+        background: var(--theme-color-dark);
+        outline: 2px solid var(--theme-bg-color-dark2);
+      }
+      &.active {
+        background: var(--theme-btn-primary-hover);
+        color: var(--color-btn-white);
+        &::before {
+          display: none;
+          content: none;
+        }
       }
     }
   }

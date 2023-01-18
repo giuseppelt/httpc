@@ -1,41 +1,25 @@
 ---
 import Icon from "astro-icon";
-import { getNavLinks } from "../sidebar";
+import { getSidebar } from "../sidebar";
 
 export interface Props {
   currentPage: string;
-  base?: string;
+  page: "docs" | "blog";
 }
 
-const { base: _base, currentPage } = Astro.props;
+const { page, currentPage } = Astro.props;
 
-let base = _base;
-if (base && base.startsWith("/")) base = base.substring(1);
-
-let current = currentPage;
-if (current.startsWith("/")) current = current.substring(1);
-if (base && current.startsWith(`${base}/`)) {
-  current = current.substring(base.length + 1);
-}
-
-let { prev, next } = getNavLinks(current);
-
-prev = (prev && `/${base}/${prev}`) || undefined;
-next = (next && `/${base}/${next}`) || undefined;
-
-const articles = await Astro.glob("~/pages/docs/**/*.mdx");
-const prevArticle = (prev && articles.find(x => x.url === prev)) || undefined;
-const nextArticle = (next && articles.find(x => x.url === next)) || undefined;
+const { prev, next } = (await getSidebar(page)).getNavLinks(currentPage);
 ---
 
 <aside class="container-grid-2col my-5">
   {
     prev ? (
-      <a href={prev} class="btn btn-article-nav" rel="prev">
+      <a href={prev.href} class="btn btn-article-nav" rel="prev">
         <Icon className="icon" name="ic:round-chevron-left" />
         <span>
           <span class="label d-block">Previous</span>
-          <span class="title d-block">{prevArticle!.frontmatter.title}</span>
+          <span class="title d-block">{prev.frontmatter?.title || prev.text}</span>
         </span>
       </a>
     ) : (
@@ -44,11 +28,11 @@ const nextArticle = (next && articles.find(x => x.url === next)) || undefined;
   }
   {
     next ? (
-      <a href={next} class="btn btn-article-nav btn-next" rel="next">
+      <a href={next.href} class="btn btn-article-nav btn-next" rel="next">
         <Icon className="icon" name="ic:round-chevron-right" />
         <span>
           <span class="label d-block">Next</span>
-          <span class="title d-block">{nextArticle!.frontmatter.title}</span>
+          <span class="title d-block">{next.frontmatter?.title || next.text}</span>
         </span>
       </a>
     ) : (
@@ -77,8 +61,14 @@ const nextArticle = (next && articles.find(x => x.url === next)) || undefined;
       font-weight: normal;
       font-size: var(--theme-text-2xs);
     }
+
     .title {
       font-size: var(--theme-text-sm);
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
     }
 
     &:hover {

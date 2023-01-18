@@ -1,0 +1,237 @@
+---
+layout: ~/layouts/Blog.astro
+title: Set function return value nullable on demand with typescript overloads
+summary: In this post we'll introduce a technique to make a function that returns a non-null value, to return also a nullable one when the scenario dictates it
+publishedAt: 2023-01-18 10:00:00
+tags:
+ - ergonomics
+ - patterns
+ - typescript
+ - type-safety
+ 
+ #cspell:ignore useuser
+---
+
+## Introduction
+Functions returning a _non-null_ value keep the code flow linear because you don't have to if-check the value for the undefined case. But sometimes, you want the same function to return a _nullable_ value, because in some scenarios that value is optional and not always available.
+
+<br />
+In this post we'll introduce a technique to make a function that returns a _non-null_ value, to return also a nullable one when the scenario dictates it.
+
+<br />
+This technique allows to define a single function and have it behaves both ways: returning a defined value and, optionally, a _maybe undefined_ value.
+
+<br />
+This technique is heavily used in the [httpc framework](/repository) to provide helpers with nice ergonomics that minimize written code while preserving full type-safety.
+
+<br/>
+In the following sections, the [`useUser`](/docs/kit-authentication#useuser) function is used as example. It returns a _non-null_ user by default, but it can optionally return _undefined_ in scenarios where an anonymous user is allowed.
+
+
+## On demand nullability
+Let's define an hypothetical API function `getMyProfile` which returns, as the name suggests, the profile of the current logged user.
+```ts
+async function getMyProfile() {
+    const user = useUser(); // <-- here user is defined
+    const profile = await db.getUserProfile(user.id);
+    return profile;
+}
+```
+
+In order to have a cleaner code, you want the `useUser` to return a _defined non-null_ user. For non authenticated user, it must throw an exception to halt the execution. The eventual exception will be dealt in an higher and central place, like a global error handler.
+
+<br />
+With this behavior, `useUser` allows to have a linear code flow with no need to add null checks every time.
+
+<br />
+But there are scenarios where the user is optional and you don't want to clog the code with try/catch to handle the case when the user is not present.
+
+<br />
+`useUser` allows to enable _nullability_ on demand, that is, to return a _maybe undefined_ user without trowing an exception when the user is not logged in.
+
+```ts
+async function getDiscounts() {
+    const user = useUser("optional"); // <-- here user can be undefined
+    if (user) {
+        return await db.getUserDiscounts(user.id);
+    } else {
+        return []; // no discounts for anonymous
+    }
+}
+```
+
+## Context and use case
+In typescript you can annotate a function return value as `undefined` to signal that the function can return a _non-defined_ value in some cases.
+```ts
+function getCurrentUser(): User | undefined {
+
+}
+```
+
+With the previous function, you have to always check the return value to be sure it's safe to use:
+```ts
+const user = getCurrentUser();
+if (user) {
+    // do something with the user
+} else {
+    // the user is not logged in
+}
+```
+
+<br />
+To simplify your code and avoid tedious repetitions, you shouldn't have to write null checks every time because for the most part the value is expected to be defined.
+
+<br />
+In real-world application there are many functions like `getCurrentUser` where the usage boils down to two cases:
+- often you want the function to return a defined value because the value is required
+- in few cases, you want a nullable value because the the value can be optional
+
+<br />
+ A possible solution is to define a new helper function that throws when the value is not available:
+```ts
+function getCurrentUserRequired() {
+    const user = getCurrentUser();
+    if (!user) {
+        throw new Error("User not logged in");
+    }
+
+    return user;
+}
+```
+
+In a _required_ context, the calling function will use the helper:
+```ts
+function printUserId() {
+    const user = getCurrentUserRequired();
+    console.log(user.id); // <-- here the user is defined
+}
+```
+and in cases where the value is optional, you will use the original function.
+```ts
+function getUserDisplayName() {
+    const user = getCurrentUser();
+    if (user) {
+        return user.username;
+    } else {
+        return "Anonymous";
+    }
+}
+```
+
+Although the helper-function solution fulfills the goal to avoid nullable checks on every usage, it has two major side effects:
+- you have to define a specific helper function for each base function
+- code duplication and possible divergent behavior among every helper
+
+## Typescript overloads on the rescue
+You can use overloads to have the same function return both a defined and a nullable value. You can default to a required value and with a parameter switch to a nullable on demand.
+```ts
+function getCurrentUser(): User;
+function getCurrentUser(mode: "optional"): User | undefined;
+function getCurrentUser(mode?: "optional") {
+    const user = // get the user from somewhere 
+    if (!user && mode !== "optional") {
+        throw new UnauthorizedError();
+    }
+
+    return user;
+}
+```
+
+### Example as required
+You can use the function as is because it defaults to non-nullable:
+```ts
+function printUserId() {
+    const user = getCurrentUser();
+    console.log(user.id); // <-- here user is defined
+}
+```
+
+As a `getCurrentUser` consumer, you want it to always return a **defined** user or throwing an error if not, so the execution is halted with the eventual exception handled in an higher level.
+
+<br />
+In this way you don't need to check every time if the user is defined and have a streamlined code flow.
+
+### Example as optional
+When the user is optional, you can use the second overload and _activate_ the nullability on demand.
+```ts
+function getUserDisplayName() {
+    const user = getCurrentUser("optional");
+    if (user) { // <-- here user can be undefined
+        return user.username;
+    } else {
+        return "Anonymous";
+    }
+}
+```
+
+### Opposite default behavior
+In a scenario where the most common case is to have an optional value, you can reverse the implementation and default to a nullable value and activate on demand the required case.
+
+```ts
+function getCurrentUser(): User | undefined;
+function getCurrentUser(mode: "required"): User;
+function getCurrentUser(mode?: "required") {
+    const user = // get the user from somewhere 
+    if (!user && mode === "required") {
+        throw new Error("User is not logged in");
+    }
+
+    return user;
+}
+```
+
+The usage from the consumer perspective became:
+```ts
+// here user can be undefined
+const user = getCurrentUser();
+
+// here user is defined
+const user = getCurrentUser("required");
+console.log("The user is :" + user.displayName);
+```
+
+## Another example: Single entity query
+This technique is not limited to parameter-less function, you can use it with function with parameters too.
+
+<br />
+Let's define a `Data` class as a wrapper around a db with basic query functions.
+
+```ts
+class Data {
+    async getUserProfile(userId: string): Promise<User>;
+    async getUserProfile(userId: string, mode: "optional"): Promise<User | undefined>;
+    async getUserProfile(userId: string, mode?: "optional") {
+        const profile = await db.select("profiles").where("userId", userId);
+        if (!profile && mode !== "optional") {
+            throw new Error("Profile not found");
+        }
+
+        return profile;
+    }
+}
+```
+
+Usage when the return value is required:
+```ts
+const profile = await data.getUserProfile(userId);
+// here profile is defined
+```
+
+And the usage when the return value is not required:
+```ts
+const profile = await data.getUserProfile(userId, "optional");
+// here profile can be undefined
+
+if (!profile) {
+    // do something if the profile is not defined
+}
+```
+
+## Conclusion
+Thanks to typescript overloads a function can be annotated with both a defined and _maybe undefined_ return value.
+
+<br />
+A function defined with this pattern keeps the code linear, centralize the handling when the value is unavailable and provide a nice ergonomics to activate the case where the value is optional. And everything is kept under strong type-safety.
+
+<br />
+Have a look at the [httpc framework](https://httpc.dev) which adopts this and many other techniques and patterns to build APIs with minimal code and strong type safety.

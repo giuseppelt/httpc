@@ -1,18 +1,17 @@
 import "reflect-metadata";
-import { createHttpCServer, httpCall, HttpCServerOptions, IHttpCHost } from "@httpc/server";
-import { Application } from "@httpc/kit";
-import { createHttpCNetlifyHandler } from "../src";
+import { httpCall } from "@httpc/server";
+import { createHttpCNetlifyHandler, HttpCNetlifyAdapterOptions } from "../src";
 
 
 interface CombinedTest {
     name: string
-    config: () => HttpCServerOptions
-    test: (host: IHttpCHost) => (void | Promise<void>)
+    config: () => HttpCNetlifyAdapterOptions
+    test: (config: HttpCNetlifyAdapterOptions) => (void | Promise<void>)
 }
 
 const TESTS: CombinedTest[] = [];
 
-function combinedTest(name: string, config: () => HttpCServerOptions, test: (host: IHttpCHost) => (void | Promise<void>)) {
+function combinedTest(name: string, config: () => HttpCNetlifyAdapterOptions, test: (config: HttpCNetlifyAdapterOptions) => (void | Promise<void>)) {
     return TESTS.push({
         name,
         config,
@@ -23,19 +22,25 @@ function combinedTest(name: string, config: () => HttpCServerOptions, test: (hos
 function runCombinedTest() {
     describe("for httpc/server", () => {
         for (const entry of TESTS) {
-            test(entry.name, () => {
-                const host = createHttpCServer(entry.config());
-                return entry.test(host) as any;
+            test(entry.name, async () => {
+                await entry.test({
+                    ...entry.config(),
+                    log: false,
+                    refresh: true, // force initialization on each call
+                });
             });
         }
     });
 
-    describe("for httpc/app", () => {
+    describe("for httpc/kit", () => {
         for (const entry of TESTS) {
             test(entry.name, async () => {
-                const host = new Application(entry.config());
-                await host.initialize();
-                return entry.test(host) as any;
+                await entry.test({
+                    ...entry.config(),
+                    kit: true,
+                    log: false,
+                    refresh: true, // force initialization on each call
+                });
             });
         }
     });
@@ -49,8 +54,8 @@ describe("createHttpCNetlifyHandler", () => {
         () => ({
             calls: {}
         }),
-        host => {
-            expect(createHttpCNetlifyHandler(host)).toBeInstanceOf(Function);
+        config => {
+            expect(createHttpCNetlifyHandler(config)).toBeInstanceOf(Function);
         }
     );
 
@@ -60,8 +65,7 @@ describe("createHttpCNetlifyHandler", () => {
                 simple: httpCall(() => ({ result: "hello" }))
             }
         }),
-
-        async host => {
+        async config => {
 
         }
     );
@@ -74,8 +78,7 @@ describe("createHttpCNetlifyHandler", () => {
                 }
             }
         }),
-
-        async host => {
+        async config => {
 
         }
     );
@@ -86,8 +89,7 @@ describe("createHttpCNetlifyHandler", () => {
                 echo: httpCall((message: string) => ({ result: message }))
             }
         }),
-
-        async host => {
+        async config => {
 
         }
     );
@@ -99,8 +101,7 @@ describe("createHttpCNetlifyHandler", () => {
                 simple: httpCall(() => ({ result: "hello" }))
             }
         }),
-
-        async host => {
+        async config => {
 
         }
     );

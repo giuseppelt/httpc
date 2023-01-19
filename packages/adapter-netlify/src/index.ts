@@ -17,6 +17,7 @@ export type HttpCNetlifyAdapterOptions = Pick<HttpCServerOptions,
     | "rewriters"
 > & {
     kit?: boolean
+    refresh?: boolean
 }
 
 
@@ -25,7 +26,7 @@ let initialized = false;
 let initializing: Promise<void> | undefined;
 
 export function createHttpCNetlifyHandler(options: HttpCNetlifyAdapterOptions): Handler {
-    if (!handler) {
+    if (!handler || options.refresh) {
         const server = createHttpCServer(options);
         handler = server.getHttpCRequestProcessor();
     }

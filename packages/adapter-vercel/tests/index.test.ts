@@ -2,20 +2,19 @@ import "reflect-metadata";
 import { ServerResponse } from "http";
 import { EventEmitter } from "events";
 import httpMocks, { RequestOptions } from "node-mocks-http";
-import { createHttpCServer, httpCall, HttpCServerOptions, IHttpCHost } from "@httpc/server";
-import { Application } from "@httpc/kit";
-import { createHttpCVercelAdapter } from "../src";
+import { httpCall } from "@httpc/server";
+import { createHttpCVercelAdapter, HttpCVercelAdapterOptions } from "../src";
 
 
 interface CombinedTest {
     name: string
-    config: () => HttpCServerOptions
-    test: (host: IHttpCHost) => (void | Promise<void>)
+    config: () => HttpCVercelAdapterOptions
+    test: (config: HttpCVercelAdapterOptions) => (void | Promise<void>)
 }
 
 const TESTS: CombinedTest[] = [];
 
-function combinedTest(name: string, config: () => HttpCServerOptions, test: (host: IHttpCHost) => (void | Promise<void>)) {
+function combinedTest(name: string, config: () => HttpCVercelAdapterOptions, test: (config: HttpCVercelAdapterOptions) => (void | Promise<void>)) {
     return TESTS.push({
         name,
         config,
@@ -26,19 +25,25 @@ function combinedTest(name: string, config: () => HttpCServerOptions, test: (hos
 function runCombinedTest() {
     describe("for httpc/server", () => {
         for (const entry of TESTS) {
-            test(entry.name, () => {
-                const host = createHttpCServer({ log: false, ...entry.config() });
-                return entry.test(host) as any;
+            test(entry.name, async () => {
+                await entry.test({
+                    ...entry.config(),
+                    log: false,
+                    refresh: true, // force initialization on each call
+                });
             });
         }
     });
 
-    describe("for httpc/app", () => {
+    describe("for httpc/kit", () => {
         for (const entry of TESTS) {
             test(entry.name, async () => {
-                const host = new Application(entry.config());
-                await host.initialize();
-                return entry.test(host) as any;
+                await entry.test({
+                    ...entry.config(),
+                    kit: true,
+                    log: false,
+                    refresh: true, // force initialization on each call
+                });
             });
         }
     });
@@ -52,8 +57,8 @@ describe("createHttpCVercelAdapter", () => {
         () => ({
             calls: {}
         }),
-        host => {
-            expect(createHttpCVercelAdapter(host)).toBeInstanceOf(Function);
+        config => {
+            expect(createHttpCVercelAdapter(config)).toBeInstanceOf(Function);
         }
     );
 
@@ -63,13 +68,12 @@ describe("createHttpCVercelAdapter", () => {
                 simple: httpCall(() => ({ result: "hello" }))
             }
         }),
-
-        async host => {
-            const adapter = createHttpCVercelAdapter(host);
+        async config => {
+            const adapter = createHttpCVercelAdapter(config);
 
             const { req, res } = createMockRequest({
                 method: "GET",
-                path: "/simple"
+                path: "/api/simple"
             });
 
             adapter(req, res);
@@ -90,13 +94,12 @@ describe("createHttpCVercelAdapter", () => {
                 }
             }
         }),
-
-        async host => {
-            const adapter = createHttpCVercelAdapter(host);
+        async config => {
+            const adapter = createHttpCVercelAdapter(config);
 
             const { req, res } = createMockRequest({
                 method: "GET",
-                path: "/parent/child"
+                path: "/api/parent/child"
             });
 
             adapter(req, res);
@@ -115,13 +118,12 @@ describe("createHttpCVercelAdapter", () => {
                 echo: httpCall((message: string) => ({ result: message }))
             }
         }),
-
-        async host => {
-            const adapter = createHttpCVercelAdapter(host);
+        async config => {
+            const adapter = createHttpCVercelAdapter(config);
 
             const { req, res } = createMockRequest({
                 method: "GET",
-                path: "/echo",
+                path: "/api/echo",
                 params: ["hello world"]
             });
 
@@ -142,13 +144,12 @@ describe("createHttpCVercelAdapter", () => {
                 simple: httpCall(() => ({ result: "hello" }))
             }
         }),
-
-        async host => {
-            const adapter = createHttpCVercelAdapter(host);
+        async config => {
+            const adapter = createHttpCVercelAdapter(config);
 
             const { req, res } = createMockRequest({
                 method: "GET",
-                path: "/not-found"
+                path: "/api/not-found"
             });
 
             adapter(req, res);

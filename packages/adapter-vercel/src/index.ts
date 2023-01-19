@@ -14,6 +14,7 @@ export type HttpCVercelAdapterOptions = Pick<HttpCServerOptions,
     | "rewriters"
 > & {
     kit?: boolean
+    refresh?: boolean
 }
 
 
@@ -22,7 +23,7 @@ let initialized = false;
 let initializing: Promise<void> | undefined;
 
 export function createHttpCVercelAdapter(options: HttpCVercelAdapterOptions) {
-    if (!handler) {
+    if (!handler || options.refresh) {
         const server = createHttpCServer({
             path: "api",
             ...options

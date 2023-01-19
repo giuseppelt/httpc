@@ -52,11 +52,13 @@ const { currentPage, headings, content, frontmatter } = Astro.props;
     document.dispatchEvent(new Event("rightbar-open"));
 
     function onClick(e: MouseEvent) {
-      function hide() {
+      function hide(useDefault?: boolean) {
         document.body.classList.remove("no-scroll");
 
-        e.stopPropagation();
-        e.preventDefault();
+        if (!useDefault) {
+          e.stopPropagation();
+          e.preventDefault();
+        }
 
         body!.style.display = "none";
         selector.style.display = "flex";
@@ -67,10 +69,12 @@ const { currentPage, headings, content, frontmatter } = Astro.props;
       if (!body!.contains(el)) {
         hide();
       } else if (el.tagName === "A" || el.parentElement?.tagName === "A") {
-        hide();
+        const href = (el.tagName === "A" ? el : el.parentElement!)?.getAttribute("href");
+        const isFragment = href && href.length > 1 && href.startsWith("#");
+        hide(!!href && !isFragment);
 
-        const headerId = (el.tagName === "A" ? el : el.parentElement!)?.getAttribute("href")?.substring(1);
-        const header = document.querySelector<HTMLElement>(`#${headerId}`);
+        const headerId = href?.substring(1);
+        const header = headerId && document.querySelector<HTMLElement>(`#${headerId}`);
         if (header) {
           const top = header.offsetTop - 96; /** top margin */
           window.scrollTo({ top, behavior: "smooth" });

@@ -1,6 +1,7 @@
 ---
 import { Code } from "astro/components";
 import { readFile } from "../utils";
+import theme from "../code-theme";
 
 export interface Props {
   title?: string;
@@ -8,15 +9,13 @@ export interface Props {
   language?: any;
 }
 
-const THEME = "nord";
-
 const { title, src, language = src.split(".").pop() } = Astro.props;
 const code = (await readFile(src, "<no code found>")) || "";
 ---
 
 <section class="code-sample">
   {title && <p class="code-title">{title}</p>}
-  <Code lang={language} code={code.trim()} theme={THEME} />
+  <Code lang={language} code={code.trim()} theme={theme} />
 </section>
 
 <style>

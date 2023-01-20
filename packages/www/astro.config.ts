@@ -7,6 +7,7 @@ import sitemap from "@astrojs/sitemap";
 import lottie from "astro-integration-lottie";
 import compress from "astro-compress";
 import rehypeLinkProcessor from "rehype-link-processor";
+import theme from "./src/code-theme";
 import { remarkPreserveCodeMeta, rehypeCodeBlockDecorator } from "./src/plugins/codeBlockDecorator";
 
 
@@ -36,7 +37,7 @@ export default defineConfig({
   ],
   markdown: {
     shikiConfig: {
-      theme: "nord"
+      theme,
     },
   },
   vite: {

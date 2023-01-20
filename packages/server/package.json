@@ -44,7 +44,7 @@
         "client-generation"
     ],
     "devDependencies": {
-        "@types/jest": "^29.2.5",
+        "@types/jest": "^29.2.6",
         "@types/node": "^16.18.11",
         "jest": "^29.3.1",
         "rimraf": "^4.1.1",

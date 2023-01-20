@@ -15,7 +15,7 @@
     "@astrojs/mdx": "^0.14.0",
     "@astrojs/preact": "^1.2.0",
     "@astrojs/sitemap": "^1.0.0",
-    "@fontsource/mulish": "^4.5.13",
+    "@fontsource/mulish": "^4.5.14",
     "astro": "^1.9.2",
     "astro-compress": "^1.1.27",
     "astro-integration-lottie": "^0.1.1",
@@ -33,7 +33,7 @@
     "hastscript": "^7.2.0",
     "nanostores": "^0.7.1",
     "node-html-parser": "^6.1.4",
-    "rehype-link-processor": "^1.0.2",
+    "rehype-link-processor": "^1.0.3",
     "sass": "^1.57.1",
     "unified": "^10.1.2",
     "unist-util-visit": "^4.1.1"

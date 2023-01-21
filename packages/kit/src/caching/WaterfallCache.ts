@@ -1,8 +1,8 @@
-import { ICache } from "./types";
+import { ICache, ICacheSync } from "./types";
 
 
 export type WaterfallCacheOptions = {
-    providers: ICache[]
+    providers: (ICache | ICacheSync)[]
 }
 
 export class WaterfallCache<V = any> implements ICache<V> {
@@ -16,9 +16,9 @@ export class WaterfallCache<V = any> implements ICache<V> {
         return this.providers[0].keys();
     }
 
-    has(key: string): boolean {
+    async has(key: string): Promise<boolean> {
         for (const p of this.providers) {
-            if (p.has(key)) {
+            if (await p.has(key)) {
                 return true;
             }
         }
@@ -26,30 +26,30 @@ export class WaterfallCache<V = any> implements ICache<V> {
         return false;
     }
 
-    get<T extends V = V>(key: string): T | undefined {
+    async get<T extends V = V>(key: string): Promise<T | undefined> {
         for (const p of this.providers) {
-            const value = p.get(key);
+            const value = await p.get(key);
             if (value !== null && value !== undefined) {
                 return value;
             }
         }
     }
 
-    set<T extends V = V>(key: string, value: T): void {
+    async set<T extends V = V>(key: string, value: T): Promise<void> {
         for (const p of this.providers) {
-            p.set(key, value);
+            await p.set(key, value);
         }
     }
 
-    delete(key: string): void {
+    async delete(key: string): Promise<void> {
         for (const p of this.providers) {
-            p.delete(key);
+            await p.delete(key);
         }
     }
 
-    clear(): void {
+    async clear(): Promise<void> {
         for (const p of this.providers) {
-            p.clear();
+            await p.clear();
         }
     }
 }

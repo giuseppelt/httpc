@@ -7,7 +7,11 @@ import { IValidator } from "./validation";
 import { IEmailSender } from "./email";
 import { Authorization } from "./permissions";
 import { BasicCredential, IAuthenticationService, IAuthorizationService } from "./auth";
-import { ICache, ICachingService } from "./caching";
+import { ICachingService } from "./caching";
+
+
+export type IsStrict<T> = T extends { $strict: true } ? true : false
+export type ExpandedKeys<T> = IsStrict<T> extends true ? Exclude<keyof T, "$strict"> : (Exclude<keyof T, "$strict"> | (string & {}))
 
 
 declare global {
@@ -21,7 +25,7 @@ declare global {
 
     }
 
-    interface IEnvVariables {
+    interface EnvVariableTypes {
 
     }
 
@@ -44,6 +48,8 @@ declare global {
 
     interface CacheTypes {
         //TODO: add request cache
-        // request: ICache
+    }
+
+    interface CacheItemTypes {
     }
 }

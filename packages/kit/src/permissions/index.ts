@@ -2,7 +2,7 @@ import Parser from "./Parser";
 import * as Token from "./Token";
 import Serializer from "./Serializer";
 import { PermissionsModel } from "./model";
-import { ICache } from "../caching";
+import type { ICacheSync } from "../caching";
 import assert from "assert";
 
 export { Token as PermissionToken }
@@ -195,12 +195,12 @@ type AssertResult =
 
 
 export class PermissionsChecker {
-    protected _cache?: ICache<[item: any, validated: boolean]>;
+    protected _cache?: ICacheSync<[item: any, validated: boolean]>;
     protected _model?: PermissionsModel;
 
     constructor(options?: {
         model?: PermissionsModel
-        cache?: false | true | ICache
+        cache?: false | true | ICacheSync
     }) {
         this._model = options?.model;
         this._cache = options?.cache === true ? new Map() : options?.cache || undefined;

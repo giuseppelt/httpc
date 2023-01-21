@@ -6,3 +6,5 @@ export * from "./WaterfallCache";
 export * from "./CachingService";
 export * from "./context";
 export * from "./decorators";
+export * from "./keys";
+export * from "./CacheMiddleware";

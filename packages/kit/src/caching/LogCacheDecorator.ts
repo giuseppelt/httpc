@@ -1,41 +1,32 @@
 import { ILogger } from "../logging";
-import { ICache } from "./types";
+import { ICache, ICacheSync } from "./types";
+import { createProxy, isPromise } from "../utils";
 
 
-export class LogCacheDecorator<V = any> implements ICache<V> {
-    constructor(
-        readonly name: string,
-        readonly logger: ILogger,
-        readonly provider: ICache<V>
-    ) {
-    }
+export function LogCacheDecorator<T extends ICache | ICacheSync>(name: string, logger: ILogger, cache: T): T {
+    return createProxy(cache as ICacheSync, {
+        get(key: string) {
+            function log(value: any) {
+                logger.debug("Cache(%s) %s: %s", name, key, value === undefined ? "miss" : "hit");
+                return value;
+            };
 
-    keys() {
-        return this.provider.keys();
-    }
-
-    has(key: string): boolean {
-        return this.provider.has(key);
-    }
-
-    get<T extends V = V>(key: string): T | undefined {
-        const value = this.provider.get<T>(key);
-        this.logger.debug("Cache(%s) %s: %s", this.name, key, value === undefined ? "miss" : "hit");
-        return value;
-    }
-
-    set<T extends V = V>(key: string, value: T): void {
-        this.logger.debug("Cache(%s) %s: set", this.name, key);
-        return this.provider.set(key, value);
-    }
-
-    delete(key: string): void {
-        this.logger.debug("Cache(%s) %s: deleted", this.name, key);
-        return this.provider.delete(key);
-    }
-
-    clear(): void {
-        this.logger.debug("Cache(%s) cleared", this.name);
-        this.provider.clear();
-    }
+            const value = cache.get<T>(key);
+            return isPromise(value)
+                ? value.then(log)
+                : log(value);
+        },
+        set(key: string, value: any) {
+            logger.debug("Cache(%s) %s: set", name, key);
+            return cache.set(key, value);
+        },
+        delete(key: string) {
+            logger.debug("Cache(%s) %s: deleted", name, key);
+            return cache.delete(key);
+        },
+        clear() {
+            logger.debug("Cache(%s) cleared", name);
+            return cache.clear();
+        }
+    }) as T;
 }

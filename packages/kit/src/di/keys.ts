@@ -1,26 +1,26 @@
 import assert from "assert";
 import { container as globalContainer, DependencyContainer, InjectionToken, instanceCachingFactory } from "tsyringe";
+import { ExpandedKeys } from "../env";
 
 
 export type Constructor<T = any> = new (...args: any) => T
 
 export type ServiceKey = keyof ServiceTypes
+export type EnvVariableKey = ExpandedKeys<EnvVariableTypes>
 
 export type ServiceKeyGroup =
     | "ENV"
     | "OPTIONS"
 
 type ServiceGroups = {
-    ENV: IEnvVariables
+    ENV: EnvVariableTypes
     OPTIONS: string | Constructor
 }
 
-type IsStrict<T> = T extends { $strict: true } ? true : false
-type KeysOf<T> = IsStrict<T> extends true ? Exclude<keyof T, "$strict"> : (Exclude<keyof T, "$strict"> | (string & {}))
-type ServiceGroupsKeys<T extends ServiceKeyGroup> = ServiceGroups[T] extends object ? KeysOf<ServiceGroups[T]> : ServiceGroups[T]
+type ServiceGroupsKeys<T extends ServiceKeyGroup> = ServiceGroups[T] extends object ? ExpandedKeys<ServiceGroups[T]> : ServiceGroups[T]
 
 
-export type ServiceInjectToken = Constructor | ServiceKey | `ENV:${string}`
+export type ServiceInjectToken = Constructor | ServiceKey | `ENV:${EnvVariableKey}`
 
 export type ServiceInstance<T extends ServiceInjectToken> =
     T extends Constructor<infer I>
@@ -67,12 +67,42 @@ export function RESOLVE_MANY<T extends ServiceInjectToken[]>(container: Dependen
 
 
 
-export function REGISTER_INSTANCE<T>(token: InjectionToken, value: T) {
-    globalContainer.register(token, {
+export function REGISTER_INSTANCE<T>(token: InjectionToken, value: T): void
+export function REGISTER_INSTANCE<T>(container: DependencyContainer, token: InjectionToken, value: T): void
+export function REGISTER_INSTANCE<T>(tokenOrContainer: InjectionToken | DependencyContainer, tokenOrValue: InjectionToken | T, value?: T) {
+    let container: DependencyContainer;
+    let token: InjectionToken;
+
+    if (arguments.length === 2) {
+        container = globalContainer;
+        token = tokenOrContainer as any;
+        value = tokenOrValue as any;
+    } else {
+        container = tokenOrContainer as any;
+        token = tokenOrValue as any;
+    }
+
+
+    container.register(token, {
         useFactory: instanceCachingFactory(() => value)
     });
 }
 
-export function REGISTER_OPTIONS<TOption>(service: Constructor, options: TOption) {
-    REGISTER_INSTANCE(KEY("OPTIONS", service), options);
+export function REGISTER_OPTIONS<TOption>(service: Constructor, options: TOption): void;
+export function REGISTER_OPTIONS<TOption>(container: DependencyContainer, service: Constructor, options: TOption): void;
+export function REGISTER_OPTIONS<TOption>(serviceOrContainer: Constructor | DependencyContainer, serviceOrOptions: Constructor | TOption, options?: TOption) {
+    let container: DependencyContainer;
+    let service: Constructor;
+
+    if (arguments.length === 2) {
+        container = globalContainer;
+        service = serviceOrContainer as any;
+        options = serviceOrOptions as any;
+    } else {
+        container = serviceOrContainer as any;
+        service = serviceOrOptions as any;
+
+    }
+
+    REGISTER_INSTANCE(container, KEY("OPTIONS", service), options);
 }

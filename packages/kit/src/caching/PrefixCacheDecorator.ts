@@ -1,43 +1,59 @@
-import { ICache } from "./types";
+import { ICache, ICacheSync } from "./types";
+import { createProxy, isPromise } from "../utils";
 
 
-export class PrefixCacheDecorator<V = any> implements ICache<V> {
-    constructor(
-        readonly prefix: string,
-        readonly provider: ICache<V>
-    ) {
+export function PrefixCacheDecorator<T extends ICache | ICacheSync>(prefix: string, cache: T): T {
+    function _prefix(key: string): string {
+        return `${prefix}:${key}`;
     }
 
-    *keys(): IterableIterator<string> {
-        for (const key of this.provider.keys()) {
-            yield this._un_prefix(key);
+    function _un_prefix(key: string): string {
+        return key.substring(prefix.length + 1);
+    }
+
+    return createProxy(cache as ICacheSync, {
+        keys() {
+            const base = cache.keys();
+
+            const iterator: IterableIterator<any> = {
+                [Symbol.iterator]() {
+                    return iterator;
+                },
+                next(): any {
+                    const entry = base.next();
+                    if (isPromise(entry)) {
+                        return entry.then(processNext);
+                    } else {
+                        return processNext(entry);
+                    }
+                }
+            };
+
+            function processNext(entry: IteratorResult<any>) {
+                if (entry.done) return entry;
+                if (!entry.value.startsWith(prefix)) return iterator.next();
+                return {
+                    done: entry.done,
+                    value: _un_prefix(entry.value),
+                };
+            }
+
+            return iterator;
+        },
+        has(key: string) {
+            return cache.has(_prefix(key)) as any;
+        },
+        get(key: string) {
+            return cache.get(_prefix(key)) as any;
+        },
+        set(key: string, value: T) {
+            return cache.set(_prefix(key), value);
+        },
+        delete(key: string) {
+            return cache.delete(_prefix(key));
+        },
+        clear(): void {
+            throw new Error("not-supported");
         }
-    }
-
-    has(key: string): boolean {
-        return this.provider.has(this._prefix(key));
-    }
-
-    get<T extends V = V>(key: string): T | undefined {
-        return this.provider.get(this._prefix(key));
-    }
-
-    set<T extends V = V>(key: string, value: T): void {
-        return this.provider.set(this._prefix(key), value);
-    }
-
-    delete(key: string): void {
-        return this.provider.delete(this._prefix(key));
-    }
-
-    clear(): void {
-        throw new Error("not-supported");
-    }
-
-    protected _prefix(key: string): string {
-        return `${this.prefix}:${key}`;
-    }
-    protected _un_prefix(key: string): string {
-        return key.substring(this.prefix.length + 1);
-    }
+    }) as T;
 }

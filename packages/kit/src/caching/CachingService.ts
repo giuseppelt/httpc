@@ -3,16 +3,17 @@ import { alias, KEY, options } from "../di";
 import { logger } from "../logging";
 import type { ILogger } from "../logging";
 import { BaseService } from "../services";
-import { CacheKey, CachingGetOptions, ICache, ICachingService } from "./types";
+import { CacheKey, CacheType, CachingGetOptions, ICache, ICacheSync, ICachingService } from "./types";
 import { LogCacheDecorator } from "./LogCacheDecorator";
 import { PrefixCacheDecorator } from "./PrefixCacheDecorator";
 
 
-type CacheFactory = (service: CachingService) => ICache
+type CacheFactory<K extends CacheKey = string> = (service: ICachingService) => CacheType<K> | ICache | ICacheSync
 
 export type CachingServiceOptions = {
     log?: boolean
     caches?: Record<CacheKey, CacheFactory>
+    defaultCache?: CacheKey
 }
 
 
@@ -20,7 +21,8 @@ export type CachingServiceOptions = {
 @alias(KEY("ICachingService"))
 export class CachingService extends BaseService() implements ICachingService {
     protected readonly factories = new Map<string, CacheFactory>();
-    protected readonly caches = new Map<string, ICache>();
+    protected readonly caches = new Map<string, ICache | ICacheSync>();
+    protected readonly _defaultCacheKey: string | undefined;
 
     constructor(
         @logger() logger: ILogger,
@@ -29,6 +31,8 @@ export class CachingService extends BaseService() implements ICachingService {
         //@ts-expect-error
         super(...arguments);
 
+        this._defaultCacheKey = options?.defaultCache;
+
         if (options?.caches) {
             for (const key in options.caches) {
                 this.register(key, options.caches[key]);
@@ -36,7 +40,15 @@ export class CachingService extends BaseService() implements ICachingService {
         }
     }
 
-    getCache<V>(key: CacheKey, options?: CachingGetOptions): ICache<V> {
+    getDefaultCache(): ICache<any> {
+        if (!this._defaultCacheKey) {
+            this._raiseError("misconfiguration", "Default cache not configured");
+        }
+
+        return this.getCache(this._defaultCacheKey);
+    }
+
+    getCache<K extends CacheKey>(key: K, options?: CachingGetOptions): CacheType<K> {
         let cache = this.caches.get(key);
         if (!cache) {
             cache = this._instantiateCache(key);
@@ -49,16 +61,16 @@ export class CachingService extends BaseService() implements ICachingService {
         }
 
         if (this.options?.log) {
-            cache = new LogCacheDecorator(key, this.logger, cache);
+            cache = LogCacheDecorator(key, this.logger, cache);
             this.logger.verbose("Decorated cache(%s) with LogDecorator", key);
         }
 
         if (options?.prefix) {
-            cache = new PrefixCacheDecorator(options.prefix, cache);
+            cache = PrefixCacheDecorator(options.prefix, cache);
             this.logger.verbose("Decorated cache(%s) with PrefixDecorator(prefix=%s)", key, options.prefix);
         }
 
-        return cache;
+        return cache as any;
     }
 
     removeCache(key: CacheKey) {
@@ -66,7 +78,7 @@ export class CachingService extends BaseService() implements ICachingService {
         this.logger.info("Cache(%s) removed", key);
     }
 
-    register(key: string, factory: CacheFactory) {
+    register<K extends CacheKey>(key: K, factory: CacheFactory<K>) {
         this.factories.set(key, factory);
         this.logger.info("Registered cache(%s)", key);
     }

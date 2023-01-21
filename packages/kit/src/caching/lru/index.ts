@@ -1,19 +1,30 @@
-import { ICache } from "../types";
+import { CacheSetOptions, ICacheSync } from "../types";
 import LRU from "lru-cache";
 
-
+/**
+ * Configure the LruCache
+ */
 export type LruCacheOptions = {
+    /**
+     * Set the max count of items the cache can hold
+     * @default 100
+     */
     size?: number
+
+    /**
+     * Set the expiration of items in milliseconds, use 0 to have no expiration
+     * @default 0
+     */
     ttl?: number
 }
 
-export class LruCache implements ICache {
+export class LruCache implements ICacheSync {
 
-    constructor(options: LruCacheOptions) {
+    constructor(options?: LruCacheOptions) {
         const {
             size = 100,
             ttl = 0
-        } = options;
+        } = options || {};
 
         this.provider = new LRU({
             max: size,
@@ -35,8 +46,10 @@ export class LruCache implements ICache {
         return this.provider.get<T>(key);
     }
 
-    set<T extends any = any>(key: string, value: T): void {
-        this.provider.set(key, value);
+    set<T extends any = any>(key: string, value: T, options?: CacheSetOptions): void {
+        this.provider.set(key, value, options && {
+            ttl: options.ttl
+        });
     }
 
     delete(key: string): void {

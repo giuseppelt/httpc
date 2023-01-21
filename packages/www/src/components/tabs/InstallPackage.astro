@@ -1,0 +1,23 @@
+---
+import { Code } from "astro/components";
+import PackageManagerTabs from "./PackageManagerTabs.astro";
+import theme from "../../code-theme";
+
+interface Props {
+  package: string;
+}
+
+const { package: packageName } = Astro.props;
+---
+
+<PackageManagerTabs>
+  <Fragment slot="npm">
+    <Code lang="shell" code={`npm install ${packageName}`} theme={theme} />
+  </Fragment>
+  <Fragment slot="pnpm">
+    <Code lang="shell" code={`pnpm add ${packageName}`} theme={theme} />
+  </Fragment>
+  <Fragment slot="yarn">
+    <Code lang="shell" code={`yarn add ${packageName}`} theme={theme} />
+  </Fragment>
+</PackageManagerTabs>

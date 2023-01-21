@@ -852,23 +852,53 @@ pre.astro-code {
         }
     }
 
+    %property-mono {
+        background-color: unset;
+        padding: unset;
+        display: unset;
+        border-radius: unset;
+        font-size: 0.9rem;
+    }
+
+    %property-code {
+        @extend .code-keyword;
+        white-space: nowrap;
+        font-size: 0.9rem;
+    }
+
+    %property-small {
+        font-size: 0.8em;
+    }
+
     .property-table {
         td:nth-child(1) code {
-            background-color: unset;
-            padding: unset;
-            display: unset;
-            border-radius: unset;
-            font-size: 0.9rem;
+            @extend %property-mono;
         }
 
         td:nth-child(2) code {
-            @extend .code-keyword;
-            white-space: nowrap;
-            font-size: 0.9rem;
+            @extend %property-code;
         }
 
         td:nth-child(3) {
-            font-size: 0.8em;
+            @extend %property-small;
+        }
+    }
+
+    .property-table-with-defaults {
+        td:nth-child(1) code {
+            @extend %property-mono;
+        }
+
+        td:nth-child(2) code {
+            @extend %property-code;
+        }
+
+        td:nth-child(3) code {
+            @extend %property-mono;
+        }
+
+        td:nth-child(4) {
+            @extend %property-small;
         }
     }
 

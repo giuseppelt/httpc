@@ -50,8 +50,6 @@ if (headings?.some(x => x.depth === 1)) {
   }
 
   .bleed-box {
-    margin-left: calc(-50vw + 50%);
-    margin-right: calc(-50vw + 50%);
     background-color: var(--theme-bg-color-dark2);
   }
 
@@ -72,6 +70,11 @@ if (headings?.some(x => x.depth === 1)) {
   @media (max-width: 768px) {
     .content {
       padding-top: calc(var(--navbar-height) + 0.5rem);
+    }
+
+    .bleed-box {
+      margin-left: calc(var(--side-spacing) * -1);
+      margin-right: calc(var(--side-spacing) * -1);
     }
 
     .page-title-text {

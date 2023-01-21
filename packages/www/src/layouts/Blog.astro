@@ -5,8 +5,7 @@ import Sidebar from "../components/Sidebar.astro";
 import Layout from "./Layout.astro";
 import ArticleNavigation from "../components/ArticleNavigation.astro";
 import TagList from "../components/TagList.astro";
-import Tag from "../components/Tag.astro";
-import { BlogTags } from "../sidebar";
+import { Icon } from "astro-icon";
 
 interface Props {
   url: string;
@@ -29,11 +28,18 @@ if (headings?.some(x => x.depth === 1)) {
     <article class="content side-spacing">
       <header class="mb-3">
         <h1 class="page-title">{frontmatter.title}</h1>
-        <TagList className="mt-1" items={frontmatter.tags.map(x => ({ text: x, href: `/blog/tags/${x}` }))} />
+        <TagList className="mt-1" items={frontmatter.tags!.map(x => ({ text: x, href: `/blog/tags/${x}` }))} />
       </header>
       <slot />
-      <ArticleNavigation page="blog" {...{currentPage}} />
+
+      <footer class="mt-5">
+        <p class="mb-3 hstack">
+          <Icon name="mdi:star" className="d-inline-block" style="width: 20px" />
+          <span><i>Stay updated</i>: subscribe to the <a href="/rss.xml" target="_blank" title="RSS feed">RSS feed</a></span>
+        </p>
+        <ArticleNavigation page="blog" {...{currentPage}} />
+      </footer>
     </article>
-    <Rightbar {...{ currentPage, content, frontmatter, headings}} />
+    <Rightbar page="blog" {...{ currentPage, content, frontmatter, headings}} />
   </main>
 </Layout>

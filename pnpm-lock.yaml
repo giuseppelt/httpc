@@ -180,6 +180,7 @@ importers:
     specifiers:
       '@astrojs/mdx': ^0.14.0
       '@astrojs/preact': ^1.2.0
+      '@astrojs/rss': ^2.0.0
       '@astrojs/sitemap': ^1.0.0
       '@fontsource/mulish': ^4.5.14
       '@nanostores/preact': ^0.3.1
@@ -204,6 +205,7 @@ importers:
     dependencies:
       '@astrojs/mdx': 0.14.0
       '@astrojs/preact': 1.2.0_preact@10.11.3
+      '@astrojs/rss': 2.0.0
       '@astrojs/sitemap': 1.0.0
       '@fontsource/mulish': 4.5.14
       astro: 1.9.2_d7bryvdu3wfuj2yjoleyq2wxna_iwdbj4p7tcybw7crwxzyorlhpu
@@ -390,6 +392,12 @@ packages:
     engines: {node: ^14.18.0 || >=16.12.0}
     dependencies:
       prismjs: 1.29.0
+    dev: false
+
+  /@astrojs/rss/2.0.0:
+    resolution: {integrity: sha512-qXsmyq2HhnKRA85US6GLelT47VLhdtS0bNq88umqfB2uneB9vWHSLnOJjhN9rv0mUSQjsFYytF4IEznfmNnpkQ==}
+    dependencies:
+      fast-xml-parser: 4.0.13
     dev: false
 
   /@astrojs/sitemap/1.0.0:
@@ -2933,6 +2941,13 @@ packages:
   /fast-json-stable-stringify/2.1.0:
     resolution: {integrity: sha512-lhd/wF+Lk98HZoTCtlVraHtfh5XYijIjalXck7saUtuanSDyLMxnHhSXEDJqHxD7msR8D0uCmqlkwjCV8xvwHw==}
     dev: true
+
+  /fast-xml-parser/4.0.13:
+    resolution: {integrity: sha512-g+OboAw8ol1FgTHhKLR7ZHcItNudceiY04BBrvqa0JBWoPhi/+e5r4H5AeW+EsQCroJLJwsuOP3dD3c6cc5uOg==}
+    hasBin: true
+    dependencies:
+      strnum: 1.0.5
+    dev: false
 
   /fastq/1.15.0:
     resolution: {integrity: sha512-wBrocU2LCXXa+lWBt8RoIRD89Fi8OdABODa/kEnyeyjS5aZO5/GNvI5sEINADqP/h8M29UHTHUb53sUu5Ihqdw==}
@@ -6058,6 +6073,10 @@ packages:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
     dev: true
+
+  /strnum/1.0.5:
+    resolution: {integrity: sha512-J8bbNyKKXl5qYcR36TIO8W3mVGVHrmmxsd5PAItGkmyzwJvybiw2IVq5nqd0i4LSNSkB/sx9VHllbfFdr9k1JA==}
+    dev: false
 
   /style-to-object/0.3.0:
     resolution: {integrity: sha512-CzFnRRXhzWIdItT3OmF8SQfWyahHhjq3HwcMNCNLn+N7klOOqPjMeG/4JSu77D7ypZdGvSzvkrbyeTMizz2VrA==}

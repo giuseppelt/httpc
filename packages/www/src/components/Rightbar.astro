@@ -6,13 +6,14 @@ import NavbarIcons from "./NavbarIcons.astro";
 import TableOfContents from "./TableOfContents.astro";
 
 interface Props {
+  page: "docs" | "blog";
   currentPage: string;
   headings?: readonly MarkdownHeading[];
   content?: MarkdownContent;
   frontmatter?: Frontmatter;
 }
 
-const { currentPage, headings, content, frontmatter } = Astro.props;
+const { currentPage, page, headings, content, frontmatter } = Astro.props;
 ---
 
 <div id="rightbar">
@@ -35,6 +36,13 @@ const { currentPage, headings, content, frontmatter } = Astro.props;
       <p role="heading" class="text-sm fw-bold">Meta</p>
       <a class="bar-link" target="_blank" href={getGithubEditLink(currentPage)}><Icon name="mdi:pencil" class="icon" /> Edit this page</a>
       <a class="bar-link share-link" href="#"><Icon name="ic:baseline-share" class="icon" /> Share</a>
+      {
+        page === "blog" && (
+          <a class="bar-link" href="/rss.xml">
+            <Icon name="mdi:rss-box" class="icon" /> Subscribe
+          </a>
+        )
+      }
     </section>
   </div>
 </div>

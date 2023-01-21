@@ -39,6 +39,6 @@ if (headings?.some(x => x.depth === 1)) {
       <slot />
       <ArticleNavigation page="docs" {...{currentPage}} />
     </article>
-    <Rightbar {...{ currentPage, content, frontmatter, headings}} />
+    <Rightbar page="docs" {...{ currentPage, content, frontmatter, headings}} />
   </main>
 </Layout>

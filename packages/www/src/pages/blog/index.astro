@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import Sidebar from "../../components/Sidebar.astro";
 import PostList from "../../components/PostList.astro";
 import { getPosts } from "../../content";
+import { Icon } from "astro-icon";
 
 const posts = await getPosts();
 ---
@@ -11,8 +12,9 @@ const posts = await getPosts();
   <main class="blog-content">
     <Sidebar page="blog" title="Blog" currentPage="/blog/" />
     <article class="content content-no-sidebar side-spacing">
-      <header class="mb-5">
+      <header class="mb-5 hstack">
         <h1 class="page-title">Posts</h1>
+        <a href="/rss.xml" class="icon d-block ms-2" style="width: 36px;"><Icon name="mdi:rss-box" /></a>
       </header>
 
       <PostList items={posts} />

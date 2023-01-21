@@ -1,5 +1,10 @@
 # Changelog
 
+## Upcoming
+- feat(kit): caching hooks
+- feat(kit): caching redis provider
+
+
 ## v0.1.0 First release
 This is the first release of the httpc framework. This release includes:
 - v0.1.0 **`@httpc/server`** -- The core httpc component, the server handles httpc calls

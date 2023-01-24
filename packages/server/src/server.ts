@@ -5,7 +5,8 @@ import { HttpCServerError } from "./errors";
 import { HttpCServerResponse } from "./responses";
 import { ErrorRenderer, JsonRenderer } from "./renders";
 import { HttpCCallParser, HttpCCallParserOptions } from "./parsers";
-import { CoorsHttpMiddleware, LogRequestMiddleware } from "./middlewares";
+import { CoorsHttpMiddleware } from "./processors";
+import { LogRequestMiddleware } from "./middlewares";
 import { httpPipeline } from "./pipeline";
 
 
@@ -27,10 +28,13 @@ export type HttpCServerOptions = {
     rewriters?: Optional<HttpCServerCallRewriter>[]
     parsers?: Optional<HttpCServerCallParser>[]
     renders?: Optional<HttpCServerRenderer>[]
+    preProcessors?: Optional<HttpCServerRequestProcessor>[]
+    postProcessors?: Optional<HttpCServerRequestProcessor>[]
+    onError?: (level: "call" | "pipeline" | "server", error: Error) => Promise<void>
 }
 
 export interface IHttpCHost {
-    getHttpCRequestProcessor(): (req: http.IncomingMessage, res: http.ServerResponse) => void
+    getHttpCRequestProcessor(): (req: http.IncomingMessage, res: http.ServerResponse) => Promise<void>
 }
 
 export type HttpCServer = http.Server & IHttpCHost;
@@ -55,7 +59,7 @@ export type HttpCalls = {
 
 export type HttpCServerCallExecutor<T extends CallHandler = CallHandler> = (call: HttpCall<Parameters<T>>) => Promise<Awaited<ReturnType<T>>>
 export type HttpCServerMiddleware = (call: HttpCall, next: HttpCServerCallExecutor) => Promise<unknown>
-export type HttpCServerHttpMiddleware = (req: http.IncomingMessage, res: http.ServerResponse, next: () => Promise<void>) => Promise<void>
+export type HttpCServerRequestProcessor = (req: http.IncomingMessage, res: http.ServerResponse) => Promise<void | undefined | "stop">
 
 export type HttpCServerCallParser = (request: http.IncomingMessage) => Promise<HttpCall | undefined | void>
 export type HttpCServerCallRewriter = (call: HttpCall) => Promise<HttpCall>
@@ -89,10 +93,14 @@ export function createHttpCServer(options: HttpCServerOptions): HttpCServer {
         ...options
     };
 
-    const httpMiddlewares = [
-        options.cors ? CoorsHttpMiddleware() : undefined!,
-        HttpCCallProcessorMiddleware(options),
-    ].filter(x => !!x).reverse();
+    const processors = [
+        ...filterOptionals([
+            ...options.preProcessors || [],
+            options.cors && CoorsHttpMiddleware(),
+        ]),
+        HttpCCallRequestProcessor(options),
+        ...filterOptionals(options.postProcessors),
+    ];
 
 
     async function processRequest(req: http.IncomingMessage, res: http.ServerResponse) {
@@ -102,26 +110,28 @@ export function createHttpCServer(options: HttpCServerOptions): HttpCServer {
             startedAt: Date.now(),
         };
 
-        const next = () => Promise.resolve();
-        type NextFunc = typeof next;
-
-        const pipeline = httpMiddlewares.reduce<NextFunc>((next, middleware) => {
-            return () => middleware(req, res, next)
-        }, next);
-
         return await runInContext(context, async () => {
-            await pipeline();
+            for (const processor of processors) {
+                if (await processor(req, res) === "stop") {
+                    return;
+                }
+            }
         });
     }
 
     const requestProcessor = (req: http.IncomingMessage, res: http.ServerResponse) => {
-        return processRequest(req, res).catch(err => {
-            console.error(err);
+        return processRequest(req, res).catch(async err => {
+            if (options?.onError) {
+                await options.onError("server", err)
+                    .catch(() => {/* do nothing, catch all */ });
+            }
+
+            //TODO: log error
 
             if (!res.writableEnded) {
-                try {
-                    res.writeHead(500).end();
-                } catch { }
+                return new Promise<void>(resolve => {
+                    res.writeHead(500).end(resolve);
+                });
             }
         });
     }
@@ -135,7 +145,7 @@ export function createHttpCServer(options: HttpCServerOptions): HttpCServer {
 }
 
 
-function HttpCCallProcessorMiddleware(options: HttpCServerOptions): HttpCServerHttpMiddleware {
+function HttpCCallRequestProcessor(options: HttpCServerOptions): HttpCServerRequestProcessor {
     const parsers = [
         ...filterOptionals(options.parsers),
         HttpCCallParser({
@@ -155,6 +165,7 @@ function HttpCCallProcessorMiddleware(options: HttpCServerOptions): HttpCServerH
         ErrorRenderer(),
         JsonRenderer()
     ];
+
     const middlewares = [
         ...filterOptionals([
             options.log && LogRequestMiddleware(),
@@ -251,8 +262,9 @@ function HttpCCallProcessorMiddleware(options: HttpCServerOptions): HttpCServerH
         return await pipeline.execute(call);
     }
 
-    return async (req, res, next) => {
+    return async (req, res) => {
         let result;
+        let isPipelineError = false;
 
         try {
             let call = await parse(req);
@@ -260,12 +272,16 @@ function HttpCCallProcessorMiddleware(options: HttpCServerOptions): HttpCServerH
             result = await execute(call);
         } catch (err) {
             result = err;
+            isPipelineError = true;
+        }
+
+        if (options.onError && result instanceof Error) {
+            await options.onError(isPipelineError ? "pipeline" : "call", result)
+                .catch(() => {/* do nothing, catch all */ });
         }
 
         const response = await render(result);
         await response.send(res);
-
-        await next();
     }
 }
 

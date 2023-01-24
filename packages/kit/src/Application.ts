@@ -1,12 +1,13 @@
 import assert from "assert";
-import { createHttpCServer, HttpCServer, HttpCServerOptions, IHttpCHost } from "@httpc/server";
+import { createHttpCServer, HttpCServer, HttpCServerOptions, HttpCServerRequestProcessor, IHttpCHost, useContextProperty } from "@httpc/server";
 import { initializeContainer, RESOLVE } from "./di";
 import { ILogger } from "./logging";
-import { container } from "tsyringe";
+import { container as globalContainer } from "tsyringe";
 
 
 export type ApplicationOptions = HttpCServerOptions & {
     port?: number
+    container?: "global" | "request"
 }
 
 export class Application implements IHttpCHost {
@@ -30,7 +31,7 @@ export class Application implements IHttpCHost {
     async initialize() {
         this._server = this._createServer();
         await initializeContainer();
-        this._logger = RESOLVE(container, "ApplicationLogger");
+        this._logger = RESOLVE(globalContainer, "ApplicationLogger");
         this._isInitialized = true;
     }
 
@@ -71,7 +72,24 @@ export class Application implements IHttpCHost {
     protected _createServer(): HttpCServer {
         return createHttpCServer({
             ...this.options,
+            preProcessors: [
+                ContainerRequestProcessor(this.options.container),
+                ...this.options.preProcessors || [],
+            ],
             log: false, // disable server logging, as it's handled by application services
         });
+    }
+}
+
+
+function ContainerRequestProcessor(mode?: "global" | "request"): HttpCServerRequestProcessor {
+    return async () => {
+        let container = globalContainer;
+
+        if (mode === "request") {
+            container = globalContainer.createChildContainer();
+        }
+
+        useContextProperty("container", container);
     }
 }

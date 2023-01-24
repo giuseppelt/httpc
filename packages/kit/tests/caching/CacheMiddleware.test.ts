@@ -1,16 +1,12 @@
 import "reflect-metadata";
-import { ApplicationTester, ContainerMiddleware, KEY, NullLogger, REGISTER_INSTANCE } from "../../src";
+import { ApplicationTester, KEY, NullLogger, REGISTER_INSTANCE } from "../../src";
 import { Cache, CachingService, CachingServiceOptions, InMemoryCache } from "../../src/caching";
 import { random } from "../utils";
 
 
 describe("CacheMiddleware", () => {
 
-    const server = new ApplicationTester({
-        middlewares: [
-            ContainerMiddleware("request"),
-        ]
-    });
+    const server = new ApplicationTester();
 
     function registerCacheOptions(options: CachingServiceOptions) {
         REGISTER_INSTANCE(KEY("ICachingService"), new CachingService(new NullLogger(), options));

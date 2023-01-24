@@ -3,6 +3,8 @@
 ## Upcoming
 - feat(kit): caching hooks
 - feat(kit): caching redis provider
+- feat(server): updated request processor with pre/post processors
+- feat(server): global error handler configurable
 
 
 ## v0.1.0 First release

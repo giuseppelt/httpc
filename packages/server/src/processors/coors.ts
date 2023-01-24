@@ -1,10 +1,10 @@
-import type { HttpCServerHttpMiddleware } from "../server";
+import type { HttpCServerRequestProcessor } from "../server";
 
 
-export function CoorsHttpMiddleware(): HttpCServerHttpMiddleware {
-    return async (req, res, next) => {
+export function CoorsHttpMiddleware(): HttpCServerRequestProcessor {
+    return async (req, res) => {
         if (req.method === "OPTIONS") {
-            return await new Promise(r => {
+            await new Promise(r => {
                 res.writeHead(204, {
                     "Access-Control-Allow-Origin": "*",
                     "Access-Control-Allow-Methods": "*",
@@ -13,9 +13,10 @@ export function CoorsHttpMiddleware(): HttpCServerHttpMiddleware {
                     "Content-Length": 0,
                 }).end(r);
             });
+
+            return "stop";
         }
 
         res.setHeader("Access-Control-Allow-Origin", "*");
-        await next();
     };
 }

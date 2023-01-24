@@ -1,7 +1,6 @@
-import { IncomingMessage, METHODS } from "http";
-import { Readable } from "stream";
 import { HttpCall } from "../src";
 import { HttpCCallParser } from "../src/parsers";
+import { createIncomingMessageMock } from "../src/testing/mocks";
 
 
 describe("httpc call convention", () => {
@@ -19,10 +18,10 @@ describe("httpc call convention", () => {
                 "PATCH",
                 "DELETE",
                 "OPTIONS",
-            ];
+            ] as const;
 
             for (const method of METHODS) {
-                const request = createRequest({ method, path: "/" });
+                const request = createIncomingMessageMock({ method, path: "/" });
                 expect(parser(request)).rejects.toMatchObject({
                     status: 405 // method not allowed
                 });
@@ -37,7 +36,7 @@ describe("httpc call convention", () => {
             ];
 
             for (const path of PATHS) {
-                const request = createRequest({
+                const request = createIncomingMessageMock({
                     method: "GET",
                     path
                 });
@@ -52,7 +51,7 @@ describe("httpc call convention", () => {
         });
 
         test("read operation w/no param", async () => {
-            const request = createRequest({
+            const request = createIncomingMessageMock({
                 method: "GET",
                 path: "/call"
             });
@@ -67,7 +66,7 @@ describe("httpc call convention", () => {
 
         test("read operation w/params", async () => {
             for (const params of TEST_PARAMS) {
-                const request = createRequest({
+                const request = createIncomingMessageMock({
                     method: "GET",
                     path: `/call?$p=${JSON.stringify(params)}`
                 });
@@ -82,7 +81,7 @@ describe("httpc call convention", () => {
         });
 
         test("write operation w/no param", async () => {
-            const request = createRequest({
+            const request = createIncomingMessageMock({
                 method: "POST",
                 path: "/call"
             });
@@ -97,7 +96,7 @@ describe("httpc call convention", () => {
 
         test("write operation w/params", async () => {
             for (const params of TEST_PARAMS) {
-                const request = createRequest({
+                const request = createIncomingMessageMock({
                     method: "POST",
                     path: `/call`,
                     body: params
@@ -113,7 +112,7 @@ describe("httpc call convention", () => {
         });
 
         test("call path override", async () => {
-            const request = createRequest({
+            const request = createIncomingMessageMock({
                 method: "GET",
                 path: "/path?$c=override"
             });
@@ -150,37 +149,3 @@ const TEST_PARAMS: any[][] = [
     [0, [1], "hello"],
     [1, [1, 2], { key: 1 }]
 ];
-
-
-function createRequest({ method, path, headers, body }: {
-    method: string
-    path: string
-    headers?: Record<string, string | number>
-    body?: any
-}): IncomingMessage {
-    method = method.toUpperCase();
-    if (!METHODS.includes(method)) {
-        throw new Error(`Http method unknown: ${method}`);
-    }
-
-
-    let buffer;
-    if (typeof body === "object") {
-        buffer = Buffer.from(JSON.stringify(body), "utf8");
-        headers = {
-            "content-type": "application/json",
-            "content-length": buffer.length,
-            ...headers,
-        }
-    }
-
-    const content = Readable.from(buffer || Buffer.from([]));
-
-    return Object.assign(content, {
-        url: new URL(path, "http://localhost").toString(),
-        method,
-        headers: Object.fromEntries(
-            Object.entries(headers || {}).map(([key, value]) => [key.toLowerCase(), value])
-        ),
-    } as IncomingMessage);
-}

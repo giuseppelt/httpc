@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { container as globalContainer } from "tsyringe";
-import { ApplicationTester, ContainerMiddleware, KEY, PassthroughMiddleware, useContextProperty } from "../../src";
+import { ApplicationTester, KEY, PassthroughMiddleware, useContextProperty } from "../../src";
 import { BasicAuthenticationMiddleware, IAuthenticationService } from "../../src/auth";
 import { random } from "../utils";
 
@@ -10,7 +10,6 @@ describe("BasicAuthenticationMiddleware", () => {
     const onAuthenticate = jest.fn(async _ => ({ id: "user-id" }));
     const server = new ApplicationTester({
         middlewares: [
-            ContainerMiddleware("request"),
             BasicAuthenticationMiddleware({
                 onAuthenticate: onAuthenticate,
             })

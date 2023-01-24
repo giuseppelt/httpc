@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { container as globalContainer } from "tsyringe";
 import { testContext } from "@httpc/server";
-import { ValidationService, NativeTypeValidator, ApplicationTester, ContainerMiddleware, useInjected, Validate, ValidationError, NullLogger, OptionalSchema } from "../../src";
+import { ValidationService, NativeTypeValidator, ApplicationTester, useInjected, Validate, ValidationError, NullLogger, OptionalSchema } from "../../src";
 
 
 describe("ValidationService", () => {
@@ -31,18 +31,14 @@ describe("ValidationService", () => {
             }
         });
 
-        const app = new ApplicationTester({
-            middlewares: [
-                ContainerMiddleware("request"),
-            ]
-        });
+        const app = new ApplicationTester({ container });
 
         beforeAll(async () => {
             await app.initialize();
         });
 
         beforeEach(() => {
-            testContext.clear()
+            testContext.clear();
         });
 
 

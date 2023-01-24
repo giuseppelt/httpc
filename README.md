@@ -221,3 +221,7 @@ For any bugs, feature requests or proposals you can [file an issue](https://http
 
 ### Contributing
 All contribution are welcome. Any PR, issue and feedback is appreciated. Checkout the [contribution guide](https://httpc.dev/contribute).
+
+
+## License
+MIT © [Giuseppe La Torre](https://github.com/giuseppelt)

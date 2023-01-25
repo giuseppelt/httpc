@@ -14,8 +14,8 @@ export function createClient<T extends {}>(options: HttpCTypedClientOptions = {}
     function createMethod(path: string, op: HttpCallDefinition) {
         return function (this: HttpCTypedClient, ...args: any) {
             return op.access === "read"
-                ? this.$client.read(path, ...args)
-                : this.$client.write(path, ...args);
+                ? client.$client.read(path, ...args)
+                : client.$client.write(path, ...args);
         };
     }
 

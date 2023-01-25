@@ -41,7 +41,7 @@ export interface ICache<V = any> {
 
 
 export type CacheKey = ExpandedKeys<CacheTypes>
-export type CacheType<K extends CacheKey> = CacheTypes extends { [k in K]: infer T } ? T : ICache
+export type CacheType<K extends CacheKey> = CacheTypes extends { [k in K]: (ICache | ICacheSync) } ? CacheTypes[K] : ICache
 
 export type CacheItemKey = ExpandedKeys<CacheItemTypes>
-export type CacheItemType<K extends CacheKey> = CacheItemTypes extends { [k in K]: infer T } ? T | undefined : any
+export type CacheItemType<K extends CacheKey> = CacheItemTypes extends { [k in K]: any } ? CacheItemTypes[K] | undefined : any

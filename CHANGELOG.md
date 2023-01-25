@@ -5,6 +5,7 @@
 - feat(kit): caching redis provider
 - feat(server): updated request processor with pre/post processors
 - feat(server): global error handler configurable
+- feat(server): updated server logging with errors trace points
 
 
 ## v0.1.0 First release

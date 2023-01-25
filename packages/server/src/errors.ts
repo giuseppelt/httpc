@@ -1,3 +1,4 @@
+import { HttpCall } from "./server"
 
 
 export type ErrorInfo = {
@@ -116,10 +117,21 @@ export class HttpCServerError extends HttpCallError {
         invalidState: 500
     };
 
-    constructor(public readonly errorCode: keyof typeof HttpCServerError.ERRORS, message = "ServerError") {
+    constructor(errorCode: keyof typeof HttpCServerError.ERRORS, message?: string, call?: HttpCall);
+    constructor(errorCode: keyof typeof HttpCServerError.ERRORS, call?: HttpCall);
+    constructor(public readonly errorCode: keyof typeof HttpCServerError.ERRORS, message: string | HttpCall = "ServerError", call?: HttpCall) {
         const statusCode = HttpCServerError.ERRORS[errorCode] || 500;
-        super(statusCode, errorCode, message)
+        if (typeof message === "object") {
+            call = message;
+            message = "ServerError";
+        }
+
+        super(statusCode, errorCode, message);
+
+        this.call = call;
     }
+
+    readonly call: HttpCall | undefined;
 }
 
 

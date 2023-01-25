@@ -8,6 +8,7 @@ import { HttpCCallParser, HttpCCallParserOptions } from "./parsers";
 import { CoorsHttpMiddleware } from "./processors";
 import { LogRequestMiddleware } from "./middlewares";
 import { httpPipeline } from "./pipeline";
+import { createConsoleColors, createLogger, Logger, LogLevel } from "./logger";
 
 
 type Optional<T> = T | false | undefined;
@@ -21,7 +22,7 @@ export type HttpCServerOptions = {
     calls: HttpCalls
     cors?: boolean
     path?: string
-    log?: boolean
+    log?: boolean | LogLevel | Logger
     maxDataSize?: number
     parsing?: HttpCCallParserOptions["mode"]
     middlewares?: Optional<HttpCServerMiddleware>[]
@@ -86,12 +87,16 @@ export function isCallFunction(obj: any): obj is HttpCallFunctionDefinition {
 }
 
 
+function assignLogger(log: HttpCServerOptions["log"]) {
+    return log === false ? undefined :
+        typeof log === "string" ? createLogger({ level: log }) :
+            typeof log === "function" ? log :
+                createLogger();
+}
+
 export function createHttpCServer(options: HttpCServerOptions): HttpCServer {
-    // apply defaults
-    options = {
-        log: true,
-        ...options
-    };
+    const logger = assignLogger(options.log ?? true);
+    const colors = createConsoleColors();
 
     const processors = [
         ...filterOptionals([
@@ -126,7 +131,7 @@ export function createHttpCServer(options: HttpCServerOptions): HttpCServer {
                     .catch(() => {/* do nothing, catch all */ });
             }
 
-            //TODO: log error
+            logger?.("critical", `${colors.gray("%s")}\t%s %s`, req.method!, req.url!, err?.message);
 
             if (!res.writableEnded) {
                 return new Promise<void>(resolve => {
@@ -166,9 +171,12 @@ function HttpCCallRequestProcessor(options: HttpCServerOptions): HttpCServerRequ
         JsonRenderer()
     ];
 
+    const logger = assignLogger(options.log ?? true);
+    const colors = createConsoleColors();
+
     const middlewares = [
         ...filterOptionals([
-            options.log && LogRequestMiddleware(),
+            logger && LogRequestMiddleware({ logger }),
             ...options.middlewares || []
         ])
     ];
@@ -208,7 +216,7 @@ function HttpCCallRequestProcessor(options: HttpCServerOptions): HttpCServerRequ
         } while (tree);
 
         if (!callDef) {
-            throw new HttpCServerError("callNotFound");
+            throw new HttpCServerError("callNotFound", call);
         }
 
         return callDef;
@@ -275,9 +283,20 @@ function HttpCCallRequestProcessor(options: HttpCServerOptions): HttpCServerRequ
             isPipelineError = true;
         }
 
-        if (options.onError && result instanceof Error) {
-            await options.onError(isPipelineError ? "pipeline" : "call", result)
-                .catch(() => {/* do nothing, catch all */ });
+        if (result instanceof Error) {
+            if (logger) {
+                const call = result instanceof HttpCServerError && result.call;
+                if (call) {
+                    logger("error", `${colors.gray("%s")}\t%s %s`, call.access, call.path, result.message);
+                } else {
+                    logger("error", `${colors.gray("%s")}\t%s %s`, req.method!, req.url!, result.message);
+                }
+            }
+
+            if (options.onError) {
+                await options.onError(isPipelineError ? "pipeline" : "call", result)
+                    .catch(() => {/* do nothing, catch all */ });
+            }
         }
 
         const response = await render(result);

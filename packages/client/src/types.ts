@@ -4,9 +4,9 @@ export type ClientDef<T> = T extends Record<string, any>
     : never
 
 type ClientCall<T> = T extends (...args: any[]) => any
-    ? (...args: CallParams<Parameters<T>>) => Promise<Awaited<ReturnType<T>>>
+    ? (...args: CallParams<Parameters<T>>) => Promise<JsonSafeType<Awaited<ReturnType<T>>>>
     : T extends CallPipeline<infer P>
-    ? (...args: CallParams<Parameters<P>>) => Promise<Awaited<ReturnType<P>>>
+    ? (...args: CallParams<Parameters<P>>) => Promise<JsonSafeType<Awaited<ReturnType<P>>>>
     : T extends Record<string, any>
     ? ClientDef<T>
     : never

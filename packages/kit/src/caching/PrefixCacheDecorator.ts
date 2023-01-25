@@ -2,12 +2,14 @@ import { ICache, ICacheSync } from "./types";
 import { createProxy, isPromise } from "../utils";
 
 
-export function PrefixCacheDecorator<T extends ICache | ICacheSync>(prefix: string, cache: T): T {
+export function PrefixCacheDecorator<T extends ICache | ICacheSync>(prefix: string | (() => string), cache: T): T {
     function _prefix(key: string): string {
+        if (typeof prefix === "function") prefix = prefix();
         return `${prefix}:${key}`;
     }
 
     function _un_prefix(key: string): string {
+        if (typeof prefix === "function") prefix = prefix();
         return key.substring(prefix.length + 1);
     }
 

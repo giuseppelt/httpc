@@ -14,7 +14,7 @@
   "dependencies": {
     "cross-fetch": "^3.1.5",
     "kleur": "^4.1.5",
-    "movie-personal-library-api-client": "workspace:^0.0.1",
+    "movie-personal-library-api-client": "workspace:*",
     "prompts": "^2.4.2"
   }
 }

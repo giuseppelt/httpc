@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "generate:template": "ts-node -T scripts/generateTemplateCatalogue",
+    "prerelease": "ts-node -T scripts/prerelease",
     "build": "pnpm run -r --filter=./packages/* --filter=!@httpc/www build",
     "test": "pnpm run -r test",
     "watch:ts": "tsc --build tsconfig.dev.json --watch --incremental --force"

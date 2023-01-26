@@ -1,7 +1,7 @@
 {
     "name": "@httpc/kit",
     "description": "httpc toolbox for building function-based API with minimal code and end-to-end type safety",
-    "version": "0.1.0",
+    "version": "0.2.0-pre",
     "author": {
         "name": "Giuseppe La Torre",
         "url": "https://github.com/giuseppelt"
@@ -62,7 +62,7 @@
         "client-generation"
     ],
     "dependencies": {
-        "@httpc/server": "workspace:^0.1.0",
+        "@httpc/server": "workspace:*",
         "jws": "^4.0.0"
     },
     "devDependencies": {

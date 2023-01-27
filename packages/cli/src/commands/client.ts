@@ -114,7 +114,7 @@ const init = createCommand("init")
                 packageName: config.name
             });
 
-            console.log("Client '%s' initialized", config.name);
+            log.success("Client '%s' initialized", config.name);
         }
     });
 
@@ -136,7 +136,7 @@ const generate = createCommand("generate")
                 await templateUtils.initialize("client", config.dest, {
                     packageName: config.name
                 });
-                console.log("Client '%s' initialized", config.name);
+                log.verbose("Client '%s' initialized", config.name);
             }
 
 

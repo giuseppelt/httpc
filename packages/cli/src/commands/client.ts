@@ -206,7 +206,13 @@ writeMetadata(api, "${sanitizePath(dest)}")
             const executeOptions = {
             };
 
-            await run(`npx ts-node --transpileOnly --project "${tsConfigPath}" -O "${JSON.stringify(executeOptions).split('"').join('\\"')}"  ${sanitizePath(main)}`)
+            //
+            // NB!
+            // skipIgnore is required because ts-node skips files inside node_modules
+            // but, the generated main- is placed inside a node_module
+            //
+
+            await run(`npx ts-node --transpileOnly --skipIgnore --project "${tsConfigPath}" -O "${JSON.stringify(executeOptions).split('"').join('\\"')}" "${sanitizePath(main)}"`)
                 .finally(() => fs.unlink(main));
 
             log.success("Client '%s' generated", config.name);

@@ -60,6 +60,10 @@ async function writeTypeIndex(rootFile: string, outDir: string) {
 
     let dirs = sanitizePath(path.dirname(rootFile)).split("/");
 
+    // remove first entry, if empty
+    // linux paths start with /
+    if (dirs.length > 0 && dirs[0] === "") dirs.shift();
+
     while (dirs.shift()) {
         const target = path.resolve(outDir, ...dirs, typeFile);
         if (await fsUtils.exists(target)) {

@@ -3,11 +3,14 @@ import { exec } from "child_process";
 
 export async function run(cmd: string, option?: {
     cwd?: string
+    showOutput?: boolean
 }) {
     return await new Promise<void>((resolve, reject) => {
-        exec(cmd, {
-            ...option,
-        }, (error, stdout, stderr) => {
+        exec(cmd, { ...option }, (error, stdout, stderr) => {
+            if (option?.showOutput && stdout) {
+                console.log(stdout);
+            }
+
             if (error) {
                 console.error(error.stack);
                 console.log('Error code: ' + error.code);

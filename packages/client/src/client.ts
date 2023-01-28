@@ -114,8 +114,8 @@ export class HttpCClient {
         const response = await this._pipeline(request);
 
         let body: TRes | undefined = undefined;
-        if (response.headers.get("content-length")) {
-            // needed because the same response can be read multiple times            
+        if (response.headers.get("content-type")?.includes("application/json")) {
+            // needed because the same response can be read multiple times        
             body = await response.clone().json() as TRes;
         }
 

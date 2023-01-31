@@ -19,9 +19,11 @@ function generateMetadataForFunction(): HttpCallDefinition {
 }
 
 function generateMetadataForPipeline(call: HttpCallPipelineDefinition): HttpCallDefinition {
+    const metadata = filterClientMetadata(call.metadata);
+
     return {
         access: call.access || undefined,
-        metadata: filterClientMetadata(call.metadata) || undefined
+        metadata: metadata && Object.keys(metadata).length > 0 ? metadata : undefined
     };
 }
 

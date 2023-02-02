@@ -18,9 +18,9 @@
     "@astrojs/sitemap": "^1.0.0",
     "@fontsource/mulish": "^4.5.14",
     "astro": "^1.9.2",
-    "astro-compress": "^1.1.27",
+    "astro-compress": "^1.1.29",
     "astro-integration-lottie": "^0.1.1",
-    "lottie-web": "^5.10.1",
+    "lottie-web": "^5.10.2",
     "preact": "^10.11.3",
     "shiki": "^0.12.1"
   },
@@ -35,8 +35,8 @@
     "nanostores": "^0.7.1",
     "node-html-parser": "^6.1.4",
     "rehype-link-processor": "^1.0.3",
-    "sass": "^1.57.1",
+    "sass": "^1.58.0",
     "unified": "^10.1.2",
-    "unist-util-visit": "^4.1.1"
+    "unist-util-visit": "^4.1.2"
   }
 }

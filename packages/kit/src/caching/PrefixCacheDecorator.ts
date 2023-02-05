@@ -4,13 +4,13 @@ import { createProxy, isPromise } from "../utils";
 
 export function PrefixCacheDecorator<T extends ICache | ICacheSync>(prefix: string | (() => string), cache: T): T {
     function _prefix(key: string): string {
-        if (typeof prefix === "function") prefix = prefix();
-        return `${prefix}:${key}`;
+        const p = typeof prefix === "function" ? prefix() : prefix;
+        return `${p}:${key}`;
     }
 
     function _un_prefix(key: string): string {
-        if (typeof prefix === "function") prefix = prefix();
-        return key.substring(prefix.length + 1);
+        const p = typeof prefix === "function" ? prefix() : prefix;
+        return key.substring(p.length + 1);
     }
 
     return createProxy(cache as ICacheSync, {

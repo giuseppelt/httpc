@@ -43,7 +43,9 @@ export function createClient<T extends {}>(options: HttpCTypedClientOptions = {}
                     return createProxy(joinPath(path, property));
                 }
 
-                throw new TypeError(`Can't find call '${path}'`);
+                // throw new TypeError(`Can't find call '${path}'`);
+
+                return undefined;
             },
             apply(target, thisArg, args) {
                 if (mode !== "loose") {

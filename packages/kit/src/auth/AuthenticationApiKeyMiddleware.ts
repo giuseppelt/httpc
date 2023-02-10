@@ -3,6 +3,7 @@ import { HttpCServerMiddleware, PassthroughMiddleware, useContext } from "@httpc
 import { RESOLVE, useContainer } from "../di";
 import { useAuthentication } from "./context";
 import { catchLogAndThrowUnauthorized } from "../services";
+import { useLogger } from "../logging";
 
 
 export type AuthenticationApiKeyMiddlewareOptions = {
@@ -21,6 +22,8 @@ export function AuthenticationApiKeyMiddleware(options?: AuthenticationApiKeyMid
         if (!user) {
             const apiKey = extractKey(request);
             if (apiKey) {
+                useLogger().debug("ApiKeyMiddleware: received key %s", apiKey);
+
                 useAuthentication(await authenticate(apiKey)
                     .catch(catchLogAndThrowUnauthorized("ApiKeyMiddleware"))
                 );

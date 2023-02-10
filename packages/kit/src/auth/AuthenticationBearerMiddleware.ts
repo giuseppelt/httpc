@@ -4,6 +4,7 @@ import { KEY, RESOLVE, useContainer } from "../di";
 import { JwtPayload } from "./JwtService";
 import { useAuthentication } from "./context";
 import { catchLogAndThrowUnauthorized } from "../services";
+import { useLogger } from "../logging";
 
 
 export type AuthenticationBearerMiddlewareOptions = {
@@ -29,7 +30,9 @@ export function AuthenticationBearerMiddleware(options?: AuthenticationBearerMid
         if (!user) {
             const [schema, token] = request.headers.authorization?.split(" ") || [];
             if (schema?.toUpperCase() === "BEARER") {
-                useAuthentication(await authenticate(token)
+                useLogger().debug("BearerMiddleware: received jwt %s", token);
+
+                useAuthentication(await authenticate(token || "")
                     .catch(catchLogAndThrowUnauthorized("BearerMiddleware"))
                 );
             }

@@ -3,7 +3,7 @@ import { singleton } from "tsyringe";
 import type { IEvent, IEventBus } from "./types";
 import type { ILogger } from "../logging";
 import { logger } from "../logging";
-import { alias, KEY } from "../di";
+import { alias, KEY, noInject } from "../di";
 import { BaseService, ITransactionService } from "../services";
 
 
@@ -16,16 +16,17 @@ export class EventBus extends BaseService() implements IEventBus {
 
     constructor(
         @logger() logger: ILogger,
+        @noInject() protected readonly emitter: EventEmitter = new EventEmitter(),
     ) {
         //@ts-expect-error
         super(...arguments);
     }
 
-    readonly events = new EventEmitter();
 
     inTransaction(data: ITransactionService) {
         const bus = new EventBus(
             this.logger,
+            this.emitter,
         );
 
         bus.hold();
@@ -35,8 +36,8 @@ export class EventBus extends BaseService() implements IEventBus {
     }
 
     addListener<T = object>(event: string, handler: (event: T) => void) {
-        this.events.addListener(event, handler);
-        return () => this.events.removeListener(event, handler);
+        this.emitter.addListener(event, handler);
+        return () => this.emitter.removeListener(event, handler);
     }
 
     publish(event: IEvent): void {
@@ -47,7 +48,7 @@ export class EventBus extends BaseService() implements IEventBus {
             return;
         }
 
-        this.events.emit(event.$event_name, event);
+        this.emitter.emit(event.$event_name, event);
     }
 
     hold(): void {

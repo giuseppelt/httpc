@@ -5,10 +5,12 @@ import { JwtPayload } from "./JwtService";
 import { useAuthentication } from "./context";
 import { catchLogAndThrowUnauthorized } from "../services";
 import { useLogger } from "../logging";
+import { BearerAuthenticationService, BearerAuthenticationServiceOptions } from "./BearerAuthenticationService";
 
 
 export type AuthenticationBearerMiddlewareOptions = {
     jwtSecret?: string
+    validation?: BearerAuthenticationServiceOptions["validations"]
     onAuthenticate?: (token: string) => Promise<IUser>
     onDecode?: (payload: JwtPayload) => IUser | Promise<IUser>
 }
@@ -16,11 +18,21 @@ export type AuthenticationBearerMiddlewareOptions = {
 export function AuthenticationBearerMiddleware(options?: AuthenticationBearerMiddlewareOptions): HttpCServerMiddleware {
     const authenticate = options?.onAuthenticate || onAuthenticate;
 
-    if (options?.jwtSecret && !container.isRegistered(KEY("ENV", "JWT_SECRET"), true)) {
-        container.registerInstance(KEY("ENV", "JWT_SECRET"), options.jwtSecret);
-    }
-    if (options?.onDecode) {
-        container.registerInstance(KEY("ENV", "JWT_DECODE"), options.onDecode);
+    if (options?.jwtSecret || options?.onDecode || options?.validation) {
+        container.register(KEY("OPTIONS", BearerAuthenticationService), {
+            useFactory: container => {
+                const jwtSecret = options?.jwtSecret || process.env.JWT_SECRET;
+                if (!jwtSecret) {
+                    throw new Error("Missing configuration: JWT_SECRET");
+                }
+
+                return {
+                    jwtSecret,
+                    validations: options?.validation,
+                    onDecodePayload: options?.onDecode,
+                } satisfies BearerAuthenticationServiceOptions;
+            },
+        });
     }
 
 

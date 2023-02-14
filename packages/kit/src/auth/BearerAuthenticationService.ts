@@ -1,18 +1,20 @@
 import { UnauthorizedError } from "@httpc/server";
 import { singleton } from "tsyringe";
-import { options, optionsOf, env, alias, KEY } from "../di";
+import { options, alias, KEY, optionsOf, env } from "../di";
 import type { ILogger } from "../logging";
 import { logger } from "../logging";
 import { BaseService, ServiceErrorPreset } from "../services";
 import { cleanNotDefined } from "../utils";
-import { JwtPayload, JwtService, JWT_CLAIMS } from "./JwtService";
+import { Factorable } from "../types";
 import { IAuthenticationService } from "./types";
+import { JwtPayload, JwtService, JwtValidateOptions, JWT_CLAIMS } from "./JwtService";
 
 
 
 export type BearerAuthenticationServiceOptions = {
     jwtSecret: string
-    onDecodePayload?: (payload: JwtPayload) => Promise<IUser>
+    validations?: Factorable<Omit<JwtValidateOptions, "secret" | "algorithm">>
+    onDecodePayload?: (payload: JwtPayload) => (Promise<IUser> | IUser)
 }
 
 
@@ -36,7 +38,13 @@ export class BearerAuthenticationService extends BaseService(BearerAuthenticatio
             this._raiseError("misconfiguration", "No jwtSecret configured");
         }
 
+        const validations = this.options?.validations && (typeof this.options.validations === "function"
+            ? this.options.validations()
+            : this.options.validations
+        );
+
         const result = this.jwt.validate(token, {
+            ...validations,
             secret: this.options.jwtSecret
         });
 
@@ -62,7 +70,7 @@ export class BearerAuthenticationService extends BaseService(BearerAuthenticatio
 
         const props = Object.fromEntries(
             Object.entries(payload)
-                .filter(([key]) => !JWT_CLAIMS.includes(key))
+                .filter(([key]) => !(JWT_CLAIMS as readonly string[]).includes(key))
         );
 
         return {
@@ -72,12 +80,12 @@ export class BearerAuthenticationService extends BaseService(BearerAuthenticatio
     }
 }
 
+
 @optionsOf(BearerAuthenticationService)
 @singleton()
-export class DefaultBearerAuthenticationServiceOptions implements BearerAuthenticationServiceOptions {
+class DefaultBearerAuthenticationServiceOptions implements BearerAuthenticationServiceOptions {
     constructor(
         @env("JWT_SECRET") public readonly jwtSecret: string,
-        @env("JWT_DECODE", undefined) public readonly onDecodePayload?: (payload: JwtPayload) => Promise<IUser>
     ) {
     }
 }

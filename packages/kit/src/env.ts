@@ -52,4 +52,9 @@ declare global {
 
     interface CacheItemTypes {
     }
+
+
+    interface EventTypes {
+
+    }
 }

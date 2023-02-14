@@ -1,10 +1,11 @@
 import EventEmitter from "events";
 import { singleton } from "tsyringe";
-import type { IEvent, IEventBus } from "./types";
+import type { EventData, EventName, EventType, IEvent, IEventBus } from "./types";
 import type { ILogger } from "../logging";
 import { logger } from "../logging";
 import { alias, KEY, noInject } from "../di";
 import { BaseService, ITransactionService } from "../services";
+import { createEvent } from "./factory";
 
 
 @singleton()
@@ -35,20 +36,30 @@ export class EventBus extends BaseService() implements IEventBus {
         return bus as this;
     }
 
-    addListener<T = object>(event: string, handler: (event: T) => void) {
+    createEvent<E extends EventName>(event: E, data: EventData<EventType<E>>): EventType<E> {
+        return createEvent(event, data);
+    }
+
+    addListener<E extends EventName>(event: E, handler: (event: EventType<E>) => void) {
         this.emitter.addListener(event, handler);
         return () => this.emitter.removeListener(event, handler);
     }
 
-    publish(event: IEvent): void {
-        this.logger.verbose("Emitted%s %s(%j)", this._isHold ? "(hold)" : "", event.$event_name, event);
+    publish(event: IEvent): void;
+    publish<E extends EventName>(event: E, data: EventData<EventType<E>>): void;
+    publish(event: string | IEvent, data?: object): void {
+        if (typeof event === "string") {
+            event = this.createEvent(event, data || {});
+        }
+
+        this.logger.verbose("Emitted%s %s(%j)", this._isHold ? "(hold)" : "", event.$eventName, event);
 
         if (this._isHold) {
             this._holdEvents.push(event);
             return;
         }
 
-        this.emitter.emit(event.$event_name, event);
+        this.emitter.emit(event.$eventName, event);
     }
 
     hold(): void {

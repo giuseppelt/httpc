@@ -34,7 +34,7 @@ export class HttpCallError extends Error {
 function createError(template: ErrorInfo) {
     return class extends HttpCallError {
         constructor(message?: string, data?: any);
-        constructor(info: Partial<ErrorInfo>);
+        constructor(info?: Partial<ErrorInfo>);
         constructor(info?: string | Partial<ErrorInfo>, data?: any) {
             if (info) {
                 if (typeof info === "object") {

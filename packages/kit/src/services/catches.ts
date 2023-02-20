@@ -1,4 +1,4 @@
-import { ForbiddenError, HttpCallError, isErrorOf, NotFoundError, UnauthorizedError } from "@httpc/server";
+import { BadRequestError, ErrorInfo, ForbiddenError, HttpCallError, isErrorOf, NotFoundError, UnauthorizedError, UnprocessableRequestError } from "@httpc/server";
 import { useLogger } from "../logging";
 import { ServiceError } from "./error";
 
@@ -19,38 +19,6 @@ export function catchError<T>(error: string | { new(): Error }, func?: (err: Err
     }
 }
 
-export function catchNotFound<T>(func: (err: ServiceError) => T) {
-    return (err: any) => {
-        if (isErrorOf("not_found", NotFoundError, err)) {
-            return func(err);
-        }
-
-        throw err;
-    };
-}
-
-export function catchNotFoundThrows(error: () => HttpCallError) {
-    return (err: any) => {
-        if (isErrorOf("not_found", NotFoundError, err)) {
-            throw error();
-        }
-
-        throw err;
-    };
-}
-
-export function catchNotFoundThrowUnauthorized(message?: string) {
-    return catchNotFoundThrows(() => new UnauthorizedError(message));
-}
-
-export function catchNotFoundThrowForbidden(message?: string) {
-    return catchNotFoundThrows(() => new ForbiddenError(message));
-}
-
-export function catchNotFoundThrowNotFound(message?: string) {
-    return catchNotFoundThrows(() => new NotFoundError(message));
-}
-
 export function catchLogAndThrowUnauthorized(log?: string, message?: string) {
     return (err: any) => {
         const logger = useLogger();
@@ -64,3 +32,54 @@ export function catchLogAndThrowUnauthorized(log?: string, message?: string) {
         throw new UnauthorizedError(message);
     };
 }
+
+
+interface ErrorRethrow {
+    (rethrows: (error: HttpCallError) => HttpCallError): (err: unknown) => never
+}
+
+interface ErrorRethrowFactory {
+    (message?: string | undefined, data?: object | undefined): (err: HttpCallError) => never
+    (info: "$inherit"): (err: HttpCallError) => never
+}
+
+function createRethrows(rethrows: ErrorRethrow, constructor: { new(info?: Partial<ErrorInfo>): HttpCallError }): ErrorRethrowFactory {
+    return (...[message, data]) => rethrows(err => {
+        if (message === "$inherit") {
+            message = err.message;
+            data = err.data;
+        }
+
+        return (message || data)
+            ? new constructor({ message, data })
+            : new constructor();
+    });
+}
+
+
+
+export function catchNotFound<T>(func: (err: ServiceError) => T) {
+    return (err: any) => {
+        if (isErrorOf("not_found", NotFoundError, err)) {
+            return func(err);
+        }
+
+        throw err;
+    };
+}
+
+const catchNotFoundThrows = catchNotFound.throws = (error: (err: HttpCallError) => HttpCallError) => {
+    return (err: any) => {
+        if (isErrorOf("not_found", NotFoundError, err)) {
+            throw error(err);
+        }
+
+        throw err;
+    };
+}
+
+catchNotFound.throwUnauthorized = createRethrows(catchNotFoundThrows, UnauthorizedError);
+catchNotFound.throwForbidden = createRethrows(catchNotFoundThrows, ForbiddenError);
+catchNotFound.throwNotFound = createRethrows(catchNotFoundThrows, NotFoundError);
+catchNotFound.throwBadRequest = createRethrows(catchNotFoundThrows, BadRequestError);
+catchNotFound.throwUnprocessable = createRethrows(catchNotFoundThrows, UnprocessableRequestError);

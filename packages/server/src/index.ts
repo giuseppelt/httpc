@@ -1,5 +1,5 @@
 export * from "./errors";
-export { useContext, useContextProperty } from "./context";
+export { useContext, useContextProperty, runInContext } from "./context";
 export * from "./hooks";
 export * from "./parsers";
 export * from "./responses";

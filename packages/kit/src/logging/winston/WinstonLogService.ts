@@ -93,9 +93,11 @@ export class WinstonLogService implements ILogService {
                     Object.assign(meta, properties(label), meta);
                 }
 
-                let extra = "";
-                if (Object.keys(meta).length > 0) {
-                    extra = " " + JSON.stringify(meta);
+                let extra = JSON.stringify(meta);
+                if (extra === "{}") {
+                    extra = '';
+                } else {
+                    extra = " " + extra;
                 }
 
                 return `${info.level}\t${info.timestamp}\t[${info.label}]\t${info.message}${extra}`;

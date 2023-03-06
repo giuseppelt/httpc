@@ -1,3 +1,4 @@
+import { injectable } from "tsyringe";
 import { options } from "../../di";
 import { ILogger, ILogService, LogLevel } from "../types";
 import { ConsoleLogger } from "./Logger";
@@ -7,6 +8,7 @@ export type ConsoleLogServiceOptions = {
     level?: LogLevel | ((label: string) => LogLevel)
 }
 
+@injectable()
 export class ConsoleLogService implements ILogService {
     constructor(
         @options(undefined) protected readonly options?: ConsoleLogServiceOptions

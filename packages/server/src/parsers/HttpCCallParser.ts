@@ -31,7 +31,7 @@ export function HttpCCallParser(options: HttpCCallParserOptions): HttpCServerCal
         try {
             return JSON.parse(p);
         } catch (err) {
-            throw new BadRequestError();
+            throw new BadRequestError("Malformed params(expected a valid JSON encoded into '$p' query param)");
         }
     }
 
@@ -46,7 +46,11 @@ export function HttpCCallParser(options: HttpCCallParserOptions): HttpCServerCal
         // no content body
         if (json === "") return [];
 
-        return JSON.parse(json);
+        try {
+            return JSON.parse(json);
+        } catch (err) {
+            throw new BadRequestError("Malformed body(expected valid JSON)");
+        }
     }
 
     function getCallPath(req: http.IncomingMessage): string {

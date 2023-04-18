@@ -1,0 +1,44 @@
+diff --git a/dist/typings/decorators/inject-all-with-transform.d.ts b/dist/typings/decorators/inject-all-with-transform.d.ts
+index 196dfac4cf47d62c916ce993814d47475de9d802..1a5764e40647af47116d8b383cd98136cc4c6016 100644
+--- a/dist/typings/decorators/inject-all-with-transform.d.ts
++++ b/dist/typings/decorators/inject-all-with-transform.d.ts
+@@ -5,5 +5,5 @@ import Transform from "../types/transform";
+  *
+  * @return {Function} The parameter decorator
+  */
+-declare function injectAllWithTransform(token: InjectionToken<any>, transformer: InjectionToken<Transform<[any], any>>, ...args: any[]): (target: any, propertyKey: string | symbol, parameterIndex: number) => any;
++declare function injectAllWithTransform(token: InjectionToken<any>, transformer: InjectionToken<Transform<[any], any>>, ...args: any[]): (target: any, propertyKey: string | symbol | undefined, parameterIndex: number) => any;
+ export default injectAllWithTransform;
+diff --git a/dist/typings/decorators/inject-all.d.ts b/dist/typings/decorators/inject-all.d.ts
+index 2bd7da471951f919112a9fd4d54bcf284de874a7..3716ef5330e2e31ef25f917760387713e9ab76d8 100644
+--- a/dist/typings/decorators/inject-all.d.ts
++++ b/dist/typings/decorators/inject-all.d.ts
+@@ -4,5 +4,5 @@ import InjectionToken from "../providers/injection-token";
+  *
+  * @return {Function} The parameter decorator
+  */
+-declare function injectAll(token: InjectionToken<any>): (target: any, propertyKey: string | symbol, parameterIndex: number) => any;
++declare function injectAll(token: InjectionToken<any>): (target: any, propertyKey: string | symbol | undefined, parameterIndex: number) => any;
+ export default injectAll;
+diff --git a/dist/typings/decorators/inject-with-transform.d.ts b/dist/typings/decorators/inject-with-transform.d.ts
+index 05f87d7f92b308242ac59c47836b4ae20159c2d0..47ba13801187a2c8861bb736e3cfd30bc300d2cc 100644
+--- a/dist/typings/decorators/inject-with-transform.d.ts
++++ b/dist/typings/decorators/inject-with-transform.d.ts
+@@ -7,5 +7,5 @@ import Transform from "../types/transform";
+  * @param args Arguments to be passed to the transform method on the transformer
+  * @returns The parameter decorator
+  */
+-declare function injectWithTransform(token: InjectionToken<any>, transformer: InjectionToken<Transform<any, any>>, ...args: any[]): (target: any, propertyKey: string | symbol, parameterIndex: number) => any;
++declare function injectWithTransform(token: InjectionToken<any>, transformer: InjectionToken<Transform<any, any>>, ...args: any[]): (target: any, propertyKey: string | symbol | undefined, parameterIndex: number) => any;
+ export default injectWithTransform;
+diff --git a/dist/typings/decorators/inject.d.ts b/dist/typings/decorators/inject.d.ts
+index 5d48d79951bf1883cfbfc431bc0678a066ec0fb9..867384c74fa576beccde10bcd4f4689a6b01d16a 100644
+--- a/dist/typings/decorators/inject.d.ts
++++ b/dist/typings/decorators/inject.d.ts
+@@ -4,5 +4,5 @@ import InjectionToken from "../providers/injection-token";
+  *
+  * @return {Function} The parameter decorator
+  */
+-declare function inject(token: InjectionToken<any>): (target: any, propertyKey: string | symbol, parameterIndex: number) => any;
++declare function inject(token: InjectionToken<any>): (target: any, propertyKey: string | symbol | undefined, parameterIndex: number) => any;
+ export default inject;

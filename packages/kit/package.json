@@ -79,7 +79,7 @@
         "rimraf": "^5.0.0",
         "ts-jest": "^29.1.0",
         "tsyringe": "^4.7.0",
-        "typescript": "^4.9.5",
+        "typescript": "^5.0.4",
         "winston": "^3.8.2",
         "zod": "^3.21.4"
     },

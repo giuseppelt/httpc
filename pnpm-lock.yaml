@@ -1,5 +1,10 @@
 lockfileVersion: '6.0'
 
+patchedDependencies:
+  tsyringe@4.7.0:
+    hash: 72xghdlo2rzuod6ye7lnnj4uma
+    path: patches/tsyringe@4.7.0.patch
+
 importers:
 
   .:
@@ -9,10 +14,10 @@ importers:
         version: 16.18.23
       ts-node:
         specifier: ^10.9.1
-        version: 10.9.1(@types/node@16.18.23)(typescript@4.9.5)
+        version: 10.9.1(@types/node@16.18.23)(typescript@5.0.4)
       typescript:
-        specifier: ^4.9.5
-        version: 4.9.5
+        specifier: ^5.0.4
+        version: 5.0.4
 
   packages/adapter-netlify:
     devDependencies:
@@ -30,7 +35,7 @@ importers:
         version: 29.5.0
       jest:
         specifier: ^29.5.0
-        version: 29.5.0(@types/node@16.18.23)
+        version: 29.5.0(@types/node@16.18.23)(ts-node@10.9.1)
       reflect-metadata:
         specifier: ^0.1.13
         version: 0.1.13
@@ -39,13 +44,13 @@ importers:
         version: 5.0.0
       ts-jest:
         specifier: ^29.1.0
-        version: 29.1.0(@babel/core@7.21.4)(jest@29.5.0)(typescript@4.9.5)
+        version: 29.1.0(@babel/core@7.21.4)(jest@29.5.0)(typescript@5.0.4)
       tsyringe:
         specifier: ^4.7.0
-        version: 4.7.0
+        version: 4.7.0(patch_hash=72xghdlo2rzuod6ye7lnnj4uma)
       typescript:
-        specifier: ^4.9.5
-        version: 4.9.5
+        specifier: ^5.0.4
+        version: 5.0.4
 
   packages/adapter-vercel:
     devDependencies:
@@ -66,7 +71,7 @@ importers:
         version: 16.18.23
       jest:
         specifier: ^29.5.0
-        version: 29.5.0(@types/node@16.18.23)
+        version: 29.5.0(@types/node@16.18.23)(ts-node@10.9.1)
       node-mocks-http:
         specifier: ^1.12.2
         version: 1.12.2
@@ -78,13 +83,13 @@ importers:
         version: 5.0.0
       ts-jest:
         specifier: ^29.1.0
-        version: 29.1.0(@babel/core@7.21.4)(jest@29.5.0)(typescript@4.9.5)
+        version: 29.1.0(@babel/core@7.21.4)(jest@29.5.0)(typescript@5.0.4)
       tsyringe:
         specifier: ^4.7.0
-        version: 4.7.0
+        version: 4.7.0(patch_hash=72xghdlo2rzuod6ye7lnnj4uma)
       typescript:
-        specifier: ^4.9.5
-        version: 4.9.5
+        specifier: ^5.0.4
+        version: 5.0.4
 
   packages/cli:
     dependencies:
@@ -110,8 +115,8 @@ importers:
         specifier: ^0.1.13
         version: 0.1.13
       typescript:
-        specifier: ^4.9.5
-        version: 4.9.5
+        specifier: ^5.0.4
+        version: 5.0.4
     devDependencies:
       '@types/node':
         specifier: ^16.18.23
@@ -124,7 +129,7 @@ importers:
         version: 5.0.0
       ts-node:
         specifier: ^10.9.1
-        version: 10.9.1(@types/node@16.18.23)(typescript@4.9.5)
+        version: 10.9.1(@types/node@16.18.23)(typescript@5.0.4)
 
   packages/client:
     devDependencies:
@@ -138,8 +143,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0
       typescript:
-        specifier: ^4.9.5
-        version: 4.9.5
+        specifier: ^5.0.4
+        version: 5.0.4
 
   packages/create:
     dependencies:
@@ -179,7 +184,7 @@ importers:
         version: 0.14.0
       jest:
         specifier: ^29.5.0
-        version: 29.5.0(@types/node@16.18.23)
+        version: 29.5.0(@types/node@16.18.23)(ts-node@10.9.1)
       lru-cache:
         specifier: ^9.1.0
         version: 9.1.0
@@ -191,13 +196,13 @@ importers:
         version: 5.0.0
       ts-jest:
         specifier: ^29.1.0
-        version: 29.1.0(@babel/core@7.21.4)(jest@29.5.0)(typescript@4.9.5)
+        version: 29.1.0(@babel/core@7.21.4)(jest@29.5.0)(typescript@5.0.4)
       tsyringe:
         specifier: ^4.7.0
-        version: 4.7.0
+        version: 4.7.0(patch_hash=72xghdlo2rzuod6ye7lnnj4uma)
       typescript:
-        specifier: ^4.9.5
-        version: 4.9.5
+        specifier: ^5.0.4
+        version: 5.0.4
       winston:
         specifier: ^3.8.2
         version: 3.8.2
@@ -219,16 +224,16 @@ importers:
         version: 16.18.23
       jest:
         specifier: ^29.5.0
-        version: 29.5.0(@types/node@16.18.23)
+        version: 29.5.0(@types/node@16.18.23)(ts-node@10.9.1)
       rimraf:
         specifier: ^5.0.0
         version: 5.0.0
       ts-jest:
         specifier: ^29.1.0
-        version: 29.1.0(@babel/core@7.21.4)(jest@29.5.0)(typescript@4.9.5)
+        version: 29.1.0(@babel/core@7.21.4)(jest@29.5.0)(typescript@5.0.4)
       typescript:
-        specifier: ^4.9.5
-        version: 4.9.5
+        specifier: ^5.0.4
+        version: 5.0.4
 
   packages/www:
     dependencies:
@@ -322,7 +327,7 @@ importers:
         version: 0.1.13
       tsyringe:
         specifier: ^4.7.0
-        version: 4.7.0
+        version: 4.7.0(patch_hash=72xghdlo2rzuod6ye7lnnj4uma)
     devDependencies:
       '@httpc/cli':
         specifier: ^0.1.0
@@ -332,10 +337,10 @@ importers:
         version: 16.18.23
       ts-node-dev:
         specifier: ^2.0.0
-        version: 2.0.0(@types/node@16.18.23)(typescript@4.9.5)
+        version: 2.0.0(@types/node@16.18.23)(typescript@5.0.4)
       typescript:
-        specifier: ^4.9.5
-        version: 4.9.5
+        specifier: ^5.0.4
+        version: 5.0.4
 
   templates/server-blank:
     dependencies:
@@ -351,10 +356,10 @@ importers:
         version: 16.18.23
       ts-node-dev:
         specifier: ^2.0.0
-        version: 2.0.0(@types/node@16.18.23)(typescript@4.9.5)
+        version: 2.0.0(@types/node@16.18.23)(typescript@5.0.4)
       typescript:
-        specifier: ^4.9.5
-        version: 4.9.5
+        specifier: ^5.0.4
+        version: 5.0.4
 
 packages:
 
@@ -1138,7 +1143,7 @@ packages:
       '@httpc/server': 0.1.0
       jws: 4.0.0
       reflect-metadata: 0.1.13
-      tsyringe: 4.7.0
+      tsyringe: 4.7.0(patch_hash=72xghdlo2rzuod6ye7lnnj4uma)
     dev: false
 
   /@httpc/server@0.1.0:
@@ -1176,7 +1181,7 @@ packages:
       slash: 3.0.0
     dev: true
 
-  /@jest/core@29.5.0:
+  /@jest/core@29.5.0(ts-node@10.9.1):
     resolution: {integrity: sha512-28UzQc7ulUrOQw1IsN/kv1QES3q2kkbl/wGslyhAclqZ/8cMdB5M68BffkIdSJgKBUt50d3hbwJ92XESlE7LiQ==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     peerDependencies:
@@ -1197,7 +1202,7 @@ packages:
       exit: 0.1.2
       graceful-fs: 4.2.11
       jest-changed-files: 29.5.0
-      jest-config: 29.5.0(@types/node@18.15.11)
+      jest-config: 29.5.0(@types/node@18.15.11)(ts-node@10.9.1)
       jest-haste-map: 29.5.0
       jest-message-util: 29.5.0
       jest-regex-util: 29.4.3
@@ -3800,7 +3805,7 @@ packages:
       - supports-color
     dev: true
 
-  /jest-cli@29.5.0(@types/node@16.18.23):
+  /jest-cli@29.5.0(@types/node@16.18.23)(ts-node@10.9.1):
     resolution: {integrity: sha512-L1KcP1l4HtfwdxXNFCL5bmUbLQiKrakMUriBEcc1Vfz6gx31ORKdreuWvmQVBit+1ss9NNR3yxjwfwzZNdQXJw==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     hasBin: true
@@ -3810,14 +3815,14 @@ packages:
       node-notifier:
         optional: true
     dependencies:
-      '@jest/core': 29.5.0
+      '@jest/core': 29.5.0(ts-node@10.9.1)
       '@jest/test-result': 29.5.0
       '@jest/types': 29.5.0
       chalk: 4.1.2
       exit: 0.1.2
       graceful-fs: 4.2.11
       import-local: 3.1.0
-      jest-config: 29.5.0(@types/node@16.18.23)
+      jest-config: 29.5.0(@types/node@16.18.23)(ts-node@10.9.1)
       jest-util: 29.5.0
       jest-validate: 29.5.0
       prompts: 2.4.2
@@ -3828,7 +3833,7 @@ packages:
       - ts-node
     dev: true
 
-  /jest-config@29.5.0(@types/node@16.18.23):
+  /jest-config@29.5.0(@types/node@16.18.23)(ts-node@10.9.1):
     resolution: {integrity: sha512-kvDUKBnNJPNBmFFOhDbm59iu1Fii1Q6SxyhXfvylq3UTHbg6o7j/g8k2dZyXWLvfdKB1vAPxNZnMgtKJcmu3kA==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     peerDependencies:
@@ -3863,11 +3868,12 @@ packages:
       pretty-format: 29.5.0
       slash: 3.0.0
       strip-json-comments: 3.1.1
+      ts-node: 10.9.1(@types/node@16.18.23)(typescript@5.0.4)
     transitivePeerDependencies:
       - supports-color
     dev: true
 
-  /jest-config@29.5.0(@types/node@18.15.11):
+  /jest-config@29.5.0(@types/node@18.15.11)(ts-node@10.9.1):
     resolution: {integrity: sha512-kvDUKBnNJPNBmFFOhDbm59iu1Fii1Q6SxyhXfvylq3UTHbg6o7j/g8k2dZyXWLvfdKB1vAPxNZnMgtKJcmu3kA==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     peerDependencies:
@@ -3902,6 +3908,7 @@ packages:
       pretty-format: 29.5.0
       slash: 3.0.0
       strip-json-comments: 3.1.1
+      ts-node: 10.9.1(@types/node@16.18.23)(typescript@5.0.4)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -4244,7 +4251,7 @@ packages:
       supports-color: 8.1.1
     dev: true
 
-  /jest@29.5.0(@types/node@16.18.23):
+  /jest@29.5.0(@types/node@16.18.23)(ts-node@10.9.1):
     resolution: {integrity: sha512-juMg3he2uru1QoXX078zTa7pO85QyB9xajZc6bU+d9yEGwrKX6+vGmJQ3UdVZsvTEUARIdObzH68QItim6OSSQ==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     hasBin: true
@@ -4254,10 +4261,10 @@ packages:
       node-notifier:
         optional: true
     dependencies:
-      '@jest/core': 29.5.0
+      '@jest/core': 29.5.0(ts-node@10.9.1)
       '@jest/types': 29.5.0
       import-local: 3.1.0
-      jest-cli: 29.5.0(@types/node@16.18.23)
+      jest-cli: 29.5.0(@types/node@16.18.23)(ts-node@10.9.1)
     transitivePeerDependencies:
       - '@types/node'
       - supports-color
@@ -6358,7 +6365,7 @@ packages:
   /trough@2.1.0:
     resolution: {integrity: sha512-AqTiAOLcj85xS7vQ8QkAV41hPDIJ71XJB4RCUrzo/1GM2CQwhkJGaf9Hgr7BOugMRpgGUrqRg/DrBDl4H40+8g==}
 
-  /ts-jest@29.1.0(@babel/core@7.21.4)(jest@29.5.0)(typescript@4.9.5):
+  /ts-jest@29.1.0(@babel/core@7.21.4)(jest@29.5.0)(typescript@5.0.4):
     resolution: {integrity: sha512-ZhNr7Z4PcYa+JjMl62ir+zPiNJfXJN6E8hSLnaUKhOgqcn8vb3e537cpkd0FuAfRK3sR1LSqM1MOhliXNgOFPA==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     hasBin: true
@@ -6382,17 +6389,17 @@ packages:
       '@babel/core': 7.21.4
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
-      jest: 29.5.0(@types/node@16.18.23)
+      jest: 29.5.0(@types/node@16.18.23)(ts-node@10.9.1)
       jest-util: 29.3.1
       json5: 2.2.3
       lodash.memoize: 4.1.2
       make-error: 1.3.6
       semver: 7.3.8
-      typescript: 4.9.5
+      typescript: 5.0.4
       yargs-parser: 21.1.1
     dev: true
 
-  /ts-node-dev@2.0.0(@types/node@16.18.23)(typescript@4.9.5):
+  /ts-node-dev@2.0.0(@types/node@16.18.23)(typescript@5.0.4):
     resolution: {integrity: sha512-ywMrhCfH6M75yftYvrvNarLEY+SUXtUvU8/0Z6llrHQVBx12GiFk5sStF8UdfE/yfzk9IAq7O5EEbTQsxlBI8w==}
     engines: {node: '>=0.8.0'}
     hasBin: true
@@ -6411,16 +6418,16 @@ packages:
       rimraf: 2.7.1
       source-map-support: 0.5.21
       tree-kill: 1.2.2
-      ts-node: 10.9.1(@types/node@16.18.23)(typescript@4.9.5)
+      ts-node: 10.9.1(@types/node@16.18.23)(typescript@5.0.4)
       tsconfig: 7.0.0
-      typescript: 4.9.5
+      typescript: 5.0.4
     transitivePeerDependencies:
       - '@swc/core'
       - '@swc/wasm'
       - '@types/node'
     dev: true
 
-  /ts-node@10.9.1(@types/node@16.18.23)(typescript@4.9.5):
+  /ts-node@10.9.1(@types/node@16.18.23)(typescript@5.0.4):
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
     hasBin: true
     peerDependencies:
@@ -6446,7 +6453,7 @@ packages:
       create-require: 1.1.1
       diff: 4.0.2
       make-error: 1.3.6
-      typescript: 4.9.5
+      typescript: 5.0.4
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
     dev: true
@@ -6478,11 +6485,12 @@ packages:
     resolution: {integrity: sha512-336iVw3rtn2BUK7ORdIAHTyxHGRIHVReokCR3XjbckJMK7ms8FysBfhLR8IXnAgy7T0PTPNBWKiH514FOW/WSg==}
     dev: false
 
-  /tsyringe@4.7.0:
+  /tsyringe@4.7.0(patch_hash=72xghdlo2rzuod6ye7lnnj4uma):
     resolution: {integrity: sha512-ncFDM1jTLsok4ejMvSW5jN1VGPQD48y2tfAR0pdptWRKYX4bkbqPt92k7KJ5RFJ1KV36JEs/+TMh7I6OUgj74g==}
     engines: {node: '>= 6.0.0'}
     dependencies:
       tslib: 1.14.1
+    patched: true
 
   /tunnel-agent@0.6.0:
     resolution: {integrity: sha512-McnNiV1l8RYeY8tBgEpuodCC1mLUdbSN+CYBL7kJsJNInOP8UjDDEwdk6Mw60vdLLrr5NHKZhMAOSrR2NZuQ+w==}
@@ -6522,12 +6530,12 @@ packages:
     resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
     engines: {node: '>=4.2.0'}
     hasBin: true
+    dev: true
 
   /typescript@5.0.4:
     resolution: {integrity: sha512-cW9T5W9xY37cc+jfEnaUvX91foxtHkza3Nw3wkoF4sSlKn0MONdkdEndig/qPBWXNkmplh3NzayQzCiHM4/hqw==}
     engines: {node: '>=12.20'}
     hasBin: true
-    dev: false
 
   /undici@5.20.0:
     resolution: {integrity: sha512-J3j60dYzuo6Eevbawwp1sdg16k5Tf768bxYK4TUJRH7cBM4kFCbf3mOnM/0E3vQYXvpxITbbWmBafaDbxLDz3g==}

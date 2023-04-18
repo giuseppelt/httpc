@@ -1,0 +1,308 @@
+---
+title: Introduction
+description: Introduction on httpc framework, the whys and the hows to develop a function-based API with safe and minimal code
+---
+
+import Aside from "~/components/Aside.astro";
+import CodeTabs from "~/components/tabs/CodeTabs.tsx";
+
+
+## What is httpc?
+
+**httpc** is a javascript/typescript framework for building function-based API with minimal code and end-to-end type safety.
+
+### Why?
+There are scenarios where an API is just a fancy way to expose functions. Likewise, most of the time a client just wants to call a function on the server.
+<br />
+The _http protocol_ provides too many features (and complexity) to achieve that simple use case. **httpc** is an abstraction over http, making easy to call functions without worrying about the underlying protocol.
+
+<Aside type="info" title={false}>
+This is what **httpc** is all about: building an API that speaks functions, arguments and return values, not http verbs, headers, resource paths, data serialization...
+</Aside>
+
+
+### How it works?
+You define functions on the server.
+```ts
+async function getById(productId: string) {
+    const product = await db.getProduct(productId);
+    if (!product) {
+        throw new NotFoundError();
+    }
+
+    return product;
+}
+
+export default {
+    products: {
+        getById
+    }
+}
+```
+
+**httpc** provides the tooling to generate an api client to deliver a smooth developer experience.
+```ts
+const product = await client.products.getById("some-product-id");
+```
+No fetch requests, no body serialization, just natural function calls.
+
+
+
+## Key features
+
+### No boilerplate code
+You just write functions and export them. No need to worry how the server will execute them.
+```ts
+function add(a: number, b: number) {
+    return a + b;
+}
+
+function greet(name: string) {
+    return `Hello ${name}`;
+}
+
+export default {
+    add,
+    greet,
+}
+```
+
+### Modularity
+Run common logic via middlewares.
+```ts
+import { httpCall } from "@httpc/server";
+
+const getPostById = httpCall(
+    Authenticated(),    // <-- authentication check
+    Validate(String),   // <-- parameters validation
+    Cache("5m"),        // <-- result caching
+    async (postId: string) => {
+        const post = await db.select("posts").where("id", postId);
+        if (!post) {
+            throw new NotFoundError();
+        }
+
+        return post;
+    }
+);
+```
+[@httpc/kit](/docs/kit-introduction) provides many builtin middlewares covering authentication, validation, logging, etc... Or, you can [create](/docs/server-extending) a custom one according your use case.
+
+
+### Context ubiquity
+You can access the request context from everywhere in your application. Be in a handler, middleware o service logic, the context is always available with no need to pass parameters around.
+```ts
+async function getPosts() {
+    const { user } = useContext();
+
+    let category = "news";
+    if (user) {
+        category = user.preferredCategory;
+        trace("Getting user preferred posts");
+    }
+    
+    return await db.select("posts").where("category", category);
+}
+
+function trace(message: string) {
+    const { requestId } = useContext();
+    console.log(`[req:${requestId}] ${message}`);
+}
+
+export default {
+    getPosts
+}
+```
+You can [extend](/docs/server-extending) the context with your own info with full type safety and autocompletion support.
+
+### Hooks
+Hooks encapsulate common logic around the request context. By convention hooks adopt the `use` prefix.
+```ts
+async function addNewComment(postId: string, message: string) {
+    const user = useUser();
+
+    if (!useIsAuthorized("comment:create")) {
+        throw new ForbiddenError("Cannot add comments");
+    }
+
+    return await db.createComment({
+        userId: user.id,
+        postId,
+        message
+    });
+}
+```
+
+[@httpc/kit](/docs/kit-introduction) offers several builtin hooks to cache data, to perform authorization checks, to make transactions...
+
+
+### Serverless
+You can host a full **httpc** API inside a serverless environment like Vercel, AWS Lambda or Netlify functions.
+This gives the advantage to deploy a single serverless function handling the whole API.
+
+<br />
+For example with Vercel, you can expose all your API functions and call them from pages with full type checking:
+
+<CodeTabs client:idle tabs={["api/index.ts", "calls/index.ts", "pages/index.tsx"]}>
+  <Fragment slot="0">
+```ts
+import { createHttpCVercelAdapter } from "@httpc/adapter-vercel";
+import calls from "../calls";
+
+export default createHttpCVercelAdapter({
+    calls,
+    log: "info"
+});
+```
+  </Fragment>
+  <Fragment slot="1">
+```ts
+import db from "./db";
+
+async function getLatest() {
+    return db.select("posts").take(10)
+        .orderBy("created_at", "desc");
+}
+
+async function addLike(postId: string) {
+    return db.update("posts").where("id", postId)
+        .increase("likes", 1);
+}
+
+export default {
+    posts: {
+        getLatest,
+        addLike,
+    }
+}
+```    
+  </Fragment>
+  <Fragment slot="2">
+```ts
+import { createClient, ClientDef } from "@httpc/client";
+import { useQuery, useMutation } from "react-query";
+import type calls from "../calls";
+
+
+const client = createClient<ClientDef<typeof calls>>();
+
+export default function Home() {
+  const posts = useQuery(["posts"], () => client.posts.getLatest());
+  const addLike = useMutation((postId: string) => client.posts.addLike(postId), {
+    onSuccess: () => queryClient.invalidateQueries(["posts"])
+  });
+
+  return (
+    <div class="container">
+      {posts.data.map(post =>
+        <div class="post">
+          <h2>{post.title}</h2>
+          <button onClick={() => addLike.mutate(post.id)}>Like</button>
+        </div>
+      )}
+    </div>
+  );
+}
+```    
+  </Fragment>
+</CodeTabs>
+
+
+### Client generation
+Through **@httpc/cli** you can generate a specific client for your API. The generated client gives the following benefits:
+
+- **Type safety**
+  <small>
+  With a typed client mirroring the server functions, the development is **type safe** end-to-end. Meaning, when something change on the server, the client breaks at build time. No more shipping wrong code or out-of-sync api definitions.
+  </small>
+
+- **Natural syntax**
+  <small>
+  The generated client delivers a smooth experience with a natural syntax developers are familiar with.
+  </small>
+
+  ```ts
+  const user = await client.users.search("some@email.com");
+  const posts = await client.posts.getByUser(user.id);
+  const newComment = await client.posts.addComment(posts[0].id, {
+      text: "Hello",
+      userId: user.id
+  });
+  ```
+
+- **Standalone package**
+  <small>
+  The generated client is a standard package with its own package.json and type files.
+  You can consume it directly if you have a monorepo setup. Or you can **publish** it like a standard package to make it available to 3rd parties.
+  </small>
+
+  ```shell
+  npm install @your-project/api-client
+  ```
+
+- **Versioning**
+  <small>
+  Being a standalone package, you can version the client and manage backward compatibility with semantic versioning.
+  </small>
+
+
+### Highly customizable
+- **Data definition**
+  <small>
+  Customize builtin objects to fit your needs, while keeping autocompletion and type checking working.
+  For example you can expand the user object with custom properties:
+  </small>
+  ```ts
+  // file: env.d.ts
+
+  interface IUser {
+      firstName: string
+      lastName: string
+  }
+  ```
+
+- **Response editing**
+  <small>
+  Low-level http customizations (status code, headers management, ...) are available if needed. Usually this isn't necessary, as builtin components cover common use cases.  
+  </small>
+  
+- **Beyond httpc**
+  <small>
+  The **httpc** server is not limited to function calls. It can handle browser form submissions, web hook callbacks, standard redirects... and, in general, any _http request_.
+  With a `Parser`, you can customize how the server processes a request. Handling standard http requests is essential in scenarios where you don't control the client.
+  </small>
+
+
+## httpc family
+import PackageCard from "~/components/PackageCard.astro";
+
+<div class="container-grid-2col gap-2">
+    <PackageCard title="@httpc/server" />
+    <PackageCard title="@httpc/client" />
+    <PackageCard title="@httpc/kit" />
+    <PackageCard title="@httpc/cli" />
+</div>
+
+## Project status
+**httpc** is experimental. It's in its infancy stage. You can try it, adopt it in hobby projects. But it's not ready for production.
+<br />
+The API is not stable yet. Breaking changes will happen.
+<br />
+**httpc** is under heavy development. You can checkout the [Changelog](/changelog) and the [Roadmap](/roadmap) for future features.
+
+
+## Involvement
+### Community
+You can join on [external:Discord](/discord) and follow the development, discuss contributions, receive support or ask for help. Participation in [external:Github discussion](/discuss) is fine too.
+
+### File an Issue
+For any bugs, feature requests or proposals you can [external:file an issue](/issues/new). All issues are available on [external:Github](/issues).
+
+### Contributing
+All contribution are welcome. Any PR, issue and feedback is appreciated. Checkout the [contribution guide](/contribute).
+
+
+## Next steps
+- Proceed to [Getting started](/docs/getting-started) if you're ready to create something with **httpc**
+- Checkout [Tutorials](/docs/tutorials) to see guides or complete applications built with **httpc**
+- Read the [Architecture](/docs/server-architecture) if you want a deep dive on how the httpc server works and how to customize it

@@ -12,11 +12,13 @@ interface Props {
 }
 
 const { page, title, currentPage } = Astro.props;
+let currentHref = `/${page}/${currentPage}`;
+if (currentHref.endsWith("/")) currentHref = currentHref.substring(0, currentHref.length - 1);
 
 const sidebar = await getSidebar(page);
 
 function isActive(href: string) {
-  return href === currentPage;
+  return href === currentHref;
 }
 
 function isHeaderOpen(header: SidebarHeaderSection) {
@@ -32,7 +34,9 @@ function isHeaderOpen(header: SidebarHeaderSection) {
         <span class="brand-section">{title}</span>
       </div>
       <div class="hstack gap-2 menu">
-        <a class="icon-link" title="Github repository" href="/repository" target="_blank"><Icon name="mdi:github" className="icon" /></a>
+        <a class="icon-link" title="Github repository" href="/repository" target="_blank"
+          ><Icon name="mdi:github" className="icon" /></a
+        >
         <IconMenu container="sidebar" />
       </div>
     </header>
@@ -45,7 +49,7 @@ function isHeaderOpen(header: SidebarHeaderSection) {
             "header" in x ? (
               <details class={`sidebar-section ${x.className || ""}`} open={isHeaderOpen(x)}>
                 <summary class="sidebar-header">
-                  {x.header} <Icon class="icon" name="ic:round-chevron-right" />{" "}
+                  {x.header} <Icon class="icon" name="ic:round-chevron-right" />
                 </summary>
                 <div class="sidebar-section-links d-flex-column">
                   {x.links.map(x => (

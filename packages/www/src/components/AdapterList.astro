@@ -1,7 +1,7 @@
 ---
 import { getDocs } from "../content";
 
-const items = (await getDocs()).filter(x => x.url.startsWith("/docs/adapters/"));
+const items = (await getDocs()).filter(x => x.slug.startsWith("adapters/"));
 ---
 
 <ul>
@@ -9,9 +9,9 @@ const items = (await getDocs()).filter(x => x.url.startsWith("/docs/adapters/"))
     items.map(x => (
       <li>
         <p>
-          <a href={x.url}>{x.frontmatter.title}</a>
+          <a href={`/docs/${x.slug}`}>{x.data.title}</a>
         </p>
-        <small>{x.frontmatter.description}</small>
+        <small>{x.data.description}</small>
       </li>
     ))
   }

@@ -7,8 +7,8 @@ import sitemap from "@astrojs/sitemap";
 import lottie from "astro-integration-lottie";
 import compress from "astro-compress";
 import rehypeLinkProcessor from "rehype-link-processor";
-import theme from "./src/code-theme";
-import { remarkPreserveCodeMeta, rehypeCodeBlockDecorator } from "./src/plugins/codeBlockDecorator";
+import codeTheme from "./src/code-theme";
+import codeDecoration from "./src/plugins/codeBlockDecorator";
 
 
 export default defineConfig({
@@ -17,10 +17,8 @@ export default defineConfig({
     port: Number(process.env.PORT || 3000)
   },
   integrations: [
-    mdx({
-      remarkPlugins: [remarkPreserveCodeMeta()],
-      rehypePlugins: [rehypeCodeBlockDecorator(), rehypeLinkProcessor()]
-    }),
+    codeDecoration(),
+    mdx(),
     preact(),
     lottie(),
     compress({
@@ -36,9 +34,12 @@ export default defineConfig({
     })
   ],
   markdown: {
+    rehypePlugins: [
+      rehypeLinkProcessor(),
+    ],
     shikiConfig: {
-      theme,
-    },
+      theme: codeTheme
+    }
   },
   vite: {
     plugins: [
@@ -55,20 +56,6 @@ export default defineConfig({
         }
       }
     ],
-    build: {
-      rollupOptions: {
-        plugins: [
-          {
-            name: "alias",
-            resolveId(imported, importer, options) {
-              if (!imported.startsWith("~/")) return null;
-
-              return path.join(path.resolve("./src"), imported.substring(2)).replaceAll("\\", "/");
-            }
-          }
-        ]
-      }
-    },
     resolve: {
       alias: {
         "~": path.resolve("./src").replaceAll("\\", "/")

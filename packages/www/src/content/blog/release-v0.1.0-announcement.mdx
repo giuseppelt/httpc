@@ -1,0 +1,140 @@
+---
+title: Release v0.1.0
+summary: Announcing the first httpc release
+publishedAt: 2023-01-14 17:00:00
+tags:
+ - announcements
+ - release
+---
+
+This is the first release of the **httpc framework**.
+
+## What is httpc
+**httpc** is a javascript/typescript framework for building function-based API with minimal code and end-to-end type safety.
+
+<br />
+Major features are:
+- natural javascript syntax and easy composition with middlewares
+- context propagation and hooks
+- heavy focus on type safety
+- [@httpc/kit](/docs/kit-introduction) includes many builtin components to handle authentication, validation, caching...
+- serverless hosting within single function, a full httpc API
+- custom client generation as standard package
+
+## Quick glance
+### No boilerplate
+You just write functions and export them. No need to worry how the server will execute them.
+```ts
+function add(a: number, b: number) {
+    return a + b;
+}
+
+function greet(name: string) {
+    return `Hello ${name}`;
+}
+
+export default {
+    add,
+    greet,
+}
+```
+
+### Modularity
+Run common logic via middlewares.
+```ts
+import { httpCall } from "@httpc/server";
+
+const getPostById = httpCall(
+    Authenticated(),    // <-- authentication check
+    Validate(String),   // <-- parameters validation
+    Cache("5m"),        // <-- result caching
+    async (postId: string) => {
+        const post = await db.select("posts").where("id", postId);
+        if (!post) {
+            throw new NotFoundError();
+        }
+
+        return post;
+    }
+);
+```
+
+### Context ubiquity
+You can access the request context from everywhere in your application.
+```ts
+async function getPosts() {
+    const { user } = useContext();
+
+    let category = "news";
+    if (user) {
+        category = user.preferredCategory;
+        trace("Getting user preferred posts");
+    }
+    
+    return await db.select("posts").where("category", category);
+}
+
+function trace(message: string) {
+    const { requestId } = useContext();
+    console.log(`[req:${requestId}] ${message}`);
+}
+```
+
+### Hooks
+Hooks encapsulate common logic around the request context.
+```ts
+async function addNewComment(postId: string, message: string) {
+    const user = useUser();
+
+    if (!useIsAuthorized("comment:create")) {
+        throw new ForbiddenError("Cannot add comments");
+    }
+
+    return await db.createComment({
+        userId: user.id,
+        postId,
+        message
+    });
+}
+```
+### Serverless
+You can host a full **httpc** API inside a serverless environment like Vercel, AWS Lambda or Netlify functions.
+This gives the advantage to deploy a single serverless function handling the whole API.
+
+### Client generation
+Through **@httpc/cli** you can generate a specific client for your API with a natural syntax developers are familiar with.
+```ts
+const user = await client.users.search("some@email.com");
+const posts = await client.posts.getByUser(user.id);
+const newComment = await client.posts.addComment(posts[0].id, {
+    text: "Hello",
+    userId: user.id
+});
+```
+
+## Documentation
+The home site with documentation is live. For now documentation covers initial steps and basic scenarios. Full documentation is working in progress, as there are many of areas to cover.
+<br />
+Head to [issues](https://github.com/giuseppelt/httpc) or [discussions](https://github.com/giuseppelt/httpc/discussions) for any info or requests.
+
+
+## Project status
+**httpc** is experimental. It's in its infancy stage. You can try it, adopt it in hobby projects. But it's not ready for production.
+<br />
+The API is not stable yet. Breaking changes will happen.
+<br />
+**httpc** is under heavy development. You can checkout the [Changelog](/changelog) and the [Roadmap](/roadmap) for future features.
+
+
+## Changelog
+This is the first release of the httpc framework. This release includes:
+- v0.1.0 **`@httpc/server`** -- The core httpc component, the server handles httpc calls
+- v0.1.0 **`@httpc/kit`** -- Toolbox with many builtin components addressing authentication, validation, caching...
+- v0.1.0 **`@httpc/client`** -- The client tailored to make httpc function calls with natural javascript
+- v0.1.0 **`@httpc/cli`** -- CLI to automate common tasks like client generation or testing
+- v0.1.0 **`create-httpc`** -- Create a new httpc project from a template
+
+### Pre-release
+Adapters are released with a prerelease tag.
+- v0.0.1-pre **`@httpc/adapter-vercel`** -- Host on Vercel serverless function with or without Next integration
+- v0.0.1-pre **`@httpc/adapter-netlify`** -- Host on Netlify functions

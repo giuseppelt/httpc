@@ -1,4 +1,5 @@
 ---
+import type { ContentItem } from "../content";
 import Navbar from "../components/Navbar.astro";
 import "../style/style.scss";
 import fontBody from "@fontsource/mulish/files/mulish-latin-variable-wghtOnly-normal.woff2"; //cspell:disable-line
@@ -7,13 +8,19 @@ import fontMono from "/assets/iosevka-custom.woff2"; //cspell:disable-line
 
 export interface Props {
   navbar?: boolean;
-  frontmatter?: Frontmatter;
+  content?: ContentItem;
   title?: string;
   description?: string;
   width?: "page" | "docs" | "blog";
 }
 
-const { frontmatter, title = frontmatter?.title, description = frontmatter?.description || frontmatter?.summary, navbar = true, width = "page" } = Astro.props;
+const {
+  content,
+  title = content?.data?.title,
+  description = content?.data?.description || content?.data?.summary,
+  navbar = true,
+  width = "page",
+} = Astro.props;
 const currentPage = Astro.url.pathname;
 
 if (!title) {

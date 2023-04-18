@@ -3,9 +3,9 @@
         {
             "files": "*.astro",
             "options": {
-                "proseWrap": "never",
+                "proseWrap": "preserve",
                 "singleQuote": false,
-                "printWidth": 2048,
+                "printWidth": 120,
                 "arrowParens": "avoid"
             }
         }

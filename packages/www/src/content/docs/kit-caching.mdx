@@ -1,0 +1,466 @@
+---
+title: Caching
+description: httpc caching allows to store data and later retrieve it to avoid repeating expensive computations, queries or long external calls
+status: working in progress
+#cspell: ignore usecached, icachingservice, cachingservice
+---
+
+import Aside from "~/components/Aside.astro";
+import InstallPackage from "~/components/tabs/InstallPackage.astro";
+
+
+## Caching in httpc
+
+Caching is a mechanism to store data that are usually produced by expensive processing or fetched with long waiting time, in fast access locations to be later retrieved and reused. The reuse of the cached data allows to not reprocess o refetch the same data, therefore, saving resources or time.
+
+<br />
+**@httpc/kit** provides two ways to caching data:
+
+- [Call output caching](#call-output-caching)
+
+    Output cache is a way to cache the whole call result, avoiding its execution for subsequent invocations. You can differentiate by arguments in order to store different values when different arguments are specified by the calling client.
+
+- [Value caching](#value-caching)
+
+    You can explicitly cache a variable for granular control. Useful to avoid re-execution of expensive computations, queries or long external calls.
+
+All caching features rely on the [`CachingService`](#cachingservice) which is used under the hood by friendlier and more integrated components.
+
+<Aside type="info">
+In order to use caching, you have to [register](#cachingservice) at least one caching provider first.
+</Aside>
+
+<Aside type="warn">
+Do not mistake caching with _http caching_, which is a transport-level mechanism. In this article caching are software techniques to store data to avoid retrieving or producing it again.
+</Aside>
+
+### Call output caching
+You can cache a call return value with the [`Cache`](#cache-middleware) middleware.
+```ts
+import { httpCall, Cache} from "@httpc/kit";
+
+const getProfile = httpCall(
+    Cache("1h"),
+    async () => {
+        return /** return the value */
+    }
+);
+```
+The [`Cache`](#cache-middleware) middleware allows to specify an expiration to limit the cached value validity.
+
+<br />
+Checkout the [Cache middleware](#cache-middleware) section for all options and configuration details.
+
+
+### Value caching
+You can cache any variable thanks to the [`useCached`](#usecached) hook. Value caching allows to store data imperatively in code for full control.
+
+```ts
+import { useCached } from "@httpc/kit";
+
+async function getExpensiveQuery() {
+    let data = await useCached("expensive-query");
+    if (!data) {
+        // data is not in cache
+        // we need to retrieve it
+        const result = await db.doExpensiveQuery();
+
+        // set the result into the cache
+        // and assign it back to the data variable
+        data = await useCached("expensive-query", result);
+    }
+
+    return data;
+}
+```
+
+Value caching via [`useCached`](#usecached) hook is available everywhere in your application, not just inside **httpc** calls. You can use it in parsers, middlewares and, in general, anywhere within the request processing execution.
+
+<br />
+Checkout the [`useCached`](#usecached) section for all options and configuration details.
+
+
+
+## Builtin components
+
+### Cache middleware
+With the `Cache` middleware you can transparently cache the call return value and sets its expiration.
+
+```ts
+import { httpCall, Cache} from "@httpc/kit";
+
+const getAllPosts = httpCall(
+    Cache("2h"),
+    async () => {
+        return await db.select("posts");
+    }
+);
+```
+
+You can specify the expiration, also know as <abbr title="Time to live">TTL</abbr>, with a human readable string in the format `(amount)(unit)`, where:
+- `amount` is a positive number
+- `unit` is one of `ms` (milliseconds), `s` (seconds), `m` (minutes), `h` (hours), `d` days.
+
+So you can set `2h` for 2 hours, `5m` for 5 minutes, and so on.
+
+<Aside type="tip">
+If a cached value is found and valid, the server will stop processing the pipeline and return the value. In other words, both the handler and all middlewares defined _after_ the **Cache** will not be executed. Therefore, the Cache middleware should be added last.
+</Aside>
+
+<Aside type="warn">
+The Cache middleware will cache only primitive values or _plain_ objects. An instance of `HttpCResponse` will be skipped.
+</Aside>
+
+#### Specific cache
+By default the Cache middleware will use the [default cache](#default-cache) as data store.
+
+<br />
+You can specify a different cache with the `cache` option:
+```ts
+import { httpCall, Cache} from "@httpc/kit";
+
+const getAllPosts = httpCall(
+    Cache("2h", { cache: "redis" }),
+    async () => {
+        return await db.select("posts");
+    }
+);
+```
+
+#### Cache Key 
+The _cache key_ is the unique identifier for the slot in which the cached value will be stored. When a call has no arguments, the _cache key_ is unique and every execution will use the same key to read and write the value from the cache. In this case, the _cache key_ is autogenerated and nothing needs to be configured.
+
+<br />
+But when the call has one or more arguments, there's a need to differentiate the slot where to store the returned value. For example, for the following `getPost` call, the cache needs to use a different slot for each `postId` specified:
+```ts
+const getPost = httpCall(
+    Cache("2h"),
+    async (postId: string) => {
+        // function logic
+    }
+);
+```
+The `Cache` middleware includes a predefined way to generate a _cache key_ from the arguments. The default implementation identifies a unique key based on **all** arguments: it hashes the arguments as `string` and concatenates them. So anything different from `string` will be stringified first.
+
+<br />
+For the previous example `getPost`, the default implementation is able to differentiate the cache slot for each post, as the `postId` is taken in to consideration. So, nothing need to be configured as the default is good.
+
+<br />
+You can specify your own implementations as `keyFactory` option. The `keyFactory` is a function that takes all arguments as input and must return a string, which will be the _cache key_ used to store the call result.
+```ts
+type KeyFactory = (arguments: any[]) => string
+```
+
+In the following example, you want to exclude the 2nd parameters from the _cache key_ as it has no influence on the value itself.
+```ts
+const getPost = httpCall(
+    Cache("2h", { keyFactory: ([postId]) => postId }),
+    async (postId: string, markAsRead?: boolean) => {
+        // function logic
+    }
+);
+```
+
+<Aside type="warn">
+The `keyFactory` should be a _pure_ function. It should rely only on the input arguments to calculate the _cache key_. Subsequent executions with the same arguments must produce the same key for the cache to work.
+</Aside>
+
+#### In-Memory cache
+You can store the value in memory without using a cache provider. This is a quick and fast way to cache values locally and strictly to the specific call.
+```ts
+const getAllPosts = httpCall(
+    Cache("2h", { inMemory: true }),
+    async () => {
+        // function logic
+    }
+);
+```
+
+You can set the `keyFactory` to identity the _cache key_ from the parameters, if you need something different from the [default implementation](#cache-key).
+```ts
+const getPost = httpCall(
+    Cache("2h", { inMemory: true, keyFactory: ([postId]) => postId }),
+    async (postId: string, markAsRead?: boolean) => {
+        // function logic
+    }
+);
+```
+
+<Aside type="warn">
+Beware of abusing in-memory cache. It's the local machine memory and too much can fill the ram and crash the process.
+</Aside>
+
+
+### CachingService
+The `CachingService` is the core service that provides the caching features to all components.
+
+<br />
+You can register different cache providers. A provider is defined by a key and a factory.
+```ts
+import { CachingService, CachingServiceOptions, REGISTER_OPTIONS } from "@httpc/kit";
+
+REGISTER_OPTIONS<CachingServiceOptions>(CachingService, {
+    caches: {
+        memory: () => new LruCache(),
+        remote: () => new RedisCache({ url: process.env.REDIS_ENDPOINT })
+    },
+});
+```
+
+Builtin components allow to specify the cache you want to use. For example, with the [`Cache`](#cache-middleware) middleware:
+```ts
+const getAllPosts = httpCall(
+    Cache("2h", { cache: "remote" }),
+    async () => {
+        // omitted
+    }
+);
+```
+
+The builtin `CachingService` is registered with the [`ICachingService`](#icachingservice) interface. For advanced scenarios, you can require it explicitly:
+```ts
+const caching = useInjected("ICachingService");
+```
+
+#### Default cache
+The `CachingServices` allows you to specify a default cache.
+```ts
+import { CachingService, CachingServiceOptions, REGISTER_OPTIONS } from "@httpc/kit";
+
+REGISTER_OPTIONS<CachingServiceOptions>(CachingService, {
+    caches: {
+        memory: () => /** omitted */,
+        remote: () => /** omitted */
+    },
+    defaultCache: "memory"
+});
+```
+
+You may want to specify a default cache to use shorthand version of all components. This avoids you to specify the target cache every time and keeps your code short.
+
+<br />
+In the following example, `useCached` will transparently use the default cache.
+```ts
+const value = useCached("some-key");
+```
+
+
+### InMemory cache provider
+// TODO
+
+
+
+## 3rd party providers
+
+**@httpc/kit** offers some pre-configured integration with 3rd party caching providers or libraries.
+
+<br />
+Usually a 3rd party cache can be enabled with a single import:
+```ts
+import "@httpc/kit/caching-*";
+```
+where the `*` is the 3rd party package name.
+
+<br />
+The pre-configured caching providers are:
+- [LRU](#lru)
+- [Redis](#redis)
+
+<Aside type="tip" title="Need other libraries?" icon="message">
+Integration with other libraries are being developed. You can ask for your preference on [external:Discord](/discord) or open a feature request on [external:Github](/issues).
+</Aside>
+
+
+### LRU
+
+**@httpc/kit** provides out of the box an integration with the [lru-cache](https://www.npmjs.com/package/lru-cache) package.
+
+<br />
+First of all, ensure the package is installed:
+<InstallPackage package="lru-cache" />
+
+To enable the integration, you can register the cache with any key you like. For example for the key `memory`:
+```ts
+import { CachingService, CachingServiceOptions, REGISTER_OPTIONS } from "@httpc/kit";
+import { LruCache } from "@httpc/kit/caching-lru";
+
+REGISTER_OPTIONS(CachingService, {
+    caches: {
+        memory: () => new LruCache()
+    }
+});
+```
+
+#### Options
+The `LruCache` can be configured with `LruCacheOptions`.
+<div class="property-table-with-defaults">
+| property      | type        | default   | description  |
+|:--------------|:------------|:----------|:-------------|
+| `size`        | `number`    | `100`     | the max count of items the cache can hold |
+| `ttl`         | `number`    | `0`       | the expiration of items in milliseconds, use 0 to have no expiration |
+</div>
+
+```ts
+const cache = new LruCache({
+    size: 10, // 10 items
+    ttl: 60000 // 1minute
+});
+```
+
+To use the pre-configured `LruCache` defaults, just instantiate it without arguments:
+```ts
+// use defaults
+const cache = new LruCache();
+```
+
+
+### Redis
+
+**@httpc/kit** provides out of the box an integration with redis via the [@redis/client](https://www.npmjs.com/package/@redis/client) package.
+
+<br />
+First of all, ensure the client is installed:
+<InstallPackage package="@redis/client" />
+
+To enable the integration, you can register the cache with any key you like. For example for the key `remote`:
+```ts
+import { CachingService, CachingServiceOptions, REGISTER_OPTIONS } from "@httpc/kit";
+import { RedisCache } from "@httpc/kit/caching-redis";
+
+REGISTER_OPTIONS(CachingService, {
+    caches: {
+        remote: () => new RedisCache({
+            url: "redis://usr:pwd@redis-server:6380"
+        })
+    }
+});
+```
+
+#### Options
+To instantiate the `RedisCache` you can either provide:
+- your own redis client
+    ```ts
+    import { RedisCache } from "@httpc/kit/caching-redis";
+    import { createClient } from "@redis/client";
+
+    const cache = new RedisCache({
+        client: createClient({
+            // configuration
+        })
+    });
+    ```
+
+- provide redis client [options](https://github.com/redis/node-redis/blob/master/docs/client-configuration.md) to configure a new one
+    ```ts
+    import { RedisCache } from "@httpc/kit/caching-redis";
+
+    const cache = new RedisCache({
+        url: "...",
+        // all redis options here
+    });
+    ```
+
+
+
+## Hooks
+
+### `useCached`
+
+With the `useCached` hook you can get and set items from the caching service. The hook is asynchronous, it returns a `Promise`, so it have to be used with `async`.
+```ts
+import { useCached } from "@httpc/kit";
+
+async function doSomething() {
+    const value = await useCached("item-key");
+    if (value) {
+        // the value is in the cache;
+    }
+}
+```
+
+With no options all operations are against the [default cache](#default-cache). But, you can also specify a cache you want to operate with.
+
+#### Get a cached value
+From the default cache:
+```ts
+const value = await useCached("item-key");
+```
+You can specify from which cache you want to get it:
+```ts
+const value = await useCached("item-key", { cache: "redis" });
+```
+
+#### Set a value
+To the default cache:
+```ts
+await useCached("item-key", value);
+```
+You can specify which cache you want to write to:
+```ts
+await useCached("item-key", value, { cache: "redis" });
+```
+You can specify the <abbr title="Time to live">TTL</abbr>, that is, the expiration in milliseconds (not all provider support this):
+```ts
+// expire after 1 minute
+await useCached("item-key", value, { ttl: 60000 });
+```
+When writing a value, `useCache` also returns it, so you can write a one-liner:
+```ts
+// both writing a value and returning it
+const value = await useCached("item-key", 12345);
+// here value = 12345
+```
+
+
+### `useCache`
+With the `useCache` hook you can get a specific cache previously defined for the[`CachingService`](#cachingservice).
+```ts
+import { useCache } from "@httpc/kit";
+
+const cache = useCache("memory");
+```
+
+You can omit the cache name to get the [default cache](#default-cache).
+```ts
+// gets the default cache
+const cache = useCache();
+```
+
+If no default cache is registered, `useCache` will throw a misconfiguration error.
+
+## Decorators
+### `cache`
+You can inject a specific cache in your service constructor.
+```ts
+import { cache, ICache } from "@httpc/kit";
+
+class Service {
+    constructor(
+        @cache("redis") private cache: ICache,
+    ) {
+
+    }
+}
+```
+With no parameters, you can inject the [default cache](#default-cache).
+```ts
+class Service {
+    constructor(
+        @cache() private cache: ICache, // default cache injected
+    ) {
+
+    }
+}
+```
+If no default cache is registered, the resolution will fail and raise an error.
+
+
+## Interfaces
+### `ICachingService`
+// TODO
+
+### `ICache`
+// TODO
+
+### `ICacheSync`
+// TODO

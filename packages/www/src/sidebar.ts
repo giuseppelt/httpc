@@ -1,10 +1,10 @@
-import { BlogTags, getDocs, getPosts } from "./content";
+import { BlogTags, ContentItemDocs, getDocs, getPosts } from "./content";
 
 
 type Link = Readonly<{
     text: string
     href: string
-    frontmatter?: Frontmatter
+    meta?: ContentItemDocs["data"]
     navigable?: "disabled"
 }>
 
@@ -48,18 +48,20 @@ async function createSidebar(links: SidebarLink[] | (() => (SidebarLink[] | Prom
 export type Sidebar = Awaited<ReturnType<typeof createSidebar>>
 
 const DocsSidebar = () => createSidebar(async () => {
-    const articles = await getDocs();
-    const tutorials = articles.filter(x => x.url.includes("/tutorials/"));
+    const PATH_BASE = "/docs/";
 
-    function docLink(path: string): Link {
-        path = "/docs/" + path;
-        const item = articles.find(x => x.url === path);
+    const articles = await getDocs();
+    const tutorials = articles.filter(x => x.slug.startsWith("tutorials/"));
+
+    function docLink(slug: string): Link {
+        const path = PATH_BASE + slug;
+        const item = articles.find(x => x.slug === slug);
         if (!item) throw new Error(`Sidebar: doc(${path}) not found`);
 
         return {
-            text: item.frontmatter.shortTitle || item.frontmatter.title,
+            text: item.data.shortTitle || item.data.title,
             href: path,
-            frontmatter: item.frontmatter
+            meta: item.data,
         };
     }
 
@@ -68,10 +70,11 @@ const DocsSidebar = () => createSidebar(async () => {
         docLink("getting-started"),
         {
             header: "Guides", links: [
-                { text: "Index", href: "/docs/tutorials", frontmatter: { title: "Guides & Tutorials" } },
+                { text: "Index", href: PATH_BASE + "tutorials", meta: { title: "Guides & Tutorials" } },
                 ...(tutorials.map(x => ({
-                    text: x.frontmatter.shortTitle || x.frontmatter.title,
-                    href: x.url,
+                    text: x.data.shortTitle || x.data.title,
+                    href: PATH_BASE + x.slug,
+                    meta: x.data,
                 })))
             ]
         },
@@ -110,34 +113,37 @@ const DocsSidebar = () => createSidebar(async () => {
                 docLink("adapters/netlify"),
             ]
         },
-        {
-            header: "Packages", links: [
-                docLink("package-httpc-server"),
-                docLink("package-httpc-client"),
-                docLink("package-httpc-kit"),
-                docLink("package-httpc-cli"),
-            ]
-        }
+        // {
+        //     header: "Packages", links: [
+        //         docLink("package-httpc-server"),
+        //         docLink("package-httpc-client"),
+        //         docLink("package-httpc-kit"),
+        //         docLink("package-httpc-cli"),
+        //     ]
+        // }
     ];
 });
 
 
 const BlogSidebar = () => createSidebar(async () => {
+    const PATH_BASE = "/blog/";
+
     const posts = await getPosts();
     const latest = posts.slice(0, 5);
 
     return [
-        { text: "Index", href: "/blog/", navigable: "disabled" },
+        { text: "Index", href: "/blog", navigable: "disabled" },
         {
             header: "Latest", open: true, links: latest.map(x => ({
-                text: x.frontmatter.shortTitle || x.frontmatter.title,
-                href: x.url,
-                frontmatter: x.frontmatter,
+                text: x.data.shortTitle || x.data.title,
+                href: PATH_BASE + x.slug,
+                meta: x.data,
             }))
         },
         {
             header: "Tags", open: true, className: "tag-cloud", navigable: "disabled", links: BlogTags.map(x => ({
-                text: x, href: `/blog/tags/${x}`
+                text: x,
+                href: `${PATH_BASE}tags/${x}`
             }))
         }
     ];

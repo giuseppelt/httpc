@@ -1,20 +1,21 @@
 ---
-import { MarkdownHeading, MarkdownContent } from "astro";
 import Rightbar from "../components/Rightbar.astro";
 import Sidebar from "../components/Sidebar.astro";
 import Layout from "./Layout.astro";
 import ArticleNavigation from "../components/ArticleNavigation.astro";
 import TagList from "../components/TagList.astro";
 import { Icon } from "astro-icon";
+import { ContentItemBlog } from "../content";
 
 interface Props {
-  url: string;
-  headings?: MarkdownHeading[];
-  frontmatter: Frontmatter;
-  content: MarkdownContent;
+  entry: ContentItemBlog;
 }
 
-const { content, url: currentPage, frontmatter, headings } = Astro.props;
+const { entry } = Astro.props;
+const meta = entry.data;
+
+const currentPage = entry.slug;
+const { Content, headings } = await entry.render();
 
 // ensure no h1 is present
 if (headings?.some(x => x.depth === 1)) {
@@ -22,24 +23,27 @@ if (headings?.some(x => x.depth === 1)) {
 }
 ---
 
-<Layout {frontmatter} title={`${frontmatter.title} | httpc Blog`} width="blog" navbar={false}>
+<Layout title={`${meta.title} | httpc Blog`} width="blog" navbar={false}>
   <main class="blog-content">
-    <Sidebar page="blog" title="Blog" {...{ currentPage, content, frontmatter, headings}} />
+    <Sidebar page="blog" title="Blog" {...{ currentPage}} />
     <article class="content side-spacing">
       <header class="mb-3">
-        <h1 class="page-title">{frontmatter.title}</h1>
-        <TagList className="mt-1" items={frontmatter.tags!.map(x => ({ text: x, href: `/blog/tags/${x}` }))} />
+        <h1 class="page-title">{meta.title}</h1>
+        <TagList className="mt-1" items={meta.tags.map(x => ({ text: x, href: `/blog/tags/${x}` }))} />
       </header>
-      <slot />
+      <Content />
 
       <footer class="mt-5">
         <p class="mb-3 hstack">
           <Icon name="mdi:star" className="d-inline-block" style="width: 20px" />
-          <span><i>Stay updated</i>: subscribe to the <a href="/rss.xml" target="_blank" title="RSS feed">RSS feed</a></span>
+          <span
+            ><i>Stay updated</i>: subscribe to the <a href="/rss.xml" target="_blank" title="RSS feed">RSS feed</a
+            ></span
+          >
         </p>
         <ArticleNavigation page="blog" {...{currentPage}} />
       </footer>
     </article>
-    <Rightbar page="blog" {...{ currentPage, content, frontmatter, headings}} />
+    <Rightbar page="blog" {...{ currentPage, headings}} />
   </main>
 </Layout>

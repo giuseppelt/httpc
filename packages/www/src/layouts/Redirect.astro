@@ -1,0 +1,25 @@
+---
+interface Props {
+  to: string;
+  fallbackText?: string;
+}
+
+const { to, fallbackText = "Redirecting..." } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="refresh" content={`0;URL='${to}'`} />
+  </head>
+
+  <body>
+    <noscript>
+      <a href={to}>{fallbackText}</a>
+    </noscript>
+    <script define:vars={{ to }}>
+      location.href = to;
+    </script>
+  </body>
+</html>

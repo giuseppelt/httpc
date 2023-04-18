@@ -1,9 +1,9 @@
 ---
-import { ContentItem } from "../content";
+import { ContentItemBlog } from "../content";
 import TagList from "./TagList.astro";
 
 interface Props {
-  items: ContentItem[];
+  items: ContentItemBlog[];
   showTags?: boolean;
   className?: string;
 }
@@ -16,16 +16,16 @@ const { items, className, showTags = true } = Astro.props;
     items.map(x => (
       <li class="post-item mb-4 hstack gap-md-3 gap-sm-1">
         <div class="post-date">
-          <span class="date-day">{x.frontmatter.publishedAt!.getDate()}</span>
-          <span class="date-month">{x.frontmatter.publishedAt!.toLocaleString("en", { month: "short" })}</span>
-          <span class="date-year d-none">{x.frontmatter.publishedAt!.getFullYear()}</span>
+          <span class="date-day">{x.data.publishedAt.getDate()}</span>
+          <span class="date-month">{x.data.publishedAt.toLocaleString("en", { month: "short" })}</span>
+          <span class="date-year d-none">{x.data.publishedAt.getFullYear()}</span>
         </div>
         <div class="vstack gap-1">
-          <a href={x.url} class="text-2xl post-title">
-            {x.frontmatter.title}
+          <a href={`/blog/${x.slug}`} class="text-2xl post-title">
+            {x.data.title}
           </a>
-          {showTags && <TagList items={x.frontmatter.tags?.map(x => ({ text: x, href: `/blog/tags/${x}` }))} />}
-          <p class="text-sm post-description">{x.frontmatter.summary || x.frontmatter.description}</p>
+          {showTags && <TagList items={x.data.tags?.map(x => ({ text: x, href: `/blog/tags/${x}` }))} />}
+          <p class="text-sm post-description">{x.data.summary || x.data.description}</p>
         </div>
       </li>
     ))

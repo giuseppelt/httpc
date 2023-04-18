@@ -1,18 +1,19 @@
 ---
 import { MarkdownHeading, MarkdownContent } from "astro";
 import Layout from "./Layout.astro";
+import { ContentItem } from "../content";
 
 interface Props {
   url: string;
   navbar?: boolean;
   headings?: MarkdownHeading[];
-  frontmatter?: Frontmatter;
+  frontmatter?: ContentItem["data"];
   content: MarkdownContent;
 }
 
-const { content, url: currentPage, frontmatter, headings } = Astro.props;
+const { content, url: currentPage, frontmatter: meta, headings } = Astro.props;
 
-const title = frontmatter?.title ? `${frontmatter.title} | httpc` : `httpc`;
+const title = meta?.title ? `${meta.title} | httpc` : `httpc`;
 
 // ensure no h1 is present
 if (headings?.some(x => x.depth === 1)) {
@@ -20,15 +21,15 @@ if (headings?.some(x => x.depth === 1)) {
 }
 ---
 
-<Layout {frontmatter} title={title}>
+<Layout title={title} description={meta?.description}>
   <main class="page-content">
     <article class="content">
       <div class="bleed-box">
         <header class="page-content mb-3">
           {
-            frontmatter && (
+            meta && (
               <h1 class="page-title">
-                <span class="page-title-text">{frontmatter.title}</span>
+                <span class="page-title-text">{meta.title}</span>
               </h1>
             )
           }

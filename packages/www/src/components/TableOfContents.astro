@@ -1,11 +1,12 @@
 ---
-import { MarkdownHeading } from "astro";
+import type { MarkdownHeading } from "astro";
 
 interface Props {
   headings: readonly MarkdownHeading[];
 }
 
-const { headings } = Astro.props;
+const { headings: _headings } = Astro.props;
+const headings = _headings.filter(x => x.depth <= 3);
 
 function processTitle(value: string) {
   if (value.includes(": ")) {
@@ -21,13 +22,11 @@ function processTitle(value: string) {
   <div class="wrap">
     <span class="indicator-toc"></span>
     {
-      headings
-        .filter(x => x.depth <= 3)
-        .map(x => (
-          <a href={`#${x.slug}`} class={`toc-link toc-depth-${x.depth}`}>
-            <span>{processTitle(x.text)}</span>
-          </a>
-        ))
+      headings.map(x => (
+        <a href={`#${x.slug}`} class={`toc-link toc-depth-${x.depth}`}>
+          <span>{processTitle(x.text)}</span>
+        </a>
+      ))
     }
   </div>
 </nav>
@@ -87,7 +86,9 @@ function processTitle(value: string) {
       id: element.id,
       element,
     }));
-    const tocHeadings = Object.fromEntries([...document.querySelectorAll<HTMLAnchorElement>("#toc .toc-link")].map(x => [x.href.split("#")[1], x]));
+    const tocHeadings = Object.fromEntries(
+      [...document.querySelectorAll<HTMLAnchorElement>("#toc .toc-link")].map(x => [x.href.split("#")[1], x])
+    );
 
     if (headings.length == 0 || Object.keys(tocHeadings).length === 0 || !indicator) {
       return;
@@ -119,7 +120,9 @@ function processTitle(value: string) {
 
       const { height } = current.getBoundingClientRect();
       current.classList.add("active");
-      indicator!.style.transform = `translateY(${current.offsetTop + (height - indicatorHeight) / 2 /** line height correction */}px)`;
+      indicator!.style.transform = `translateY(${
+        current.offsetTop + (height - indicatorHeight) / 2 /** line height correction */
+      }px)`;
     }
 
     document.addEventListener("rightbar-open", () => {

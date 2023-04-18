@@ -9,7 +9,7 @@ export interface Props {
 
 const { page, currentPage } = Astro.props;
 
-const { prev, next } = (await getSidebar(page)).getNavLinks(currentPage);
+const { prev, next } = (await getSidebar(page)).getNavLinks(`/${page}/${currentPage}`);
 ---
 
 <aside class="container-grid-2col my-5">
@@ -19,7 +19,7 @@ const { prev, next } = (await getSidebar(page)).getNavLinks(currentPage);
         <Icon className="icon" name="ic:round-chevron-left" />
         <span>
           <span class="label d-block">Previous</span>
-          <span class="title d-block">{prev.frontmatter?.title || prev.text}</span>
+          <span class="title d-block">{prev.meta?.title || prev.text}</span>
         </span>
       </a>
     ) : (
@@ -32,7 +32,7 @@ const { prev, next } = (await getSidebar(page)).getNavLinks(currentPage);
         <Icon className="icon" name="ic:round-chevron-right" />
         <span>
           <span class="label d-block">Next</span>
-          <span class="title d-block">{next.frontmatter?.title || next.text}</span>
+          <span class="title d-block">{next.meta?.title || next.text}</span>
         </span>
       </a>
     ) : (

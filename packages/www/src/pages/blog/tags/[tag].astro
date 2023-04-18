@@ -11,7 +11,7 @@ export function getStaticPaths() {
 }
 
 const { tag } = Astro.params;
-const items = (await getPosts()).filter(x => x.frontmatter.tags?.includes(tag!));
+const items = (await getPosts()).filter(x => x.data.tags.includes(tag as any));
 ---
 
 <Layout title="Blog | httpc" width="blog" navbar={false}>

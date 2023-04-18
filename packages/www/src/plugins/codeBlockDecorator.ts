@@ -55,7 +55,7 @@ function parseMeta(value: string) {
 
 
 function enrichCode(info: ReturnType<typeof parseMeta>, codeElement: Element) {
-    const lines = codeElement.children.filter(x => x.type === "element" && (x.properties?.className as string[]).includes("line")) as Element[];
+    const lines = codeElement.children.filter((x: any) => x.type === "element" && (x.properties?.className as string[]).includes("line")) as Element[];
 
     lines.forEach((line, index) => {
         const lineNumber = index + 1;
@@ -85,15 +85,27 @@ function enrichCode(info: ReturnType<typeof parseMeta>, codeElement: Element) {
     }
 }
 
-export function rehypeCodeBlockDecorator() {
+function rehypeCodeBlockDecorator() {
     return () => (tree: Root, file: any) => {
         visit(tree, "element", (node: Element) => {
-            if (node.tagName !== "pre" && (node.children?.[0] as Element)?.tagName !== "code") {
+            let children: any[] = node.children;
+            if (node.tagName !== "pre" && children?.[0]?.tagName !== "code") {
                 return;
             }
 
-            const { meta, ...properties } = node.properties || {};
-            node.properties = properties;
+            let meta: string | undefined;
+            const metaNode = children?.[0]?.children?.[0]?.children?.[0]?.children[0];
+            if (metaNode && metaNode.type === "text" && metaNode.value.startsWith("// meta:")) {
+                // remove node
+                children?.[0].children.splice(0, 1);
+
+                // remove eventual break
+                if (children?.[0].children?.[0]?.value === "\n") {
+                    children?.[0].children.splice(0, 1);
+                }
+
+                meta = metaNode.value.substring("// meta:".length).trim() || undefined;
+            }
 
             if (!meta) {
                 return [SKIP];
@@ -136,16 +148,31 @@ export function rehypeCodeBlockDecorator() {
     };
 }
 
-export function remarkPreserveCodeMeta() {
+function remarkPreserveCodeMeta() {
     return () => (tree: Root) => {
-        visit(tree, "html", node => {
-            const code = node as any as Code;
-            if (code.value && code.meta && code.value.startsWith("<pre")) {
-                const meta = code.meta.replaceAll("\"", "&quot;");
-                code.value = code.value.substring(0, 5) +
-                    `meta="${meta}" ` +
-                    code.value.substring(5);
-            }
+        visit(tree, "code", (node: Code) => {
+            node.value = `// meta: ${node.meta}\n${node.value}`;
         });
     };
+}
+
+
+export default (): AstroIntegration => {
+    return {
+        name: "code-decoration",
+        hooks: {
+            "astro:config:setup": ({ updateConfig }) => {
+                updateConfig({
+                    markdown: {
+                        rehypePlugins: [
+                            rehypeCodeBlockDecorator(),
+                        ],
+                        remarkPlugins: [
+                            remarkPreserveCodeMeta()
+                        ],
+                    }
+                });
+            },
+        }
+    }
 }

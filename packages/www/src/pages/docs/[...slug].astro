@@ -1,0 +1,17 @@
+---
+import { getDocs } from "../../content";
+import Layout from "../../layouts/Docs.astro";
+
+export async function getStaticPaths() {
+  const items = (await getDocs()).map(entry => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+
+  return items;
+}
+
+const { entry } = Astro.props;
+---
+
+<Layout entry={entry} />

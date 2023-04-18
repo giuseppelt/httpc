@@ -8,9 +8,14 @@ import { Icon } from "astro-icon";
 const posts = await getPosts();
 ---
 
-<Layout title="Blog | httpc" description="Articles, blog posts and best practices about httpc framework, node, typescript and API design" width="blog" navbar={false}>
+<Layout
+  title="Blog | httpc"
+  description="Articles, blog posts and best practices about httpc framework, node, typescript and API design"
+  width="blog"
+  navbar={false}
+>
   <main class="blog-content">
-    <Sidebar page="blog" title="Blog" currentPage="/blog/" />
+    <Sidebar page="blog" title="Blog" currentPage="" />
     <article class="content content-no-sidebar side-spacing">
       <header class="mb-5 hstack">
         <h1 class="page-title">Posts</h1>

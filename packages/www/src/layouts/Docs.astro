@@ -1,44 +1,45 @@
 ---
-import { MarkdownHeading, MarkdownContent } from "astro";
+import type { ContentItemDocs } from "../content";
+import Layout from "./Layout.astro";
 import Rightbar from "../components/Rightbar.astro";
 import Sidebar from "../components/Sidebar.astro";
-import Layout from "./Layout.astro";
 import ArticleNavigation from "../components/ArticleNavigation.astro";
 import TagList from "../components/TagList.astro";
 import Tag from "../components/Tag.astro";
 
 interface Props {
-  url: string;
-  headings?: MarkdownHeading[];
-  frontmatter: Frontmatter;
-  content: MarkdownContent;
+  entry: ContentItemDocs;
 }
 
-const { content, url: currentPage, frontmatter, headings } = Astro.props;
+const { entry } = Astro.props;
+const meta = entry.data;
+
+const currentPage = entry.slug;
+const { Content, headings } = await entry.render();
 
 // ensure no h1 is present
-if (headings?.some(x => x.depth === 1)) {
+if (headings.some(x => x.depth === 1)) {
   throw new Error(`H1 not allowed in docs(${currentPage})`);
 }
 ---
 
-<Layout {frontmatter} title={`${frontmatter.title} | httpc documentation`} width="docs" navbar={false}>
+<Layout content={entry} title={`${meta.title} | httpc documentation`} width="docs" navbar={false}>
   <main class="docs-content">
-    <Sidebar page="docs" title="Docs" {...{ currentPage, content, frontmatter, headings}} />
+    <Sidebar page="docs" title="Docs" {...{currentPage}} />
     <article class="content side-spacing">
       <header class="mb-3">
-        {frontmatter && <h1 class="page-title">{frontmatter.title}</h1>}
+        {meta && <h1 class="page-title">{meta.title}</h1>}
         {
-          frontmatter && frontmatter.status && (
+          meta && meta.status && (
             <TagList className="mt-1">
-              <Tag prefix="status:" text={frontmatter.status} className={`tag-status-${frontmatter.status.replaceAll(" ", "-")}`} />
+              <Tag prefix="status:" text={meta.status} className={`tag-status-${meta.status.replaceAll(" ", "-")}`} />
             </TagList>
           )
         }
       </header>
-      <slot />
+      <Content />
       <ArticleNavigation page="docs" {...{currentPage}} />
     </article>
-    <Rightbar page="docs" {...{ currentPage, content, frontmatter, headings}} />
+    <Rightbar page="docs" {...{ currentPage, headings}} />
   </main>
 </Layout>

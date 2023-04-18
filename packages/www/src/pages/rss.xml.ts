@@ -13,14 +13,14 @@ export async function get(context: APIContext) {
         stylesheet: "/rss-style.xsl",
         customData: "<language>en-us</language>",
         items: posts.map(x => ({
-            link: "https://httpc.dev" + x.url,
-            title: x.frontmatter.title,
-            pubDate: x.frontmatter.publishedAt,
-            description: x.frontmatter.summary || x.frontmatter.description,
-            content: (x.frontmatter.summary || x.frontmatter.description)
+            link: "https://httpc.dev/blog/" + x.slug,
+            title: x.data.title,
+            pubDate: x.data.publishedAt,
+            description: x.data.summary || x.data.description,
+            content: (x.data.summary || x.data.description)
                 ? `
-<p>${x.frontmatter.summary || x.frontmatter.description}</p>
-<p><a href="https://httpc.dev${x.url}">Read more</a></p>
+<p>${x.data.summary || x.data.description}</p>
+<p><a href="https://httpc.dev/blog/${x.slug}">Read more</a></p>
 ` : undefined
         }))
     })

@@ -1,0 +1,230 @@
+---
+title: Services and Dependency injection
+shortTitle: Services & Dependencies
+status: working in progress
+---
+import Aside from "~/components/Aside.astro";
+
+## What is Dependency Injection?
+// TODO
+
+
+## Hooks
+### `useInjected`
+The `useInjected` hook resolves items from the request-scoped container. Services, configurations, constants, everything available inside the request scope.
+<br />
+`useInjected` resolutions are required. If no registration is found at request level for the specified key, the resolution goes up to the global scope. If still no registration is found, `useInjected` throws an error.
+<br />
+The are several ways to resolve something:
+
+#### Service by Constructor
+You can resolve a service instance by passing its class.
+```ts
+const orders = useInjected(OrderService);
+```
+
+#### Service by Alias
+You can resolve a service instance with an alias if previously set.
+```ts
+const logger = useInjected("ApplicationLogger");
+```
+You can type-check aliases with [custom service definitions](/docs/kit-extending).
+
+#### Environment variables
+You can resolve environment variables with the [`KEY`](#key) helper.
+```ts
+const secret = useInjected(KEY("ENV", "SERVICE-SECRET"));
+```
+You can type-check environment variables with [explicit definitions](/docs/kit-extending).
+
+
+#### Multiple injection
+You can resolve multiple instances at the same time, and destructure the result to assign each one. You can even mix different _requesting keys_.
+```ts
+const [orders, tracking, logger] = useInjected(OrderService, TrackingService, "ApplicationLogger");
+```
+Returning instances have defined types, so everything is type checked and safe.
+
+
+### `useTransaction`
+// TODO
+
+
+## Decorators
+**@httpc/kit** uses the [tsyringe](https://npmjs.org/packages/tsyringe) library as dependency container.
+
+<br />
+**httpc/kit** offers additional decorators to cover some lacks tsyringe leaves, like [`optional`](#optional) to specify a non-required dependency, or [`alias`](#alias) to register a class with a specific name.
+
+<br />
+Other decorators like [`logger`](#logger) and [`options`](#options), enable new use cases or ease the usage for repetitive or boilerplate code. 
+
+### `optional`
+`optional` is a parameter decorator. It allows optional dependencies in constructor injection.
+```ts
+class MyService {
+    constructor(
+        @optional() dependency: AnotherService | unauthorized
+    ) {
+    }
+}
+```
+<Aside type="warn" title={false}>
+Remember to type the parameter with `undefined`, as the resolution will pass `undefined` to instantiate the class.
+</Aside>
+
+You can define a default value when the dependency is missing.
+```ts
+class MyService {
+    constructor(
+        @optional({ field: "value" }) configuration: Configuration
+    ) {
+    }
+}
+```
+
+
+### `env`
+`env` is a parameter decorator. It inject an environment variable while instantiating a class.
+```ts
+class MyService {
+    constructor(
+        @env("LOG_LEVEL") logLevel: string
+    ) {
+    }
+}
+```
+The specified environment variable is required to be defined. A missing variable will cause a resolution error.
+
+<br />
+You can specify a default value, when the variable is missing. In that case, the environment variable became optional as it fallbacks to the default value specified.
+```ts
+class MyService {
+    constructor(
+        @env("LOG_LEVEL", "info") logLevel: string
+    ) {
+    }
+}
+```
+
+
+### `options` / `optionsOf`
+`options` is a parameter decorator. It's part of the _service-options_ pattern, where a class needs a configuration object.
+```ts
+type MyServiceOptions = {
+  field: string
+}
+
+class MyService {
+    constructor(
+        @options() options: MyServiceOptions
+    ) {
+    }
+}
+```
+By default, the options are required, meaning the container must resolve the options.
+<br />
+You can make options resolution optional:
+```ts
+class MyService {
+    constructor(
+        @options(undefined) options: MyServiceOptions | undefined
+    ) {
+    }
+}
+```
+Or you can set a default value:
+```ts
+class MyService {
+    constructor(
+        @options({ field: "value" }) options: MyServiceOptions
+    ) {
+    }
+}
+```
+The options can be registered in two ways: with a class or manually.
+<br />
+You can use a class with the decorator `optionsOf`:
+```ts
+@optionsOf(MyService)
+class Options implements MyServiceOptions {
+    field: "value"
+}
+```
+<Aside type="info" title="guideline" icon="guide">
+Implementing the interface is optional. It's strongly suggested for type checking and have editor autocompletion.
+</Aside>
+
+You can register options manually with an helper:
+```ts
+REGISTER_OPTIONS<MyServiceOptions>(MyService, {
+    field: "value"
+});
+```
+
+### `logger`
+`logger` is a parameter decorator. It creates a specific logger when the class will be instantiated.
+```ts
+class MyService {
+    constructor(
+        @logger() private logger: ILogger
+    ) {
+    }
+}
+```
+Detailed information and advanced usage on the [Logging page](/docs/kit-logging).
+
+### `noInject`
+`noInject` is a parameter decorator. It allows the resolution to skip a parameter.
+```ts
+class MyService {
+    constructor(
+        dependency: AnotherService,
+        @noInject() param: string | undefined,
+    ) {
+    }
+}
+```
+In the above example, the `param` argument will be not resolved and set to `undefined` when resolved.
+<br />
+`noInject` is useful when the class needs be manually instantiated.
+```ts
+const service = new MyService(dependencyInstance, "value");
+```
+
+### `alias`
+`alias` is a class decorator. It allows to resolve the decorating class with the `string` specified.
+```ts
+@alias("Payments")
+class MyPaymentProvider {
+
+}
+```
+Now, you can resolve the provider with the `string`:
+```ts
+const payments = useInjected("Payments");
+```
+The `alias` decorator is used to register a class to an expected implementation. For example, the [bearer authentication](/docs/kit-authentication#bearer-authentication) expects a `"BearerAuthentication"` service to be registered to customize advanced behaviors.
+
+### `initializer`
+`initializer` is a class decorator. It signals the class has an initializer method, which will run during the application startup.
+```ts
+@initializer()
+class MyService implement IInitialize {
+    async initialize(): Promise<void> {
+        // do initialization work
+    }
+}
+```
+You can implement the `IInitialize` interface to have type checking. This is optional, just for convenience while developing.
+
+<Aside type="warn" title="Reminder">
+Initializations are run on **application startup** only. Subsequent resolutions will not run initializations.
+<br />
+Initializers are useful for singletons, to run some logic before application starts.
+</Aside>
+
+
+## Helpers
+### `KEY`
+// TODO

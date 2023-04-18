@@ -1,5 +1,5 @@
 import { CacheSetOptions, ICacheSync } from "../types";
-import LRU from "lru-cache";
+import { LRUCache as LRU } from "lru-cache";
 
 /**
  * Configure the LruCache
@@ -43,7 +43,7 @@ export class LruCache implements ICacheSync {
     }
 
     get<T extends any = any>(key: string): T | undefined {
-        return this.provider.get<T>(key);
+        return this.provider.get(key);
     }
 
     set<T extends any = any>(key: string, value: T, options?: CacheSetOptions): void {

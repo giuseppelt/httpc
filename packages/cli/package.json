@@ -43,18 +43,18 @@
     ],
     "dependencies": {
         "@httpc/client": "workspace:*",
-        "commander": "^10.0.0",
+        "commander": "^10.0.1",
         "cross-fetch": "^3.1.5",
-        "giget": "^1.0.0",
+        "giget": "^1.1.2",
         "kleur": "^4.1.5",
         "prompts": "^2.4.2",
         "reflect-metadata": "^0.1.13",
         "typescript": "^4.9.5"
     },
     "devDependencies": {
-        "@types/node": "^16.18.11",
-        "@types/prompts": "^2.4.2",
-        "rimraf": "^4.1.2",
+        "@types/node": "^16.18.23",
+        "@types/prompts": "^2.4.4",
+        "rimraf": "^5.0.0",
         "ts-node": "^10.9.1"
     }
 }

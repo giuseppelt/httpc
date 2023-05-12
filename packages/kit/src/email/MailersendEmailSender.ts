@@ -16,6 +16,7 @@ const MAILERSEND_API = "https://api.mailersend.com/v1";
 export type MailersendEmailSenderOptions = {
     apiKey: string
     defaultSender?: EmailRecipient
+    isTest?: boolean
 }
 
 @injectable()
@@ -36,8 +37,8 @@ export class MailersendEmailSender extends BaseService() implements IEmailSender
             assert(params.to.length > 0, "options.to must have at least an item");
         }
 
-        const to = mapEmailRecipient(params.to);
-        const from = params.from ? mapEmailRecipient(params.from)[0] :
+        const to = [mapEmailRecipient(params.to)].flat();
+        const from = params.from ? mapEmailRecipient(params.from) :
             this.options.defaultSender ? mapEmailRecipient(this.options.defaultSender) :
                 undefined;
 
@@ -47,12 +48,12 @@ export class MailersendEmailSender extends BaseService() implements IEmailSender
             html: params.bodyHtml,
             text: params.bodyText,
             subject: params.subject,
-            cc: params.cc ? mapEmailRecipient(params.cc) : undefined,
-            bcc: params.bcc ? mapEmailRecipient(params.bcc) : undefined,
+            cc: params.cc ? [mapEmailRecipient(params.cc)].flat() : undefined,
+            bcc: params.bcc ? [mapEmailRecipient(params.bcc)].flat() : undefined,
         });
 
         if (this.logger.isLevelEnabled("debug")) {
-            this.logger.debug("Email params: %o", { ...request, bodyHtml: "<omitted>", bodyText: "<omitted>" });
+            this.logger.debug("Email params=%o", { ...request, bodyHtml: "<omitted>", bodyText: "<omitted>" });
         }
 
         await this._sendMail(request);
@@ -62,6 +63,11 @@ export class MailersendEmailSender extends BaseService() implements IEmailSender
 
     private async _sendMail(params: object) {
         assert(this.options.apiKey, "ApiKey must be set");
+
+        if (this.options.isTest) {
+            this.logger.verbose("Send email skipped: isTest=true");
+            return;
+        }
 
         try {
             const token = this.options.apiKey;
@@ -92,13 +98,15 @@ export class MailersendEmailSender extends BaseService() implements IEmailSender
 }
 
 
-function mapEmailRecipient(r: EmailRecipient | EmailRecipient[]): { email: string, name?: string }[] {
-    if (!Array.isArray(r)) {
-        return mapEmailRecipient([r]);
+function mapEmailRecipient(recipient: EmailRecipient): { email: string, name?: string };
+function mapEmailRecipient(recipients: EmailRecipient[]): { email: string, name?: string }[];
+function mapEmailRecipient(recipients: EmailRecipient | EmailRecipient[]): { email: string, name?: string } | ({ email: string, name?: string }[]);
+function mapEmailRecipient(x: EmailRecipient | EmailRecipient[]) {
+    if (Array.isArray(x)) {
+        return x.map(x => mapEmailRecipient(x));
     }
 
-    return r.map(x => (typeof x === "string" ?
-        { email: x } :
-        x
-    ));
+    return typeof x === "string"
+        ? { email: x }
+        : x
 }

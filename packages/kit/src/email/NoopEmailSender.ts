@@ -14,9 +14,9 @@ export class NoopEmailSender extends BaseService() implements IEmailSender {
         }
 
         if (this.logger.isLevelEnabled("debug")) {
-            this.logger.debug("Mail params=%o", { ...options, bodyHtml: "<omitted>", bodyText: "<omitted>" });
+            this.logger.debug("Email params=%o", { ...options, bodyHtml: "<omitted>", bodyText: "<omitted>" });
         }
 
-        this.logger.verbose("Mail sent(%s)", options.to);
+        this.logger.verbose("Email sent(%s)", options.to);
     }
 }

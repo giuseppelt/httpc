@@ -11,4 +11,4 @@ import type api from "./types";
 export type ClientOptions = HttpCClientOptions;
 export type ClientApi = HttpCTypedClient & ClientDef<typeof api>;
 
-export default function createClient(options?: ClientOptions): ClientApi;
+export function createClient(options?: ClientOptions): ClientApi;

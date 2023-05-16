@@ -8,6 +8,6 @@ exports.AuthHeader = AuthHeader;
 exports.Header = Header;
 exports.QueryParam = QueryParam;
 exports.HttpCClientError = HttpCClientError;
-exports.default = function (options) {
+exports.createClient = function (options) {
     return createClient({ ...options, metadata });
 };

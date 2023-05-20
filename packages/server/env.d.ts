@@ -1,6 +1,6 @@
 import { IncomingMessage } from "http";
 
-global {
+declare global {
     interface IHttpCContext {
         readonly requestId: string
         readonly request: IncomingMessage

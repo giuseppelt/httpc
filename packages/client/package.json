@@ -1,7 +1,7 @@
 {
     "name": "@httpc/client",
     "description": "httpc client for building function-based API with minimal code and end-to-end type safety",
-    "version": "0.2.0-pre20230503165257",
+    "version": "0.2.0-pre20230520161649",
     "author": {
         "name": "Giuseppe La Torre",
         "url": "https://github.com/giuseppelt"

@@ -7,15 +7,16 @@ export async function run(cmd: string, option?: {
 }) {
     return await new Promise<void>((resolve, reject) => {
         exec(cmd, { ...option }, (error, stdout, stderr) => {
-            if (option?.showOutput && stdout) {
-                console.log(stdout);
-            }
-
             if (error) {
                 console.error(error.stack);
-                console.log('Error code: ' + error.code);
+                console.log("\nError code: " + error.code);
+                console.log(stdout);
                 reject(error);
                 return;
+            }
+
+            if (option?.showOutput && stdout) {
+                console.log(stdout);
             }
 
             resolve();

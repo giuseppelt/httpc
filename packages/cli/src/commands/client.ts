@@ -118,9 +118,15 @@ const init = createCommand("init")
         }
     });
 
+
+type GenerateCommandOptions = Readonly<{
+    debug?: boolean
+}>
+
 const generate = createCommand("generate")
     .description("generate a client typings")
-    .action(async () => {
+    .option("-d, --debug", "enable compilation settings like sourcemaps")
+    .action(async (cmdOptions: GenerateCommandOptions) => {
         const configs = await readConfig();
 
         const tsConfigPath = path.resolve("tsconfig.json");
@@ -150,9 +156,9 @@ const generate = createCommand("generate")
                 sourceMap: false,
                 emitDeclarationOnly: true,
                 declaration: true,
-                declarationMap: true,
+                declarationMap: !!cmdOptions.debug,
                 outDir: dest,
-                removeComments: false,
+                removeComments: !cmdOptions.debug,
             };
 
             if (!await fsUtils.exists(entry)) {

@@ -48,6 +48,8 @@ export class BearerAuthenticationService extends BaseService(BearerAuthenticatio
             secret: this.options.jwtSecret
         });
 
+        this.logger.verbose("Jwt validation %o", result);
+
         if (!result.success) {
             if (result.error === "expired") {
                 this._raiseError("expired");

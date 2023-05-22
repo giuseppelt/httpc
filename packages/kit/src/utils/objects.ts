@@ -1,18 +1,27 @@
 
-export function cleanUndefined<T extends object>(obj: T): T {
-    return cleanObject(obj, [undefined]);
+export function cleanUndefined<T extends object>(obj: T): T;
+export function cleanUndefined<T extends object>(obj?: T, makeUndefinedIfEmpty?: boolean): T;
+export function cleanUndefined<T extends object>(obj?: T, makeUndefinedIfEmpty?: boolean): T | undefined {
+    return cleanObject(obj, [undefined], makeUndefinedIfEmpty);
 }
 
-export function cleanNotDefined<T extends object>(obj: T): T {
-    return cleanObject(obj, [undefined, null]);
+export function cleanNotDefined<T extends object>(obj: T): T;
+export function cleanNotDefined<T extends object>(obj?: T, makeUndefinedIfEmpty?: boolean): T | undefined;
+export function cleanNotDefined<T extends object>(obj?: T, makeUndefinedIfEmpty?: boolean): T | undefined {
+    return cleanObject(obj, [undefined, null], makeUndefinedIfEmpty);
 }
 
-export function cleanObject<T extends object>(obj: T, values: any[]): T {
+export function cleanObject<T extends object>(obj: T, values: any[]): T;
+export function cleanObject<T extends object>(obj: T | undefined, values: any[], makeUndefinedIfEmpty?: boolean): T | undefined;
+export function cleanObject<T extends object>(obj: T | undefined, values: any[], makeUndefinedIfEmpty?: boolean): T | undefined {
     if (!obj) return obj;
 
-    return Object.fromEntries(
-        Object.entries(obj).filter(([, value]) => !values.includes(value))
-    ) as T;
+    const entries = Object.entries(obj).filter(([, value]) => !values.includes(value));
+    if (entries.length === 0 && makeUndefinedIfEmpty) {
+        return;
+    }
+
+    return Object.fromEntries(entries) as T;
 }
 
 

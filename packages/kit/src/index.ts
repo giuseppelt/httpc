@@ -9,5 +9,6 @@ export * from "./permissions";
 export * from "./caching";
 export * from "./auth";
 export * from "./email";
+export * from "./geo";
 export * from "./testing";
 export * from "./Application";

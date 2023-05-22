@@ -67,7 +67,7 @@ type HeaderName =
     | "www-authenticate"
 
 
-export function useRequestHeader(header: HeaderName) {
+export function useRequestHeader(header: HeaderName | (string & {})) {
     const { request } = useContext();
 
     return request.headers[header] as string | undefined;

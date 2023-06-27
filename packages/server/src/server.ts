@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { runInContext } from "./context";
 import { HttpCServerError } from "./errors";
 import { HttpCServerResponse } from "./responses";
-import { ErrorRenderer, JsonRenderer } from "./renders";
+import { ErrorRenderer, BinaryRenderer, JsonRenderer } from "./renderers";
 import { HttpCCallParser, HttpCCallParserOptions } from "./parsers";
 import { CoorsHttpMiddleware } from "./processors";
 import { LogRequestMiddleware } from "./middlewares";
@@ -168,6 +168,7 @@ function HttpCCallRequestProcessor(options: HttpCServerOptions): HttpCServerRequ
     const renderers = [
         ...filterOptionals(options.renders),
         ErrorRenderer(),
+        BinaryRenderer(),
         JsonRenderer()
     ];
 

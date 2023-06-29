@@ -21,7 +21,7 @@ export async function initializeContainer(container: DependencyContainer = globa
                 await service.initialize();
 
                 if ("logger" in service) {
-                    ((service as any).logger as ILogger).info("Initialized");
+                    ((service as any).logger as ILogger).verbose("Initialized");
                 }
             }
         }));

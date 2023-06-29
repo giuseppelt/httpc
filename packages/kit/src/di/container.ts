@@ -1,12 +1,12 @@
 import { container as globalContainer, DependencyContainer } from "tsyringe";
-import { ILogger, NullLoggerService } from "../logging";
+import { ConsoleLogService, ILogger } from "../logging";
 import { IInitialize } from "../services";
 import { KEY, RESOLVE, RESOLVE_ALL } from "./keys";
 
 
 export async function initializeContainer(container: DependencyContainer = globalContainer) {
     if (!container.isRegistered(KEY("ILogService"))) {
-        container.register(KEY("ILogService"), NullLoggerService);
+        container.register(KEY("ILogService"), ConsoleLogService);
     }
 
     if (!container.isRegistered(KEY("ApplicationLogger"))) {

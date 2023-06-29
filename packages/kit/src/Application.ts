@@ -1,8 +1,8 @@
 import assert from "assert";
-import { createHttpCServer, HttpCServer, HttpCServerOptions, HttpCServerRequestProcessor, IHttpCHost, useContextProperty } from "@httpc/server";
-import { initializeContainer, RESOLVE } from "./di";
-import { ILogger } from "./logging";
 import { container as globalContainer } from "tsyringe";
+import { createHttpCServer, HttpCServer, HttpCServerOptions, HttpCServerRequestProcessor, IHttpCHost, useContextProperty } from "@httpc/server";
+import { EnvVariableKey, initializeContainer, KEY, RESOLVE } from "./di";
+import { ILogger } from "./logging";
 
 
 export type ApplicationOptions = HttpCServerOptions & {
@@ -37,6 +37,37 @@ export class Application implements IHttpCHost {
 
     getHttpCRequestProcessor() {
         return this.server.getHttpCRequestProcessor();
+    }
+
+    registerEnv(filter?: (name: string) => boolean): void;
+    registerEnv(definitions: Partial<Record<EnvVariableKey, "optional" | "required">>): void;
+    registerEnv(): void;
+    registerEnv(filterOrDef?: ((name: string) => boolean) | Partial<Record<string, "optional" | "required">>): void {
+        let vars: [string, string | undefined][];
+
+        if (typeof filterOrDef === "object") {
+            vars = [];
+
+            for (const [name, opt] of Object.entries(filterOrDef)) {
+                const value = process.env[name] ?? undefined;
+                if (value === undefined && opt === "required") {
+                    throw new Error("Missing required environment variable: " + name);
+                }
+
+                vars.push([name, value]);
+            }
+        } else {
+            vars = Object.entries(process.env);
+
+            if (typeof filterOrDef === "function") {
+                vars = vars.filter(([name]) => filterOrDef(name));
+            }
+        }
+
+
+        for (const [name, value] of vars) {
+            globalContainer.registerInstance(KEY("ENV", name), value);
+        }
     }
 
     start(port?: number) {

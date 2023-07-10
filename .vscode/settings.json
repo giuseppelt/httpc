@@ -11,6 +11,7 @@
         "**/.vercel": true,
         "**/.expo": true,
         "**/.expo-shared": true,
+        "**/.astro": true,
     },
     "[typescriptreact]": {
         "editor.tabSize": 2

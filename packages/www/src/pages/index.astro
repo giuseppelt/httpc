@@ -8,14 +8,22 @@ import Svg from "../components/Svg.astro";
 //cspell:ignore teenyicons, typesafe, typesafety
 ---
 
-<Layout title="httpc: function-based API made easy" description="httpc is a javascript and typescript framework for building function-based APIs with minimal code and end-to-end typesafety">
+<Layout
+  title="httpc: function-based API made easy"
+  description="httpc is a javascript and typescript framework for building function-based APIs with minimal code and end-to-end typesafety"
+>
   <div class="relative">
     <div class="pattern-bg"></div>
     <main>
       <div class="page-content">
-        <h1 style="font-size: 2.6em; font-weight: 900; letter-spacing: -1px;" class="mb-2">Just call a <span style="font-family: var(--font-mono);">function()</span></h1>
+        <h1 style="font-size: 2.6em; font-weight: 900; letter-spacing: -1px;" class="mb-2">
+          Just call a <span style="font-family: var(--font-mono);">function()</span>
+        </h1>
         <p class="mb-2 text-2xl mb-4">Build function-based API with minimal code and end-to-end type safety</p>
-        <p class="mb-5"><a class="btn btn-primary" href="/docs">Get Started</a></p>
+        <p class="mb-5">
+          <a class="btn btn-primary" href="/docs">Get Started</a>
+          <a class="ms-1 btn btn-white" href="/repository"><Icon name="bi:star-fill" class="icon-sm top" /> GitHub</a>
+        </p>
         <p class="text-2xs mb-1">For javascript/typescript</p>
         <div class="hstack gap-1">
           <Icon name="teenyicons:javascript-outline" class="hero-language-icon" />
@@ -35,8 +43,15 @@ import Svg from "../components/Svg.astro";
         <div class="feature">
           <Icon name="mdi:code-parentheses-box" className="feature-icon" />
           <h2 class="mb-3">Speaks functions</h2>
-          <p class="text mb-2">Don't worry about <em>raw</em> <abbr title="Hypertext Transfer Protocol (HTTP): the communication rules the World Wide Web is built upon">HTTP</abbr>. No path binding, no http verbs, no headers, no data serialization.</p>
-          <p class="text mb-3">With <strong>httpc</strong> you deal just with functions, arguments and return values.</p>
+          <p class="text mb-2">
+            Don't worry about <em>raw</em>
+            <abbr title="Hypertext Transfer Protocol (HTTP): the communication rules the World Wide Web is built upon"
+              >HTTP</abbr
+            >. No path binding, no http verbs, no headers, no data serialization.
+          </p>
+          <p class="text mb-3">
+            With <strong>httpc</strong> you deal just with functions, arguments and return values.
+          </p>
           <Svg src="assets/svg/httpc-functions.svg" />
           <a href="/docs/kit-introduction" class="feature-link">See how to design a function-based API</a>
         </div>
@@ -46,21 +61,33 @@ import Svg from "../components/Svg.astro";
           <p class="text mb-2">Handle requests with idiomatic code with no complex wiring and unnatural syntax.</p>
           <p class="text mb-3">Less code, translates in less effort to produce, evolve, test, refactor and maintain.</p>
           <img class="feature-image" alt="httpc - no boilerplate code" src="/assets/httpc-no-boilerplate.png" />
-          <a href="/docs/kit-introduction#writing-less-code-minimizing-repetition-redundancy-and-boilerplate" class="feature-link">See how you reduce your code with httpc</a>
+          <a
+            href="/docs/kit-introduction#writing-less-code-minimizing-repetition-redundancy-and-boilerplate"
+            class="feature-link">See how you reduce your code with httpc</a
+          >
         </div>
         <div class="feature">
           <Icon name="mdi:heart-box" className="feature-icon" />
           <h2 class="mb-3">Typesafe & autocomplete</h2>
           <p class="text mb-2">Break things when you like to happen. No more missing parameter, type mismatch...</p>
-          <p class="text mb-3">Type definitions provide autocompletion and keep your more productive avoiding frequent doc lookups.</p>
+          <p class="text mb-3">
+            Type definitions provide autocompletion and keep your more productive avoiding frequent doc lookups.
+          </p>
           <img class="feature-image" alt="httpc - type safe" src="/assets/httpc-typesafe.png" />
-          <a href="/docs/kit-introduction#pursuing-extensive-type-safety" class="feature-link">Learn more about e2e typesafety</a>
+          <a href="/docs/kit-introduction#pursuing-extensive-type-safety" class="feature-link"
+            >Learn more about e2e typesafety</a
+          >
         </div>
         <div class="feature">
           <Icon name="mdi:drawing-box" className="feature-icon" />
           <h2 class="mb-3">Feature packed</h2>
-          <p class="text mb-2">Use builtin components with sensible defaults for common concerns like authentication, authorization, logging...</p>
-          <p class="text mb-3"><strong>@httpc/kit</strong> provides a toolbox with many utilities that cover lots of use cases out of the box.</p>
+          <p class="text mb-2">
+            Use builtin components with sensible defaults for common concerns like authentication, authorization,
+            logging...
+          </p>
+          <p class="text mb-3">
+            <strong>@httpc/kit</strong> provides a toolbox with many utilities that cover lots of use cases out of the box.
+          </p>
           <div class="hstack gap-1" style="aspect-ratio: 662/123;">
             <Icon name="fluent:key-32-filled" class="little-icon" />
             <Icon name="mdi:shield-check" class="little-icon" />
@@ -74,7 +101,9 @@ import Svg from "../components/Svg.astro";
           <Icon name="mdi:pencil-box" className="feature-icon" />
           <h2 class="mb-3">Highly customizable</h2>
           <p class="text mb-2">Rich modular architecture, you can plug into anything and model any behavior.</p>
-          <p class="text mb-2">You can go beyond <strong>httpc</strong> and manage form submissions, web hooks, rest requests...</p>
+          <p class="text mb-2">
+            You can go beyond <strong>httpc</strong> and manage form submissions, web hooks, rest requests...
+          </p>
           <div class="anim-container">
             <div class="anim-pipeline">
               <Lottie src="/animations/anim-pipeline.json" />
@@ -85,8 +114,12 @@ import Svg from "../components/Svg.astro";
         <div class="feature">
           <Icon name="mdi:arrow-top-right-bold-box" className="feature-icon" />
           <h2 class="mb-3">Distribute the client</h2>
-          <p class="text mb-2">You can generate and publish a client to provide a ready-to-go experience for 3rd parties.</p>
-          <p class="text mb-2">With a standard package you can easily share the client, manage versions and backward compatibility.</p>
+          <p class="text mb-2">
+            You can generate and publish a client to provide a ready-to-go experience for 3rd parties.
+          </p>
+          <p class="text mb-2">
+            With a standard package you can easily share the client, manage versions and backward compatibility.
+          </p>
           <div class="anim-container">
             <div class="anim-publish">
               <Lottie src="/animations/anim-publish.json" />
@@ -176,7 +209,23 @@ import Svg from "../components/Svg.astro";
   }
 
   .pattern-bg {
-    background-image: linear-gradient(112.5deg, rgb(245, 245, 245) 0%, rgb(245, 245, 245) 15%, rgb(195, 195, 195) 15%, rgb(195, 195, 195) 40%, rgb(157, 157, 157) 40%, rgb(157, 157, 157) 47%, rgb(137, 137, 137) 47%, rgb(137, 137, 137) 68%, rgb(125, 125, 125) 68%, rgb(125, 125, 125) 72%, rgb(112, 112, 112) 72%, rgb(112, 112, 112) 92%, rgb(101, 101, 101) 92%, rgb(101, 101, 101) 100%);
+    background-image: linear-gradient(
+      112.5deg,
+      rgb(245, 245, 245) 0%,
+      rgb(245, 245, 245) 15%,
+      rgb(195, 195, 195) 15%,
+      rgb(195, 195, 195) 40%,
+      rgb(157, 157, 157) 40%,
+      rgb(157, 157, 157) 47%,
+      rgb(137, 137, 137) 47%,
+      rgb(137, 137, 137) 68%,
+      rgb(125, 125, 125) 68%,
+      rgb(125, 125, 125) 72%,
+      rgb(112, 112, 112) 72%,
+      rgb(112, 112, 112) 92%,
+      rgb(101, 101, 101) 92%,
+      rgb(101, 101, 101) 100%
+    );
     position: absolute;
     z-index: -1;
     user-select: none;
@@ -189,7 +238,21 @@ import Svg from "../components/Svg.astro";
     filter: brightness(1.25) sepia() saturate(0);
 
     @media (max-width: 768px) {
-      background-image: linear-gradient(112.5deg, rgb(245, 245, 245) 0%, rgb(245, 245, 245) 15%, rgb(195, 195, 195) 15%, rgb(195, 195, 195) 45%, rgb(157, 157, 157) 45%, rgb(157, 157, 157) 48%, rgb(137, 137, 137) 48%, rgb(137, 137, 137) 78%, rgb(125, 125, 125) 78%, rgb(125, 125, 125) 91%, rgb(101, 101, 101) 91%, rgb(101, 101, 101) 100%);
+      background-image: linear-gradient(
+        112.5deg,
+        rgb(245, 245, 245) 0%,
+        rgb(245, 245, 245) 15%,
+        rgb(195, 195, 195) 15%,
+        rgb(195, 195, 195) 45%,
+        rgb(157, 157, 157) 45%,
+        rgb(157, 157, 157) 48%,
+        rgb(137, 137, 137) 48%,
+        rgb(137, 137, 137) 78%,
+        rgb(125, 125, 125) 78%,
+        rgb(125, 125, 125) 91%,
+        rgb(101, 101, 101) 91%,
+        rgb(101, 101, 101) 100%
+      );
     }
   }
 
@@ -246,7 +309,8 @@ import Svg from "../components/Svg.astro";
       height: 1.2em;
       vertical-align: bottom;
       //cspell:disable
-      background: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M8.7 17.3q-.275-.275-.275-.7q0-.425.275-.7l3.9-3.9l-3.9-3.9q-.275-.275-.275-.7q0-.425.275-.7q.275-.275.7-.275q.425 0 .7.275l4.6 4.6q.15.15.213.325q.062.175.062.375t-.062.375q-.063.175-.213.325l-4.6 4.6q-.275.275-.7.275q-.425 0-.7-.275Z"%2F%3E%3C%2Fsvg%3E') no-repeat center;
+      background: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M8.7 17.3q-.275-.275-.275-.7q0-.425.275-.7l3.9-3.9l-3.9-3.9q-.275-.275-.275-.7q0-.425.275-.7q.275-.275.7-.275q.425 0 .7.275l4.6 4.6q.15.15.213.325q.062.175.062.375t-.062.375q-.063.175-.213.325l-4.6 4.6q-.275.275-.7.275q-.425 0-.7-.275Z"%2F%3E%3C%2Fsvg%3E')
+        no-repeat center;
       //cspell:enable
     }
   }

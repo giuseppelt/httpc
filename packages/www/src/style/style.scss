@@ -77,9 +77,6 @@
     --theme-btn-primary: var(--theme-color-accent);
     --theme-btn-primary-hover: #2d8799;
     --theme-btn-primary-active: #236e7d;
-    --theme-btn-secondary: #d8e9ed;
-    --theme-btn-secondary-hover: #afdbe4;
-    --theme-btn-secondary-active: #a7e3ef;
 
     font-size: var(--font-size);
 
@@ -408,7 +405,24 @@ $utilities: (
     }
 }
 
+.icon {
+    display: inline-block;
+    height: 32px;
+}
 
+.icon-sm {
+    @extend .icon;
+    height: 20px;
+
+    &.top {
+        vertical-align: text-top;
+    }
+}
+
+.icon-lg {
+    @extend .icon;
+    height: 42px;
+}
 
 .btn {
     border: 0;
@@ -428,7 +442,11 @@ $utilities: (
 
 .btn-primary {
     background-color: var(--theme-btn-primary);
-    color: var(--color-btn-white) !important;
+    color: var(--color-btn-white);
+
+    &:visited {
+        color: var(--color-btn-white);
+    }
 
     &:hover {
         background-color: var(--theme-btn-primary-hover);
@@ -441,31 +459,25 @@ $utilities: (
 }
 
 
-.btn-secondary {
-    background-color: var(--theme-btn-secondary);
+.btn-white {
+    background-color: white;
     color: var(--color-black);
+    outline: 1px solid var(--color-dim);
+
+    &:visited {
+        color: var(--color-black);
+    }
 
     &:hover {
-        background-color: var(--theme-btn-secondary-hover);
+        background-color: var(--theme-btn-primary-hover);
+        color: white;
+        outline: 0;
     }
 
     &:active,
     &[aria-selected="true"] {
-        background-color: var(--theme-btn-secondary-active);
-    }
-}
-
-.btn-ghost {
-    background-color: unset;
-    color: var(--color-dim);
-
-    &:hover {
-        color: var(--color-black);
-    }
-
-    &[aria-selected="true"] {
-        background-color: var(--theme-btn-secondary-active);
-        color: var(--color-black);
+        background-color: var(--theme-btn-primary-active);
+        color: white;
     }
 }
 

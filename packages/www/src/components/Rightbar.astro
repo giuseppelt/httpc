@@ -31,7 +31,7 @@ const { currentPage, page, headings } = Astro.props;
     </section>
 
     <section class="mt-4 vstack gap-1">
-      <p role="heading" class="text-sm fw-bold">Meta</p>
+      <p role="heading" aria-level="2" class="text-sm fw-bold">Meta</p>
       <a class="bar-link" target="_blank" href={getGithubEditLink(currentPage)}
         ><Icon name="mdi:pencil" class="icon" /> Edit this page</a
       >

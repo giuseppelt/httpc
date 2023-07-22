@@ -20,6 +20,7 @@ type CallPipeline<T extends (...args: any[]) => any> = {
 }
 
 export type JsonSafeType<T> =
+    T extends void ? undefined :
     T extends Function ? never :
     T extends Promise<any> ? never :
     T extends number | string | boolean | undefined | null ? T :

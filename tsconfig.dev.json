@@ -24,6 +24,9 @@
         },
         {
             "path": "./packages/adapter-netlify/tsconfig.build.json"
+        },
+        {
+            "path": "./packages/adapter-cloudflare/tsconfig.build.json"
         }
     ]
 }

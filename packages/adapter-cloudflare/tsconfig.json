@@ -1,0 +1,14 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "lib": [],
+        "types": [
+            "@cloudflare/workers-types"
+        ],
+        "sourceMap": true
+    },
+    "include": [
+        "env.d.ts",
+        "src"
+    ]
+}

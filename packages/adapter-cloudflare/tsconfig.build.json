@@ -1,0 +1,15 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "module": "esnext",
+        "outDir": "dist",
+        "noEmit": false,
+        "sourceMap": false,
+        "declaration": true,
+        "declarationMap": false
+    },
+    "include": [
+        "src",
+        "env.d.ts"
+    ]
+}

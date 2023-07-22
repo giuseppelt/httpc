@@ -91,6 +91,12 @@ export const UnprocessableRequestError = createError({
     message: "Can't process request",
 });
 
+export const InternalServerError = createError({
+    status: 500,
+    errorCode: "internal_error",
+    message: "Server error"
+});
+
 export const NotSupportedError = createError({
     status: 500,
     errorCode: "not_supported",

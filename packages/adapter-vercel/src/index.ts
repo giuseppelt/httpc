@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import { HttpCServerOptions, createHttpCServer } from "@httpc/server";
+import { HttpCServerOptions, HttpCServerRequestProcessor, createHttpCServerProcessor } from "@httpc/server";
 
 
 export type HttpCVercelAdapterOptions = Pick<HttpCServerOptions,
@@ -18,18 +18,16 @@ export type HttpCVercelAdapterOptions = Pick<HttpCServerOptions,
 }
 
 
-let handler: ((req: IncomingMessage, res: ServerResponse) => void | Promise<void>) | undefined;
+let handler: HttpCServerRequestProcessor | undefined;
 let initialized = false;
 let initializing: Promise<void> | undefined;
 
 export function createHttpCVercelAdapter(options: HttpCVercelAdapterOptions) {
     if (!handler || options.refresh) {
-        const server = createHttpCServer({
+        handler = createHttpCServerProcessor({
             path: "api",
             ...options
         });
-
-        handler = server.getHttpCRequestProcessor();
     }
 
     if (!options.kit || initialized) {

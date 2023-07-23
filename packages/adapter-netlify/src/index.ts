@@ -1,6 +1,6 @@
 import { Readable, Writable } from "stream";
 import type { IncomingMessage, OutgoingHttpHeaders, ServerResponse } from "http";
-import { HttpCServerOptions, createHttpCServer } from "@httpc/server";
+import { HttpCServerOptions, HttpCServerRequestProcessor, createHttpCServerProcessor } from "@httpc/server";
 import type { Handler, HandlerEvent } from "@netlify/functions";
 
 
@@ -21,14 +21,13 @@ export type HttpCNetlifyAdapterOptions = Pick<HttpCServerOptions,
 }
 
 
-let handler: ((req: IncomingMessage, res: ServerResponse) => void | Promise<void>) | undefined;
+let handler: HttpCServerRequestProcessor | undefined;
 let initialized = false;
 let initializing: Promise<void> | undefined;
 
 export function createHttpCNetlifyHandler(options: HttpCNetlifyAdapterOptions): Handler {
     if (!handler || options.refresh) {
-        const server = createHttpCServer(options);
-        handler = server.getHttpCRequestProcessor();
+        handler = createHttpCServerProcessor(options);
     }
 
     return async (event, context) => {

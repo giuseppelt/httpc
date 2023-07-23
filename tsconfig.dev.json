@@ -8,7 +8,10 @@
             "path": "./packages/client/tsconfig.dev.esm.json"
         },
         {
-            "path": "./packages/server/tsconfig.dev.json"
+            "path": "./packages/server/tsconfig.dev.cjs.json"
+        },
+        {
+            "path": "./packages/server/tsconfig.dev.esm.json"
         },
         {
             "path": "./packages/cli/tsconfig.json"

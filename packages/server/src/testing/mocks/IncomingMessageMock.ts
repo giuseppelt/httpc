@@ -1,5 +1,5 @@
-import { IncomingMessage, METHODS } from "http";
-import { Readable } from "stream";
+import { IncomingMessage, METHODS } from "node:http";
+import { Readable } from "node:stream";
 
 
 export type IncomingMessageMockParams = {

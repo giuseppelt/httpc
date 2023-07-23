@@ -1,5 +1,5 @@
+import type { HttpCServerRenderer } from "../processor";
 import { BinaryResponse } from "../responses";
-import type { HttpCServerRenderer } from "../server";
 
 
 export function BinaryRenderer(): HttpCServerRenderer {

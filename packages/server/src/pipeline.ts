@@ -1,4 +1,4 @@
-import { HttpCallAccess, HttpCalls, HttpCServerCallExecutor, HttpCServerMiddleware, isCallPipeline, HttpCallPipelineDefinition, CallHandler, HttpCallDefinition, isCallFunction } from "./server";
+import { HttpCallAccess, HttpCalls, HttpCServerCallExecutor, HttpCServerMiddleware, isCallPipeline, HttpCallPipelineDefinition, CallHandler, HttpCallDefinition, isCallFunction } from "./processor";
 
 
 export type HttpCallMetadata<T extends Record<string, any> = Record<string, any>> = T

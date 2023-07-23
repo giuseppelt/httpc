@@ -1,7 +1,6 @@
+import type { HttpCServerMiddleware } from "../processor";
 import { useContext } from "../context";
 import { createConsoleColors, createLogger, Logger, LogLevel } from "../logger";
-import { HttpCServerMiddleware } from "../server";
-
 
 type LogRequestMiddlewareOptions = {
     ansi?: boolean

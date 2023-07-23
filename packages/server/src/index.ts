@@ -4,6 +4,7 @@ export * from "./hooks";
 export * from "./parsers";
 export * from "./responses";
 export * from "./pipeline";
+export * from "./processor";
 export * from "./server";
 export * from "./middlewares";
 export * from "./testing";

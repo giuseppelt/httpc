@@ -1,4 +1,4 @@
-import type { HttpCServerRequestProcessor } from "../server";
+import type { HttpCServerRequestProcessor } from "../processor";
 
 
 export function CoorsHttpMiddleware(): HttpCServerRequestProcessor {

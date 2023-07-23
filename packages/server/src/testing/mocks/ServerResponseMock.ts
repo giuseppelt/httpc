@@ -1,5 +1,5 @@
-import type { OutgoingHttpHeaders, ServerResponse } from "http";
-import { Writable } from "stream";
+import type { OutgoingHttpHeaders, ServerResponse } from "node:http";
+import { Writable } from "node:stream";
 
 
 export type ServerResponseMockParams = {

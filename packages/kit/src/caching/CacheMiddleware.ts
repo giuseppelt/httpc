@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { HttpCServerMiddleware, HttpCServerResponse } from "@httpc/server";
 import { humanDuration, HumanDuration } from "../utils";
 import { CacheKey } from "./types";

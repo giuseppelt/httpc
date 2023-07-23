@@ -1,4 +1,4 @@
-import { HttpCall } from "./server"
+import type { HttpCall } from "./processor";
 
 
 export type ErrorInfo = {

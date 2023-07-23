@@ -1,7 +1,7 @@
-import http from "http";
+import type { IncomingMessage } from "http";
+import type { HttpCServerCallParser } from "../processor";
 import { BadRequestError, HttpCServerError } from "../errors";
 import Parser from "./Parser";
-import type { HttpCServerCallParser } from "../server";
 
 
 export type HttpCCallParserOptions = {
@@ -16,7 +16,7 @@ export function HttpCCallParser(options: HttpCCallParserOptions): HttpCServerCal
         maxDataSize = (2 ** 20) * 5, // 5MB
     } = options;
 
-    function paramsFromQuery(req: http.IncomingMessage): any[] {
+    function paramsFromQuery(req: IncomingMessage): any[] {
         const url = new URL(req.url!, `http://${req.headers.host}`);
 
         if (mode === "loose" && !url.searchParams.has("$p")) {
@@ -35,7 +35,7 @@ export function HttpCCallParser(options: HttpCCallParserOptions): HttpCServerCal
         }
     }
 
-    async function paramsFromBody(req: http.IncomingMessage): Promise<any[]> {
+    async function paramsFromBody(req: IncomingMessage): Promise<any[]> {
         const contentType = req.headers["content-type"];
         if (contentType && Parser.contentType(contentType).mediaType !== "application/json") {
             throw new HttpCServerError("unsupportedMediaType", `Content type '${req.headers["content-type"]}' not supported`);
@@ -53,7 +53,7 @@ export function HttpCCallParser(options: HttpCCallParserOptions): HttpCServerCal
         }
     }
 
-    function getCallPath(req: http.IncomingMessage): string {
+    function getCallPath(req: IncomingMessage): string {
         const url = new URL(req.url!, `http://${req.headers.host}`);
         let path = url.pathname;
 

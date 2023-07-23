@@ -1,6 +1,6 @@
+import type { HttpCServerCallParser } from "../processor";
 import { BadRequestError, HttpCServerError } from "../errors";
 import Parser from "./Parser";
-import { HttpCServerCallParser } from "../server";
 import { PathMatcher } from "./PathMatcher";
 
 

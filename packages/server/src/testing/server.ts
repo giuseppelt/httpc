@@ -1,5 +1,5 @@
-import { ServerResponse } from "http";
-import { createHttpCServer, HttpCServerOptions } from "../server";
+import type { HttpCServerOptions } from "../processor";
+import { createHttpCServer } from "../server";
 import { createIncomingMessageMock, IncomingMessageMockParams, createServerResponseMock } from "./mocks";
 
 

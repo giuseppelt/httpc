@@ -1,4 +1,4 @@
-import { HttpCServerMiddleware } from "../server";
+import type { HttpCServerMiddleware } from "../processor";
 
 
 export function PassthroughMiddleware(func: () => Promise<any> | void): HttpCServerMiddleware {

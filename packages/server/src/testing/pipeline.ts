@@ -1,9 +1,9 @@
-import type http from "http";
-import { randomUUID } from "crypto";
+import type { IncomingMessage } from "http";
+import type { HttpCallPipelineDefinition, HttpCServerMiddleware, HttpCallAccess } from "../processor";
+import { randomUUID } from "node:crypto";
 import { useContextProperty } from "../context";
 import { PassthroughMiddleware } from "../middlewares";
 import { HttpCallMetadata, httpCall, httpPipeline } from "../pipeline";
-import { HttpCallPipelineDefinition, HttpCServerMiddleware, HttpCallAccess } from "../server";
 import { runInTestContext, testContext } from "./context";
 
 
@@ -116,11 +116,11 @@ export class CallBuilder {
         return await this.create(handler || (() => { }))();
     }
 
-    private _buildRequest(): http.IncomingMessage {
+    private _buildRequest(): IncomingMessage {
         return {
             headers: normalizeHeaders(this._headers) as any,
             url: this._url,
-        } as http.IncomingMessage;
+        } as IncomingMessage;
     }
 }
 

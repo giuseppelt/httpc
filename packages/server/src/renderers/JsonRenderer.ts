@@ -1,5 +1,5 @@
+import type { HttpCServerRenderer } from "../processor";
 import { ErrorResponse, JsonResponse } from "../responses";
-import type { HttpCServerRenderer } from "../server";
 
 
 export function JsonRenderer(): HttpCServerRenderer {

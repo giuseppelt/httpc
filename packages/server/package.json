@@ -9,6 +9,14 @@
     "license": "MIT",
     "module": "./dist/esm/index.js",
     "main": "./dist/cjs/index.js",
+    "exports": {
+        ".": {
+            "types": "./dist/esm/index.d.ts",
+            "workerd": "./dist/esm/index.web.js",
+            "import": "./dist/esm/index.js",
+            "require": "./dist/cjs/index.js"
+        }
+    },
     "scripts": {
         "build": "rimraf dist && tsc -p tsconfig.build.json --module commonjs --outDir ./dist/cjs && tsc -p tsconfig.build.json --module es2020 --outDir ./dist/esm",
         "coverage": "jest --coverage",

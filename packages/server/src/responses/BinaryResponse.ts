@@ -11,6 +11,8 @@ type BinaryResponseOptions = {
     contentType?: string
     contentDisposition?: string
     contentDispositionFilename?: string
+    /** Caching time in seconds. This translates to Cache-Control: max-age=x  */
+    cache?: number
 }
 
 
@@ -47,6 +49,9 @@ export class BinaryResponse extends HttpCServerResponse {
             } : undefined,
             ...this.options?.contentDisposition ? {
                 "Content-Disposition": this.options.contentDisposition,
+            } : undefined,
+            ...this.options?.cache ? {
+                "Cache-Control": `max-age=${Math.max(0, this.options.cache || 0)}`
             } : undefined,
         };
 

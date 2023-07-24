@@ -1,4 +1,4 @@
-import http from "http";
+import type { ServerResponse } from "http";
 import { HttpCServerResponse } from "./HttpCServerResponse";
 
 
@@ -7,7 +7,7 @@ export class EmptyResponse extends HttpCServerResponse {
         super({ statusCode, headers });
     }
 
-    protected override write(response: http.ServerResponse) {
+    protected override write(response: ServerResponse) {
         response.writeHead(this.statusCode, this.headers).end();
     }
 }

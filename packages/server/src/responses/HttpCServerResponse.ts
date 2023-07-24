@@ -1,4 +1,4 @@
-import http from "http";
+import type { ServerResponse } from "http";
 
 
 export abstract class HttpCServerResponse {
@@ -16,7 +16,7 @@ export abstract class HttpCServerResponse {
     headers?: Record<string, string | number>
     body?: unknown
 
-    send(response: http.ServerResponse): Promise<void> {
+    send(response: ServerResponse): Promise<void> {
         return new Promise<void>(resolve => {
             this.write(response
                 .once("finish", resolve)
@@ -29,5 +29,5 @@ export abstract class HttpCServerResponse {
         });
     }
 
-    protected abstract write(response: http.ServerResponse): void;
+    protected abstract write(response: ServerResponse): void;
 }

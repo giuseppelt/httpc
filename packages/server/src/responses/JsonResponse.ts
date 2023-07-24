@@ -1,4 +1,4 @@
-import http from "http";
+import type { ServerResponse } from "http";
 import { HttpCServerResponse } from "./HttpCServerResponse";
 
 
@@ -17,7 +17,7 @@ export class JsonResponse extends HttpCServerResponse {
         });
     }
 
-    protected override write(response: http.ServerResponse) {
+    protected override write(response: ServerResponse) {
         const hasBody = typeof this.body !== "undefined";
         const status = this.statusCode || (hasBody ? 200 : 204);
         const body = hasBody ? Buffer.from(this.render()!, "utf-8") : undefined;

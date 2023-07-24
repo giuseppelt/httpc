@@ -1,4 +1,4 @@
-import http from "http";
+import type { ServerResponse } from "http";
 import { HttpCServerResponse } from "./HttpCServerResponse";
 
 
@@ -35,7 +35,7 @@ export class BinaryResponse extends HttpCServerResponse {
         this.options = options;
     }
 
-    protected override write(response: http.ServerResponse) {
+    protected override write(response: ServerResponse) {
         const status = this.statusCode || 200;
         const body = this.render();
         const headers = {

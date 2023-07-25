@@ -1,8 +1,7 @@
 import { HttpCServerOptions, createHttpCServerProcessor, useContextProperty } from "@httpc/server";
 import type { IncomingMessage, OutgoingHttpHeaders, ServerResponse } from "http";
-import { Buffer } from "node:buffer";
+import "./buffer-polyfill";
 
-globalThis.Buffer = Buffer;
 
 export type CloudflareWorkerOptions = Pick<HttpCServerOptions,
     | "calls"
@@ -23,7 +22,7 @@ export type CloudflareWorkerOptions = Pick<HttpCServerOptions,
 export function createCloudflareWorker(options: CloudflareWorkerOptions): { fetch: ExportedHandlerFetchHandler<IWorkerEnv> } {
 
     const handler = createHttpCServerProcessor({
-        calls: options.calls,
+        ...options,
     });
 
 
@@ -59,15 +58,13 @@ function createRequest(request: Request): IncomingMessage {
     const url = new URL(request.url);
     const pathAndSearch = url.pathname + (url.searchParams.size > 0 ? "?" + url.searchParams.toString() : "");
 
-    const message = request.body!;
+    const message = request.body || new ReadableStream();
     return Object.assign(message, {
         url: pathAndSearch,
         method: request.method,
         headers: Object.fromEntries(request.headers),
     } as IncomingMessage);
 }
-
-
 
 function createResponse() {
     let _statusCode = 200;

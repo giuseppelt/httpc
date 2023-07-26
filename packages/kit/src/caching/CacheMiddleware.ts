@@ -1,5 +1,4 @@
-import crypto from "node:crypto";
-import { HttpCServerMiddleware, HttpCServerResponse } from "@httpc/server";
+import { HttpCServerMiddleware, HttpCServerResponse, randomUUID } from "@httpc/server";
 import { humanDuration, HumanDuration } from "../utils";
 import { CacheKey } from "./types";
 import { useCached } from "./context";
@@ -18,7 +17,7 @@ export function Cache(ttl: HumanDuration, key?: KeyFactory): HttpCServerMiddlewa
 export function Cache(ttl: HumanDuration, options: CacheOption): HttpCServerMiddleware;
 export function Cache(ttl: HumanDuration, keyOrOptions?: KeyFactory | CacheOption, options?: CacheOption): HttpCServerMiddleware {
     let keyFactory: KeyFactory = defaultKeyFactory;
-    let keyPrefix = "cached_" + crypto.randomUUID();
+    let keyPrefix = "cached_" + randomUUID();
 
     if (typeof keyOrOptions === "function") {
         keyFactory = keyOrOptions;

@@ -1,5 +1,5 @@
 import type http from "node:http";
-import { randomUUID } from "node:crypto";
+import { randomUUID } from "./utils";
 import { runInContext } from "./context";
 import { HttpCServerError } from "./errors";
 import { HttpCServerResponse } from "./responses";

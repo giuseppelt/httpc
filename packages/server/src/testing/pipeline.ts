@@ -1,6 +1,6 @@
 import type { IncomingMessage } from "http";
 import type { HttpCallPipelineDefinition, HttpCServerMiddleware, HttpCallAccess } from "../processor";
-import { randomUUID } from "node:crypto";
+import { randomUUID } from "../utils";
 import { useContextProperty } from "../context";
 import { PassthroughMiddleware } from "../middlewares";
 import { HttpCallMetadata, httpCall, httpPipeline } from "../pipeline";

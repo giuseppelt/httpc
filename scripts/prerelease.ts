@@ -5,7 +5,8 @@ const packages = [
     "server",
     "kit",
     "cli",
-    "client"
+    "client",
+    "adapter-cloudflare"
 ]
 
 type PackageJson = {

@@ -1,7 +1,7 @@
 {
     "name": "@httpc/adapter-cloudflare",
     "description": "Adapter for hosting on Cloudflare worker or pages an httpc API",
-    "version": "0.0.1-pre",
+    "version": "0.0.1-pre20230727004606",
     "type": "module",
     "author": {
         "name": "Giuseppe La Torre",
@@ -49,8 +49,8 @@
         "lambda"
     ],
     "peerDependencies": {
-        "@httpc/kit": "^0.1.0",
-        "@httpc/server": "^0.1.0"
+        "@httpc/kit": "^0.2.0-pre",
+        "@httpc/server": "^0.2.0-pre"
     },
     "peerDependenciesMeta": {
         "@httpc/server": {

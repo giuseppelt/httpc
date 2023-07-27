@@ -56,7 +56,7 @@ export type HttpCalls = {
 
 export type HttpCServerCallExecutor<T extends CallHandler = CallHandler> = (call: HttpCall<Parameters<T>>) => Promise<Awaited<ReturnType<T>>>
 export type HttpCServerMiddleware = (call: HttpCall, next: HttpCServerCallExecutor) => Promise<unknown>
-export type HttpCServerRequestProcessor = (req: http.IncomingMessage, res: http.ServerResponse) => Promise<void | undefined | "stop">
+export type HttpCServerRequestProcessor = (req: http.IncomingMessage, res: http.ServerResponse, context?: Partial<IHttpCContext>) => Promise<void | undefined | "stop">
 
 export type HttpCServerCallParser = (request: http.IncomingMessage) => Promise<HttpCall | undefined | void>
 export type HttpCServerCallRewriter = (call: HttpCall) => Promise<HttpCall>
@@ -104,11 +104,12 @@ export function createHttpCServerProcessor(options: HttpCServerOptions): HttpCSe
     ];
 
 
-    async function processRequest(req: http.IncomingMessage, res: http.ServerResponse) {
-        const context: IHttpCContext = {
+    async function processRequest(req: http.IncomingMessage, res: http.ServerResponse, context?: Partial<IHttpCContext>) {
+        context = {
             requestId: randomUUID(),
             request: req,
             startedAt: Date.now(),
+            ...context,
         };
 
         return await runInContext(context, async () => {
@@ -120,8 +121,8 @@ export function createHttpCServerProcessor(options: HttpCServerOptions): HttpCSe
         });
     }
 
-    return (req: http.IncomingMessage, res: http.ServerResponse) => {
-        return processRequest(req, res).catch(async err => {
+    return (req: http.IncomingMessage, res: http.ServerResponse, context?: Partial<IHttpCContext>) => {
+        return processRequest(req, res, context).catch(async err => {
             if (options?.onError) {
                 await options.onError("server", err)
                     .catch(() => {/* do nothing, catch all */ });

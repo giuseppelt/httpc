@@ -1,4 +1,4 @@
-import { HttpCServerOptions, createHttpCServerProcessor, useContextProperty } from "@httpc/server";
+import { HttpCServerOptions, createHttpCServerProcessor } from "@httpc/server";
 import type { IncomingMessage, OutgoingHttpHeaders, ServerResponse } from "http";
 import "./buffer-polyfill";
 
@@ -28,10 +28,6 @@ export function createCloudflareWorker(options: CloudflareWorkerOptions): { fetc
 
     return {
         async fetch(request, env, ctx) {
-            Object.entries(env).forEach(([key, value]) => {
-                useContextProperty(key, value);
-            });
-
             const req = createRequest(request);
             const res = createResponse();
 
@@ -40,7 +36,7 @@ export function createCloudflareWorker(options: CloudflareWorkerOptions): { fetc
                     res.on("close", resolve);
                     res.on("error", reject);
                 }),
-                handler(req, res),
+                handler(req, res, env), // pass env as extra context
             ]);
 
             const buffer = res.getBuffer();

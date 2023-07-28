@@ -7,6 +7,7 @@ on:
 
 jobs:
   update:
+    if: github.repository == 'giuseppelt/httpc'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

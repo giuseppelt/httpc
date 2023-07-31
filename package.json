@@ -7,6 +7,7 @@
     "generate:template": "ts-node -T scripts/generateTemplateCatalogue",
     "prerelease": "ts-node -T scripts/prerelease",
     "build": "pnpm run -r --filter=./packages/* --filter=!@httpc/www build",
+    "publish": "pnpm publish --filter=./packages/* --filter=!@httpc/www",
     "test": "pnpm run -r test",
     "watch:ts": "tsc --build tsconfig.dev.json --watch --incremental --force"
   },

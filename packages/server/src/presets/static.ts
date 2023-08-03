@@ -24,7 +24,7 @@ export function StaticFileParser(options?: StaticFileParserOptions): HttpCServer
             return;
         }
 
-        let { pathname } = new URL(request.url, `http://${request.headers.host}`);
+        let { pathname } = new URL(request.url);
         if (!pathname.startsWith(path)) {
             return;
         }

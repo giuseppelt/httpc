@@ -1,22 +1,30 @@
+import { useResponseHeader } from "../hooks";
 import type { HttpCServerRequestProcessor } from "../processor";
 
 
-export function CoorsHttpMiddleware(): HttpCServerRequestProcessor {
-    return async (req, res) => {
+export type CoorsRequestProcessorOptions = {
+    maxAge?: number
+}
+
+export function CoorsRequestProcessor(options?: CoorsRequestProcessorOptions): HttpCServerRequestProcessor {
+    const {
+        maxAge = 86400 // 1 day
+    } = options || {};
+
+    return async req => {
         if (req.method === "OPTIONS") {
-            await new Promise(r => {
-                res.writeHead(204, {
+            return new Response(undefined, {
+                status: 204,
+                headers: {
                     "Access-Control-Allow-Origin": "*",
                     "Access-Control-Allow-Methods": "*",
                     "Access-Control-Allow-Headers": "*",
-                    "Access-Control-Max-Age": 86400, // 1day
-                    "Content-Length": 0,
-                }).end(r);
+                    "Access-Control-Max-Age": maxAge.toString(),
+                    "Content-Length": "0",
+                }
             });
-
-            return "stop";
         }
 
-        res.setHeader("Access-Control-Allow-Origin", "*");
+        useResponseHeader("access-control-allow-origin", "*");
     };
 }

@@ -1,4 +1,3 @@
-import type { ServerResponse } from "http";
 import { HttpCServerResponse } from "./HttpCServerResponse";
 
 
@@ -11,29 +10,28 @@ export class JsonResponse extends HttpCServerResponse {
             status = 0;
         }
 
+
         super({
             statusCode: status as number || 0,
             body: data,
         });
     }
 
-    protected override write(response: ServerResponse) {
-        const hasBody = typeof this.body !== "undefined";
-        const status = this.statusCode || (hasBody ? 200 : 204);
-        const body = hasBody ? Buffer.from(this.render()!, "utf-8") : undefined;
+    override render() {
+        const status = this.statusCode || 200;
+        // treat undefined as null, as undefined is not a valid json
+        const body = JSON.stringify(this.body ?? null);
         const headers = {
             ...this.headers,
             ...body ? {
                 "Content-Type": "application/json; charset=utf-8",
-                "Content-Length": body.length
+                "Content-Length": body.length.toString()
             } : undefined
         };
 
-        response.writeHead(status, headers)
-            .end(body)
-    }
-
-    protected render(): string | undefined {
-        return typeof this.body === "undefined" ? undefined : JSON.stringify(this.body);
+        return new Response(body, {
+            status,
+            headers
+        });
     }
 }

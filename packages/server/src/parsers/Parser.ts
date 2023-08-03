@@ -1,32 +1,57 @@
-import http from "http";
 import { HttpCServerError } from "../errors";
+import { MayBeArray } from "../internal";
 
 
-async function readBodyAsBuffer(req: http.IncomingMessage, maxBufferSize = 0) {
-    const chunks: Buffer[] = [];
+async function readBodyAsBytes(req: Request, maxBufferSize = 0) {
+    if (!req.body) {
+        return [];
+    }
+    if (req.bodyUsed) {
+        throw new HttpCServerError("invalidState", "Request body already consumed");
+    }
+
+    const chunks: Uint8Array[] = [];
     let length = 0;
 
-    for await (const chunk of req) {
-        chunks.push(chunk);
-        length += (chunk as Buffer).length;
+    const reader = req.body.getReader();
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        chunks.push(value);
+        length += value.length;
 
         if (maxBufferSize > 0 && length > maxBufferSize) {
             throw new HttpCServerError("requestToLarge");
         }
     }
 
-    return Buffer.concat(chunks);
+    if (chunks.length === 0) return [];
+    if (chunks.length === 1) return chunks[0];
+
+    const content = new Uint8Array(length);
+    let offset = 0;
+    for (var a = 0; a < chunks.length; a++) {
+        let chunk = chunks[a];
+        content.set(chunk, offset);
+        offset += chunk.length;
+    }
+
+    return content;
 }
 
-async function readBodyAsString(req: http.IncomingMessage, maxBufferSize = 0) {
-    return (await readBodyAsBuffer(req, maxBufferSize)).toString("utf8");
+async function readBodyAsString(req: Request, maxBufferSize = 0) {
+    //TODO: limit buffer size
+    return req.text();
 }
 
-
-
-type MayBeArray<T> = T | T[];
+async function readBodyAsJson(req: Request, maxBufferSize = 0) {
+    //TODO: limit buffer size
+    return await req.json();
+}
 
 export type QueryStringParsingOptions = {
+    undefinedIfEmpty?: boolean
     numbers?: boolean
     booleans?: boolean
     arrays?: boolean
@@ -36,12 +61,24 @@ const DEFAULT_QUERY_PARSING_OPTIONS: Required<QueryStringParsingOptions> = {
     numbers: true,
     booleans: true,
     arrays: true,
+    undefinedIfEmpty: false,
 }
 
 function queryStringToObject(qs: string | URLSearchParams): Record<string, string>;
-function queryStringToObject(qs: string | URLSearchParams, options: QueryStringParsingOptions): Record<string, MayBeArray<string | number | boolean>>;
-function queryStringToObject(qs: string | URLSearchParams, options: QueryStringParsingOptions = DEFAULT_QUERY_PARSING_OPTIONS): Record<string, string> {
-    const entries = [...new URLSearchParams(qs || "").entries()] as [string, any][];
+function queryStringToObject<T extends QueryStringParsingOptions>(qs: string | URLSearchParams, options: T): Record<string, MayBeArray<string | number | boolean>> | (T extends { undefinedIfEmpty: true } ? undefined : never);
+function queryStringToObject(qs: string | URLSearchParams, options: QueryStringParsingOptions = DEFAULT_QUERY_PARSING_OPTIONS): Record<string, string> | undefined {
+    // fast paths
+    if (!qs || qs === "") {
+        return options.undefinedIfEmpty ? undefined : {};
+    }
+
+    const search = typeof qs === "string" ? new URLSearchParams(qs) : qs;
+    const entries = [...search] as [string, any][];
+
+    // fast path
+    if (entries.length === 0) {
+        return options.undefinedIfEmpty ? undefined : {};
+    }
 
     for (const entry of entries) {
         entry[1] = parseParam(entry[1], options);
@@ -133,7 +170,8 @@ function contentType(contentType: string): HeaderContentType {
 
 export default {
     readBodyAsString,
-    readBodyAsBuffer,
+    readBodyAsBytes,
+    readBodyAsJson,
     queryStringToObject,
     contentType,
 };

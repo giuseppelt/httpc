@@ -2,9 +2,9 @@ import { container } from "tsyringe";
 import { HttpCServerMiddleware, PassthroughMiddleware, useContext } from "@httpc/server";
 import { KEY, RESOLVE, useContainer } from "../di";
 import { JwtPayload } from "./JwtService";
-import { useAuthentication } from "./context";
 import { catchLogAndThrowUnauthorized } from "../services";
 import { useLogger } from "../logging";
+import { useAuthentication } from "./context";
 import { BearerAuthenticationService, BearerAuthenticationServiceOptions } from "./BearerAuthenticationService";
 
 
@@ -40,7 +40,7 @@ export function AuthenticationBearerMiddleware(options?: AuthenticationBearerMid
         const { request, user } = useContext();
 
         if (!user) {
-            const [schema, token] = request.headers.authorization?.split(" ") || [];
+            const [schema, token] = request.headers.get("authorization")?.split(" ") || [];
             if (schema?.toUpperCase() === "BEARER") {
                 useLogger().debug("BearerMiddleware: received jwt %s", token);
 

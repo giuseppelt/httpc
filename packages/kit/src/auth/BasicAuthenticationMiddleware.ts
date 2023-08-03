@@ -39,7 +39,7 @@ export function BasicAuthenticationMiddleware(options?: BasicAuthenticationMiddl
         const { request, user } = useContext();
 
         if (!user) {
-            const [schema, hash] = request.headers.authorization?.split(" ") || [];
+            const [schema, hash] = request.headers.get("authorization")?.split(" ") || [];
             if (schema?.toUpperCase() === "BASIC") {
 
                 const credentials = hashToCredentials(hash);

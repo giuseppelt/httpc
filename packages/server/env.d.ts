@@ -1,9 +1,7 @@
-import { IncomingMessage } from "http";
 
-declare global {
-    interface IHttpCContext {
-        readonly requestId: string
-        readonly request: IncomingMessage
-        readonly startedAt: number
-    }
+interface IHttpCContext {
+    readonly requestId: string
+    readonly request: Request
+    readonly startedAt: number
+    responseHeaders?: Record<string, string>;
 }

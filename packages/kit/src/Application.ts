@@ -1,42 +1,54 @@
 import assert from "assert";
 import { container as globalContainer } from "tsyringe";
-import { createHttpCServer, HttpCServer, HttpCServerOptions, HttpCServerRequestProcessor, IHttpCHost, useContextProperty } from "@httpc/server";
+import { createHttpCServer, HttpCServer, HttpCServerError, HttpCServerOptions, HttpCServerRequestProcessor, IHttpCServer, useContextProperty } from "@httpc/server";
 import { EnvVariableKey, initializeContainer, KEY, RESOLVE } from "./di";
 import { ILogger } from "./logging";
 
 
 export type ApplicationOptions = HttpCServerOptions & {
-    port?: number
+    autoInitialize?: boolean
     container?: "global" | "request"
 }
 
-export class Application implements IHttpCHost {
-    protected _isInitialized = false;
-    protected _server?: HttpCServer = undefined;
+export class Application implements IHttpCServer {
+    protected _isInitialized: boolean | Promise<void> = false;
+    protected _httpc?: HttpCServer = undefined;
     protected _logger?: ILogger = undefined;
 
     constructor(protected readonly options: ApplicationOptions) {
-
     }
 
-    get server(): HttpCServer {
-        assert(this._server, "Application not initialized");
-        return this._server;
+    fetch: IHttpCServer["fetch"] = async (req, context) => {
+        if (!this.options.autoInitialize) {
+            throw new HttpCServerError("invalidState", "Application not initialized");
+        }
+
+        await this.initialize();
+
+        return await this._httpc!.fetch(req, context);
     }
+
     get logger(): ILogger {
         assert(this._logger, "Application not initialized");
         return this._logger;
     }
 
     async initialize() {
-        this._server = this._createServer();
-        await initializeContainer();
-        this._logger = RESOLVE(globalContainer, "ApplicationLogger");
-        this._isInitialized = true;
-    }
+        if (this._isInitialized) {
+            return this._isInitialized;
+        }
 
-    getHttpCRequestProcessor() {
-        return this.server.getHttpCRequestProcessor();
+        const initialize = async () => {
+            this._httpc = this._createServer();
+            await initializeContainer();
+            this._logger = RESOLVE(globalContainer, "ApplicationLogger");
+            this._isInitialized = true;
+        }
+
+        return this._isInitialized = initialize().then(() => {
+            this._isInitialized = true;
+            this.fetch = this._httpc!.fetch;
+        });
     }
 
     registerEnv(filter?: (name: string) => boolean): void;
@@ -70,42 +82,12 @@ export class Application implements IHttpCHost {
         }
     }
 
-    start(port?: number) {
-        assert(this._isInitialized, "Application not initialized");
-
-        return new Promise<void>(resolve => {
-            this.server.listen(port ?? this.options.port, resolve);
-
-            const address = this.server.address();
-            const listening = typeof address === "string" ? address : address?.port;
-            this.logger.info("Started: listening on %s", listening);
-        });
-    }
-
-    async stop(waitPending = false) {
-        await new Promise<void>((resolve, reject) => {
-            if (waitPending) {
-                this.logger.verbose("Stopping: wait for pending connection");
-                this.server.once("close", resolve);
-            }
-
-            this.server.close(err => {
-                if (err) reject(err);
-                else if (!waitPending) {
-                    resolve();
-                }
-            });
-        });
-
-        this.logger.info("Stopped");
-    }
-
     protected _createServer(): HttpCServer {
         return createHttpCServer({
             ...this.options,
-            preProcessors: [
+            processors: [
                 ContainerRequestProcessor(this.options.container),
-                ...this.options.preProcessors || [],
+                ...this.options.processors || [],
             ],
             log: false, // disable server logging, as it's handled by application services
         });

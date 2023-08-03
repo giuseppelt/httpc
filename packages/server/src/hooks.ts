@@ -1,7 +1,7 @@
 import { useContext } from "./context";
 
 
-type HeaderName =
+export type HeaderName =
     | "accept"
     | "accept-language"
     | "accept-patch"
@@ -70,5 +70,13 @@ type HeaderName =
 export function useRequestHeader(header: HeaderName | (string & {})) {
     const { request } = useContext();
 
-    return request.headers[header] as string | undefined;
+    return request.headers.get(header) || undefined;
+}
+
+
+export function useResponseHeader(header: HeaderName | (string & {}), value: string) {
+    const context = useContext();
+    const responseHeaders = context.responseHeaders ??= {};
+
+    return responseHeaders[header] = value;
 }

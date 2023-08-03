@@ -2,10 +2,11 @@ import type { HttpCServerCallParser } from "../processor";
 import { BadRequestError, HttpCServerError } from "../errors";
 import Parser from "./Parser";
 import { PathMatcher } from "./PathMatcher";
+import { tryParseInt } from "./utils";
 
 
 export type RawBodyParserOptions = {
-    format?: "string" | "buffer"
+    format?: "string" | "bytes"
     maxDataLength?: number
     basePath?: string
     paths?: "*" | string[]
@@ -31,13 +32,13 @@ export function RawBodyParser(options?: RawBodyParserOptions): HttpCServerCallPa
             return;
         }
 
-        const { pathname } = new URL(req.url, `http://${req.headers.origin}`);
+        const { pathname } = new URL(req.url);
         const result = matcher.match(pathname);
         if (!result) {
             return;
         }
 
-        const contentLength = tryParseInt(req.headers["content-length"]);
+        const contentLength = tryParseInt(req.headers.get("content-length"));
         if (!contentLength) {
             if (!enforce) return;
             throw new BadRequestError();
@@ -46,8 +47,8 @@ export function RawBodyParser(options?: RawBodyParserOptions): HttpCServerCallPa
             throw new HttpCServerError("requestToLarge");
         };
 
-        const body = format === "buffer"
-            ? await Parser.readBodyAsBuffer(req, maxDataLength)
+        const body = format === "bytes"
+            ? await Parser.readBodyAsBytes(req, maxDataLength)
             : await Parser.readBodyAsString(req, maxDataLength);
 
         return {
@@ -56,13 +57,4 @@ export function RawBodyParser(options?: RawBodyParserOptions): HttpCServerCallPa
             params: [body]
         };
     }
-}
-
-
-function tryParseInt(value: string | undefined, defaultValue?: number): number {
-    if (value) {
-        try { return parseInt(value!) }
-        catch { }
-    }
-    return defaultValue || 0;
 }

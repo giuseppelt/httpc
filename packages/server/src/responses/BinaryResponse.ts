@@ -1,9 +1,7 @@
-import type { ServerResponse } from "http";
 import { HttpCServerResponse } from "./HttpCServerResponse";
 
 
 type BinaryResponseType =
-    | Buffer
     | ArrayBufferLike
     | Uint8Array
 
@@ -37,12 +35,24 @@ export class BinaryResponse extends HttpCServerResponse {
         this.options = options;
     }
 
-    protected override write(response: ServerResponse) {
+    override render() {
+        let body = this.body;
+        let bodyLength = 0;
+        if (body instanceof Uint8Array) {
+            bodyLength = body.byteLength;
+        } else if (body instanceof ArrayBuffer) {
+            bodyLength = body.byteLength;
+        } else {
+            throw new Error("Binary type not supported: " + this.body?.constructor?.name);
+        }
+
+
         const status = this.statusCode || 200;
-        const body = this.render();
         const headers = {
             ...this.headers,
-            "Content-Length": body.length,
+            ...bodyLength !== undefined ? {
+                "Content-Length": bodyLength.toString()
+            } : undefined,
             "Content-Type": this.options?.contentType || "application/octet-stream",
             ...this.options?.contentDispositionFilename ? {
                 "Content-Disposition": `attachment; filename="${this.options.contentDispositionFilename}"`,
@@ -55,18 +65,9 @@ export class BinaryResponse extends HttpCServerResponse {
             } : undefined,
         };
 
-        response.writeHead(status, headers)
-            .end(body);
-    }
-
-    protected render(): Buffer | Uint8Array {
-        const body = this.body;
-        if (body instanceof Buffer || body instanceof Uint8Array) {
-            return body;
-        } else if (body instanceof ArrayBuffer) {
-            return Buffer.from(body);
-        }
-
-        throw new Error("Binary type not supported: " + this.body?.constructor?.name);
+        return new Response(body, {
+            status,
+            headers,
+        });
     }
 }

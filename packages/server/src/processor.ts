@@ -1,11 +1,10 @@
-import type http from "node:http";
 import { randomUUID } from "./utils";
 import { runInContext } from "./context";
 import { HttpCServerError } from "./errors";
 import { HttpCServerResponse } from "./responses";
 import { ErrorRenderer, BinaryRenderer, JsonRenderer } from "./renderers";
 import { HttpCCallParser, HttpCCallParserOptions } from "./parsers";
-import { CoorsHttpMiddleware } from "./processors";
+import { CoorsRequestProcessor } from "./processors";
 import { LogRequestMiddleware } from "./middlewares";
 import { httpPipeline } from "./pipeline";
 import { createConsoleColors, createLogger, Logger, LogLevel } from "./logger";
@@ -29,12 +28,24 @@ export type HttpCServerOptions = {
     rewriters?: Optional<HttpCServerCallRewriter>[]
     parsers?: Optional<HttpCServerCallParser>[]
     renders?: Optional<HttpCServerRenderer>[]
-    preProcessors?: Optional<HttpCServerRequestProcessor>[]
-    postProcessors?: Optional<HttpCServerRequestProcessor>[]
+    processors?: Optional<HttpCServerRequestProcessor | HttpCServerRequestProcessorDefinition>[]
     onError?: (level: "call" | "pipeline" | "server", error: Error) => Promise<void>
 }
 
-export type HttpCServerProcessor = (req: http.IncomingMessage, res: http.ServerResponse) => Promise<void>
+// export type HttpCServerProcessor = (req: http.IncomingMessage, res: http.ServerResponse) => Promise<void>
+
+export type HttpCServerPr = (req: Request, context?: Partial<IHttpCContext>) => Promise<Response>
+
+export type HttpCServerRequestProcessor<K extends HttpCServerRequestProcessorDefinition["when"] = "pre"> =
+    | ("pre" extends K ? Extract<HttpCServerRequestProcessorDefinition, { when: K }>["processor"] : never)
+    | Extract<HttpCServerRequestProcessorDefinition, { when: K }>
+
+export type HttpCServerRequestProcessorDefinition =
+    | {
+        when: "pre"
+        processor: (req: Request) => Promise<Response | HttpCServerResponse | void>
+    }
+
 
 export type CallHandler = (...args: any[]) => any;
 export type HttpCallFunctionDefinition<T extends CallHandler = CallHandler> = T
@@ -56,9 +67,8 @@ export type HttpCalls = {
 
 export type HttpCServerCallExecutor<T extends CallHandler = CallHandler> = (call: HttpCall<Parameters<T>>) => Promise<Awaited<ReturnType<T>>>
 export type HttpCServerMiddleware = (call: HttpCall, next: HttpCServerCallExecutor) => Promise<unknown>
-export type HttpCServerRequestProcessor = (req: http.IncomingMessage, res: http.ServerResponse, context?: Partial<IHttpCContext>) => Promise<void | undefined | "stop">
 
-export type HttpCServerCallParser = (request: http.IncomingMessage) => Promise<HttpCall | undefined | void>
+export type HttpCServerCallParser = (request: Request) => Promise<HttpCall | undefined | void>
 export type HttpCServerCallRewriter = (call: HttpCall) => Promise<HttpCall>
 export type HttpCServerRenderer = (result: unknown) => Promise<HttpCServerResponse | undefined | void>
 
@@ -90,39 +100,65 @@ function assignLogger(log: HttpCServerOptions["log"]) {
                 createLogger();
 }
 
-export function createHttpCServerProcessor(options: HttpCServerOptions): HttpCServerRequestProcessor {
+export function createHttpCServerProcessor(options: HttpCServerOptions): HttpCServerPr {
     const logger = assignLogger(options.log ?? true);
     const colors = createConsoleColors();
 
     const processors = [
         ...filterOptionals([
-            ...options.preProcessors || [],
-            options.cors && CoorsHttpMiddleware(),
+            //     ...options.preProcessors || [],
+            options.cors && CoorsRequestProcessor(),
         ]),
         HttpCCallRequestProcessor(options),
-        ...filterOptionals(options.postProcessors),
-    ];
+        // ...filterOptionals(options.postProcessors),
+    ].map(x => {
+        if (typeof x === "function") {
+            return {
+                when: "pre",
+                processor: x
+            };
+        }
+
+        return x;
+    });
 
 
-    async function processRequest(req: http.IncomingMessage, res: http.ServerResponse, context?: Partial<IHttpCContext>) {
+    async function processRequest(req: Request, context?: Partial<IHttpCContext>) {
         context = {
+            ...context,
             requestId: randomUUID(),
             request: req,
             startedAt: Date.now(),
-            ...context,
         };
 
         return await runInContext(context, async () => {
-            for (const processor of processors) {
-                if (await processor(req, res) === "stop") {
-                    return;
+            let response: Response | HttpCServerResponse | undefined;
+
+            for (const { when, processor } of processors) {
+                if (when === "pre") {
+                    const result = await processor(req);
+                    if (result) {
+                        response = result;
+                        break;
+                    }
                 }
             }
+
+            if (!response) {
+                throw new HttpCServerError("callNotFound");
+            }
+
+
+            if (response instanceof HttpCServerResponse) {
+                response = response.render();
+            }
+
+            return response;
         });
     }
 
-    return (req: http.IncomingMessage, res: http.ServerResponse, context?: Partial<IHttpCContext>) => {
-        return processRequest(req, res, context).catch(async err => {
+    return (req: Request, context?: Partial<IHttpCContext>) => {
+        return processRequest(req, context).catch(async err => {
             if (options?.onError) {
                 await options.onError("server", err)
                     .catch(() => {/* do nothing, catch all */ });
@@ -130,11 +166,7 @@ export function createHttpCServerProcessor(options: HttpCServerOptions): HttpCSe
 
             logger?.("critical", `${colors.gray("%s")}\t%s %s`, req.method!, req.url!, err?.message);
 
-            if (!res.writableEnded) {
-                return new Promise<void>(resolve => {
-                    res.writeHead(500).end(resolve);
-                });
-            }
+            return new Response(undefined, { status: 500 });
         });
     }
 }
@@ -213,7 +245,7 @@ function HttpCCallRequestProcessor(options: HttpCServerOptions): HttpCServerRequ
         return callDef;
     }
 
-    async function parse(req: http.IncomingMessage): Promise<HttpCall> {
+    async function parse(req: Request): Promise<HttpCall> {
         for (const parser of parsers) {
             const call = await parser(req);
             if (call) {
@@ -236,8 +268,8 @@ function HttpCCallRequestProcessor(options: HttpCServerOptions): HttpCServerRequ
         return call;
     }
 
-    async function render(result: any): Promise<HttpCServerResponse> {
-        if (result instanceof HttpCServerResponse) {
+    async function render(result: any): Promise<HttpCServerResponse | Response> {
+        if (result instanceof HttpCServerResponse || result instanceof Response) {
             return result;
         }
 
@@ -261,38 +293,40 @@ function HttpCCallRequestProcessor(options: HttpCServerOptions): HttpCServerRequ
         return await pipeline.execute(call);
     }
 
-    return async (req, res) => {
-        let result;
-        let isPipelineError = false;
+    return {
+        when: "pre",
+        async processor(req) {
+            let result;
+            let isPipelineError = false;
 
-        try {
-            let call = await parse(req);
-            call = await rewrite(call);
-            result = await execute(call);
-        } catch (err) {
-            result = err;
-            isPipelineError = true;
-        }
+            try {
+                let call = await parse(req);
+                call = await rewrite(call);
+                result = await execute(call);
+            } catch (err) {
+                result = err;
+                isPipelineError = true;
+            }
 
-        if (result instanceof Error) {
-            if (logger) {
-                const call = result instanceof HttpCServerError && result.call;
-                if (call) {
-                    logger("error", `${colors.gray("%s")}\t%s %s`, call.access, call.path, result.message);
-                } else {
-                    logger("error", `${colors.gray("%s")}\t%s %s`, req.method!, req.url!, result.message);
+            if (result instanceof Error) {
+                if (logger) {
+                    const call = result instanceof HttpCServerError && result.call;
+                    if (call) {
+                        logger("error", `${colors.gray("%s")}\t%s %s`, call.access, call.path, result.message);
+                    } else {
+                        logger("error", `${colors.gray("%s")}\t%s %s`, req.method!, req.url!, result.message);
+                    }
+                }
+
+                if (options.onError) {
+                    await options.onError(isPipelineError ? "pipeline" : "call", result)
+                        .catch(() => {/* do nothing, catch all */ });
                 }
             }
 
-            if (options.onError) {
-                await options.onError(isPipelineError ? "pipeline" : "call", result)
-                    .catch(() => {/* do nothing, catch all */ });
-            }
+            return await render(result);
         }
-
-        const response = await render(result);
-        await response.send(res);
-    }
+    };
 }
 
 function buildCallTree(middlewares: HttpCServerMiddleware[], def: HttpCalls): CallTree {

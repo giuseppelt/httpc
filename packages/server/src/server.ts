@@ -1,20 +1,13 @@
-import { createServer, Server } from "node:http";
-import { createHttpCServerProcessor, HttpCServerOptions, HttpCServerRequestProcessor } from "./processor";
+import { createHttpCServerProcessor, HttpCServerOptions, HttpCServerPr } from "./processor";
 
 
-export interface IHttpCHost {
-    getHttpCRequestProcessor(): HttpCServerRequestProcessor;
+export interface IHttpCServer {
+    fetch: HttpCServerPr
 }
 
-export type HttpCServer = Server & IHttpCHost;
+export type HttpCServer = IHttpCServer;
 
 
 export function createHttpCServer(options: HttpCServerOptions): HttpCServer {
-    const processor = createHttpCServerProcessor(options);
-    const server = createServer(processor) as HttpCServer;
-    server.getHttpCRequestProcessor = function () {
-        return processor;
-    }
-
-    return server;
+    return { fetch: createHttpCServerProcessor(options) };
 }

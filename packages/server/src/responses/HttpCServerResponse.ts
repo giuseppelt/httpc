@@ -1,10 +1,8 @@
-import type { ServerResponse } from "http";
-
 
 export abstract class HttpCServerResponse {
     constructor(params: {
         statusCode: number
-        headers?: Record<string, string | number>
+        headers?: Record<string, string>
         body?: unknown
     }) {
         this.statusCode = params.statusCode;
@@ -13,21 +11,8 @@ export abstract class HttpCServerResponse {
     }
 
     statusCode: number
-    headers?: Record<string, string | number>
+    headers?: Record<string, string>
     body?: unknown
 
-    send(response: ServerResponse): Promise<void> {
-        return new Promise<void>(resolve => {
-            this.write(response
-                .once("finish", resolve)
-                .once("close", resolve)
-                .once("error", error => {
-                    console.error(error);
-                    resolve();
-                })
-            );
-        });
-    }
-
-    protected abstract write(response: ServerResponse): void;
+    abstract render(): Response
 }

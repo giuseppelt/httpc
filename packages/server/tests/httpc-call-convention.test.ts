@@ -1,6 +1,6 @@
 import { HttpCall } from "../src";
 import { HttpCCallParser } from "../src/parsers";
-import { createIncomingMessageMock } from "../src/testing/mocks";
+import { createIncomingMessageMock } from "../src/node/mocks";
 
 
 describe("httpc call convention", () => {

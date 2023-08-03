@@ -2,6 +2,7 @@ import type { HttpCServerCallParser } from "../processor";
 import { BadRequestError, HttpCServerError } from "../errors";
 import Parser from "./Parser";
 import { PathMatcher } from "./PathMatcher";
+import { tryParseInt } from "./utils";
 
 
 export type FormUrlEncodedParserOptions = {
@@ -26,7 +27,7 @@ export function FormUrlEncodedParser(options?: FormUrlEncodedParserOptions): Htt
             return;
         }
 
-        const { pathname } = new URL(req.url, `http://${req.headers.origin}`);
+        const { pathname } = new URL(req.url);
         const result = matcher.match(pathname);
         if (!result) {
             return;
@@ -36,12 +37,14 @@ export function FormUrlEncodedParser(options?: FormUrlEncodedParserOptions): Htt
             if (!enforce) return;
             throw new HttpCServerError("methodNotAllowed");
         }
-        if (!req.headers["content-type"] || Parser.contentType(req.headers["content-type"]).mediaType !== "application/x-www-form-urlencoded") {
+
+        const contentType = req.headers.get("content-type");
+        if (contentType && Parser.contentType(contentType).mediaType !== "application/x-www-form-urlencoded") {
             if (!enforce) return;
             throw new HttpCServerError("unsupportedMediaType");
         }
 
-        const contentLength = tryParseInt(req.headers["content-length"]);
+        const contentLength = tryParseInt(req.headers.get("content-length"));
         if (!contentLength) {
             if (!enforce) return;
             throw new BadRequestError();
@@ -51,21 +54,12 @@ export function FormUrlEncodedParser(options?: FormUrlEncodedParserOptions): Htt
         };
 
         const body = await Parser.readBodyAsString(req, maxDataLength);
-        const arg = Parser.queryStringToObject(body);
+        const arg = Parser.queryStringToObject(body, { undefinedIfEmpty: true });
 
         return {
             path: result.path,
             access: "write",
-            params: [arg]
+            params: arg ? [arg] : []
         };
     }
-}
-
-
-function tryParseInt(value: string | undefined, defaultValue?: number): number {
-    if (value) {
-        try { return parseInt(value!) }
-        catch { }
-    }
-    return defaultValue || 0;
 }

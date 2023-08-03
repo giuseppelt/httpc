@@ -16,6 +16,9 @@
             "browser": "./dist/esm/index.web.js",
             "import": "./dist/esm/index.js",
             "require": "./dist/cjs/index.js"
+        },
+        "./env": {
+            "types": "./env.d.ts"
         }
     },
     "scripts": {
@@ -30,7 +33,7 @@
     },
     "files": [
         "dist",
-        "env*.d.ts",
+        "env.d.ts",
         "README.md",
         "package.json"
     ],

@@ -12,6 +12,6 @@
   },
   "include": [
     "src",
-    "*.d.ts"
+    "env.d.ts"
   ]
 }

@@ -1,4 +1,3 @@
-import type { IncomingMessage } from "http";
 import type { HttpCServerCallParser } from "../processor";
 import { BadRequestError, HttpCServerError } from "../errors";
 import Parser from "./Parser";
@@ -16,11 +15,12 @@ export function HttpCCallParser(options: HttpCCallParserOptions): HttpCServerCal
         maxDataSize = (2 ** 20) * 5, // 5MB
     } = options;
 
-    function paramsFromQuery(req: IncomingMessage): any[] {
-        const url = new URL(req.url!, `http://${req.headers.host}`);
+    function paramsFromQuery(req: Request): any[] {
+        const url = new URL(req.url);
 
         if (mode === "loose" && !url.searchParams.has("$p")) {
-            return [Parser.queryStringToObject(url.searchParams)];
+            const arg1 = Parser.queryStringToObject(url.searchParams, { undefinedIfEmpty: true });
+            return arg1 ? [arg1] : [];
         }
 
         const p = url.searchParams.get("$p");
@@ -35,26 +35,21 @@ export function HttpCCallParser(options: HttpCCallParserOptions): HttpCServerCal
         }
     }
 
-    async function paramsFromBody(req: IncomingMessage): Promise<any[]> {
-        const contentType = req.headers["content-type"];
+    async function paramsFromBody(req: Request): Promise<any[]> {
+        const contentType = req.headers.get("content-type");
         if (contentType && Parser.contentType(contentType).mediaType !== "application/json") {
-            throw new HttpCServerError("unsupportedMediaType", `Content type '${req.headers["content-type"]}' not supported`);
+            throw new HttpCServerError("unsupportedMediaType", `Content type '${contentType}' not supported`);
         }
 
-        const json = await Parser.readBodyAsString(req, maxDataSize);
-
-        // no content body
-        if (json === "") return [];
-
         try {
-            return JSON.parse(json);
+            return await Parser.readBodyAsJson(req, maxDataSize);
         } catch (err) {
             throw new BadRequestError("Malformed body(expected valid JSON)");
         }
     }
 
-    function getCallPath(req: IncomingMessage): string {
-        const url = new URL(req.url!, `http://${req.headers.host}`);
+    function getCallPath(req: Request): string {
+        const url = new URL(req.url);
         let path = url.pathname;
 
         // query string override

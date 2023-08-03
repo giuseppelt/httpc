@@ -1,4 +1,3 @@
-import type { IncomingMessage } from "http";
 import type { HttpCallPipelineDefinition, HttpCServerMiddleware, HttpCallAccess } from "../processor";
 import { randomUUID } from "../utils";
 import { useContextProperty } from "../context";
@@ -116,11 +115,11 @@ export class CallBuilder {
         return await this.create(handler || (() => { }))();
     }
 
-    private _buildRequest(): IncomingMessage {
+    private _buildRequest(): Request {
         return {
             headers: normalizeHeaders(this._headers) as any,
             url: this._url,
-        } as IncomingMessage;
+        } as Request;
     }
 }
 

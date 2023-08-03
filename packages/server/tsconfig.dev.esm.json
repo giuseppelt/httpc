@@ -4,9 +4,5 @@
     "outDir": "./dist/esm",
     "module": "esnext",
     "tsBuildInfoFile": "./dist/.tsBuildInfoFile.mjs"
-  },
-  "include": [
-    "src",
-    "*.d.ts"
-  ]
+  }
 }

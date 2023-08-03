@@ -1,6 +1,6 @@
 import type { HttpCServerOptions } from "../processor";
-import { createHttpCServer } from "../server";
-import { createIncomingMessageMock, IncomingMessageMockParams, createServerResponseMock } from "./mocks";
+import { createHttpCNodeServer } from "./server";
+import { createIncomingMessageMock, IncomingMessageMockParams, createServerResponseMock } from "../node/mocks";
 
 
 export type HttpCServerTesterOptions = HttpCServerOptions & {
@@ -14,8 +14,8 @@ export function createHttpCServerTester(options: HttpCServerTesterOptions) {
         ...options,
     };
 
-    const server = createHttpCServer(options);
-    const processor = server.getHttpCRequestProcessor();
+    const server = createHttpCNodeServer(options);
+    const processor = server.requestProcessor;
 
     return {
         async process(request: IncomingMessageMockParams) {

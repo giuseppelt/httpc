@@ -15,7 +15,7 @@ export class ErrorResponse extends JsonResponse {
         super(status, error);
     }
 
-    protected render() {
+    override render() {
         const error = this.body as Error;
         let { message, stack, data } = error as any;
         let errorCode = error instanceof HttpCallError ?

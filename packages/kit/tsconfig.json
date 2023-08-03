@@ -4,13 +4,11 @@
         "module": "commonjs",
         "sourceMap": true,
         "declaration": true,
-        "declarationMap": true,
-        "lib": [
-            "ES2022"
-        ]
+        "declarationMap": true
     },
     "include": [
         "src",
-        "tests"
+        "tests",
+        "env.d.ts"
     ]
 }

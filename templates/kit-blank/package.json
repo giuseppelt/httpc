@@ -18,7 +18,7 @@
     "dependencies": {
         "@httpc/kit": "^0.1.0",
         "reflect-metadata": "^0.1.13",
-        "tsyringe": "^4.7.0"
+        "tsyringe": "^4.8.0"
     },
     "devDependencies": {
         "@httpc/cli": "^0.1.0",

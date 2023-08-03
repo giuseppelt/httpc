@@ -26,9 +26,6 @@
       "ignoreMissing": [
         "rollup"
       ]
-    },
-    "patchedDependencies": {
-      "tsyringe@4.7.0": "patches/tsyringe@4.7.0.patch"
     }
   }
 }

@@ -1,7 +1,8 @@
-import assert from "assert";
+
 import { injectWithTransform } from "tsyringe";
 import { KEY } from "../di";
-import { CacheKey, ICachingService } from "./types";
+import { assert } from "../internal";
+import type { CacheKey, ICachingService } from "./types";
 
 
 export function cache(key: CacheKey, options?: any): ParameterDecorator;

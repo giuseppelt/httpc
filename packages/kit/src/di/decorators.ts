@@ -1,5 +1,5 @@
-import assert from "assert";
 import { inject, InjectionToken, registry, container, injectWithTransform, DependencyContainer } from "tsyringe";
+import { assert } from "../internal";
 import { Constructor, CONTAINER_KEY, KEY } from "./keys";
 
 

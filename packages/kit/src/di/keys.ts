@@ -1,5 +1,5 @@
-import assert from "assert";
 import { container as globalContainer, DependencyContainer, InjectionToken, instanceCachingFactory } from "tsyringe";
+import { assert } from "../internal";
 import { ExpandedKeys } from "../env";
 
 

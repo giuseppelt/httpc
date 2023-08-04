@@ -1,5 +1,5 @@
-import assert from "assert";
 import { singleton } from "tsyringe";
+import { assert } from "../internal";
 import type { IEmailSender, SendEmailParams } from "./types";
 import { BaseService } from "../services";
 

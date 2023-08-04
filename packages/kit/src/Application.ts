@@ -1,8 +1,8 @@
-import assert from "assert";
 import { container as globalContainer } from "tsyringe";
 import { createHttpCServer, HttpCServer, HttpCServerError, HttpCServerOptions, HttpCServerRequestProcessor, IHttpCServer, useContextProperty } from "@httpc/server";
 import { EnvVariableKey, initializeContainer, KEY, RESOLVE } from "./di";
 import { ILogger } from "./logging";
+import { assert } from "./internal";
 
 
 export type ApplicationOptions = HttpCServerOptions & {

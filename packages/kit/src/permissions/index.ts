@@ -3,7 +3,7 @@ import * as Token from "./Token";
 import Serializer from "./Serializer";
 import { PermissionsModel } from "./model";
 import type { ICacheSync } from "../caching";
-import assert from "assert";
+import { assert } from "../internal";
 
 export { Token as PermissionToken }
 export { Parser as PermissionParser }

@@ -1,4 +1,4 @@
-import assert from "assert";
+import { assert } from "../internal";
 import { useInjected } from "../di"
 import { IService } from "./types";
 

@@ -1,9 +1,9 @@
-import assert from "assert";
 import { injectable } from "tsyringe";
 import { fetch, Response } from "../fetch";
 import type { ILogger } from "../logging";
 import type { EmailRecipient, IEmailSender, SendEmailParams } from "./types";
 import { BaseService } from "../services";
+import { assert } from "../internal";
 import { options } from "../di";
 import { logger } from "../logging";
 import { cleanUndefined } from "../utils";

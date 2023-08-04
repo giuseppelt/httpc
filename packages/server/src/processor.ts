@@ -125,10 +125,10 @@ export function createHttpCServerProcessor(options: HttpCServerOptions): HttpCSe
 
     async function processRequest(req: Request, context?: Partial<IHttpCContext>) {
         context = {
-            ...context,
             requestId: randomUUID(),
             request: req,
             startedAt: Date.now(),
+            ...context,
         };
 
         return await runInContext(context, async () => {

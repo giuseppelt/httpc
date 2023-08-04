@@ -25,6 +25,10 @@
         "./caching-*": {
             "require": "./dist/cjs/caching/*/index.js",
             "import": "./dist/esm/caching/*/index.js"
+        },
+        "./geo-*": {
+            "require": "./dist/cjs/geo/*/index.js",
+            "import": "./dist/esm/geo/*/index.js"
         }
     },
     "scripts": {

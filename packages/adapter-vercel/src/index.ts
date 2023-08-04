@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import { HttpCServerOptions, HttpCServerRequestProcessor, createHttpCServerProcessor } from "@httpc/server";
+import { HttpCServerOptions, IHttpCServer, createHttpCServer } from "@httpc/server";
+import { createRequest, writeResponse } from "@httpc/server/node";
 
 
 export type HttpCVercelAdapterOptions = Pick<HttpCServerOptions,
@@ -18,37 +19,28 @@ export type HttpCVercelAdapterOptions = Pick<HttpCServerOptions,
 }
 
 
-let handler: HttpCServerRequestProcessor | undefined;
-let initialized = false;
-let initializing: Promise<void> | undefined;
+let server: IHttpCServer | undefined;
+
+//TODO: add a @httpc/kit solution
 
 export function createHttpCVercelAdapter(options: HttpCVercelAdapterOptions) {
-    if (!handler || options.refresh) {
-        handler = createHttpCServerProcessor({
-            path: "api",
-            ...options
-        });
-    }
-
-    if (!options.kit || initialized) {
-        return handler;
-    }
+    const local = (!server || options.refresh)
+        ? (server = createHttpCServer({ path: "api", ...options }))
+        : server;
 
     return async (req: IncomingMessage, res: ServerResponse) => {
+        try {
+            const request = createRequest(req);
+            const response = await local.fetch(request);
+            await writeResponse(res, response);
+        } catch (err) {
+            console.error(err);
 
-        if (!initializing) {
-            initializing = Promise.resolve().then(async () => {
-                const lib = "@httpc/kit";
-                const { initializeContainer } = await import(lib);
-                await initializeContainer();
+            if (!res.headersSent) {
+                res.writeHead(500);
+            }
 
-                initialized = true;
-                initializing = undefined;
-            });
+            res.end();
         }
-
-        await initializing;
-
-        await handler!(req, res);
     }
 }

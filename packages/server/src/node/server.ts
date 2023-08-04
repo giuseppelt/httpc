@@ -17,24 +17,7 @@ export function createHttpCNodeServer(options: HttpCServerNodeOptions | IHttpCSe
             return new Response(undefined, { status: 500 });
         });
 
-        res.writeHead(response.status, response.statusText, Object.fromEntries(response.headers.entries()));
-        if (!response.body) {
-            res.end();
-            return;
-        }
-
-        const reader = response.body.getReader()
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            await new Promise<void>((resolve, reject) => res.write(value, err => {
-                if (err) reject(err);
-                else resolve();
-            }));
-        }
-
-        res.end();
+        await writeResponse(res, response);
     };
 
     const server = createServer({}, async (req, res) => {
@@ -55,7 +38,7 @@ export function createHttpCNodeServer(options: HttpCServerNodeOptions | IHttpCSe
 }
 
 
-function createRequest(req: IncomingMessage): Request {
+export function createRequest(req: IncomingMessage): Request {
     const url = `http://${req.headers.host}${req.url}`;
     const method = req.method || "GET";
 
@@ -75,4 +58,24 @@ function createRequest(req: IncomingMessage): Request {
     } as RequestInit);
 }
 
+export async function writeResponse(res: ServerResponse, response: Response) {
+    res.writeHead(response.status, response.statusText, Object.fromEntries(response.headers.entries()));
+    if (!response.body) {
+        res.end();
+        return;
+    }
+
+    const reader = response.body.getReader()
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        await new Promise<void>((resolve, reject) => res.write(value, err => {
+            if (err) reject(err);
+            else resolve();
+        }));
+    }
+
+    res.end();
+}
 

@@ -121,7 +121,8 @@ export class HttpCServerError extends HttpCallError {
         noRequestContext: 500,
         missingContextData: 500,
         missingResponse: 500,
-        invalidState: 500
+        invalidState: 500,
+        notSupported: 500,
     };
 
     constructor(errorCode: keyof typeof HttpCServerError.ERRORS, message?: string, call?: HttpCall);

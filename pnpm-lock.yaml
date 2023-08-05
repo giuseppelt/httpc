@@ -238,6 +238,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.1.6
+      valibot:
+        specifier: ^0.10.0
+        version: 0.10.0
       winston:
         specifier: ^3.8.2
         version: 3.8.2
@@ -6809,6 +6812,10 @@ packages:
       '@jridgewell/trace-mapping': 0.3.18
       '@types/istanbul-lib-coverage': 2.0.4
       convert-source-map: 1.9.0
+    dev: true
+
+  /valibot@0.10.0:
+    resolution: {integrity: sha512-/B4tumqDKh9HNjB+VMbZQgF3YlzBovcunl/NBGjEbU9nN7u27xn6MRxIQotXY6ruXaj7U2Zu7m9Vmw7aDAFTbg==}
     dev: true
 
   /validator@13.7.0:

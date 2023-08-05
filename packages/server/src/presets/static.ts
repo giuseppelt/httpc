@@ -1,5 +1,5 @@
+import type { HttpCServerCallParser } from "../requests";
 import { NotFoundError } from "../errors";
-import type { HttpCServerCallParser } from "../processor";
 import { BinaryResponse } from "../responses";
 
 
@@ -93,7 +93,12 @@ export function StaticFileCalls(options: StaticFileCallsOptions) {
             throw new NotFoundError();
         }
 
-        return new BinaryResponse(Buffer.from(desc.data, desc.encoding || "utf8"), {
+
+        const body = desc.encoding === "utf8"
+            ? new TextEncoder().encode(desc.data)
+            : fromUTF16(desc.data);
+
+        return new BinaryResponse(body, {
             contentType: desc.contentType,
             cache: caching?.seconds
         });
@@ -102,4 +107,16 @@ export function StaticFileCalls(options: StaticFileCallsOptions) {
     return {
         [CALL_INTERNAL_GET_STATIC_FILE]: getStaticFile
     };
+}
+
+
+function fromUTF16(string: string) {
+    const chunk = new Uint8Array(string.length * 2);
+    const l = string.length;
+    for (var a = 0; a < l; a++) {
+        var c = string.charCodeAt(a);
+        chunk[a * 2] = c & 0xFF;
+        chunk[a * 2 + 1] = c >> 8;
+    }
+    return chunk;
 }

@@ -1,5 +1,5 @@
 import { createServer, IncomingMessage, RequestListener, Server, ServerResponse } from "node:http";
-import { HttpCServerOptions } from "../processor";
+import { HttpCServerOptions } from "../server";
 import { createHttpCServer, IHttpCServer } from "../server";
 
 
@@ -12,12 +12,12 @@ export function createHttpCNodeServer(options: HttpCServerNodeOptions | IHttpCSe
         : createHttpCServer(options);
 
     const processor = async (req: IncomingMessage, res: ServerResponse) => {
-        const request = createRequest(req);
+        const request = createRequestFromNode(req);
         const response = await httpc.fetch(request).catch(() => {
             return new Response(undefined, { status: 500 });
         });
 
-        await writeResponse(res, response);
+        await writeResponseToNode(res, response);
     };
 
     const server = createServer({}, async (req, res) => {
@@ -38,7 +38,7 @@ export function createHttpCNodeServer(options: HttpCServerNodeOptions | IHttpCSe
 }
 
 
-export function createRequest(req: IncomingMessage): Request {
+export function createRequestFromNode(req: IncomingMessage): Request {
     const url = `http://${req.headers.host}${req.url}`;
     const method = req.method || "GET";
 
@@ -58,7 +58,7 @@ export function createRequest(req: IncomingMessage): Request {
     } as RequestInit);
 }
 
-export async function writeResponse(res: ServerResponse, response: Response) {
+export async function writeResponseToNode(res: ServerResponse, response: Response) {
     res.writeHead(response.status, response.statusText, Object.fromEntries(response.headers.entries()));
     if (!response.body) {
         res.end();

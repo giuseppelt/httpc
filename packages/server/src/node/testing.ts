@@ -1,14 +1,13 @@
-import type { HttpCServerOptions } from "../processor";
+import type { HttpCServerOptions } from "../server";
 import { createHttpCNodeServer } from "./server";
 import { createIncomingMessageMock, IncomingMessageMockParams, createServerResponseMock } from "../node/mocks";
 
 
-export type HttpCServerTesterOptions = HttpCServerOptions & {
-}
+export type HttpCNodeServerTesterOptions = HttpCServerOptions
 
-export type HttpCServerTester = ReturnType<typeof createHttpCServerTester>
+export type HttpCNodeServerTester = ReturnType<typeof createHttpCNodeServerTester>
 
-export function createHttpCServerTester(options: HttpCServerTesterOptions) {
+export function createHttpCNodeServerTester(options: HttpCNodeServerTesterOptions) {
     options = {
         log: false,
         ...options,

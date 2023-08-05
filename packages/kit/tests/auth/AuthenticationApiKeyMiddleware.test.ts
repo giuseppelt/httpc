@@ -195,7 +195,7 @@ describe("AuthenticationApiKeyMiddleware", () => {
 
         for (const schema of schemas) {
             const apiKey = random.uuid();
-            const call = server.newCall().withUrl(`http://localhost/?${schema}=${apiKey}`);
+            const call = server.newCall().withQuery(`${schema}=${apiKey}`);
 
             await expect(call.run()).resolves.toBeUndefined();
             expect(onAuthenticate).toBeCalledWith(apiKey);
@@ -204,7 +204,7 @@ describe("AuthenticationApiKeyMiddleware", () => {
     });
 
     test("missing querystring key extract nothing", async () => {
-        const call = server.newCall().withUrl(`http://localhost/`);
+        const call = server.newCall();
 
         await expect(call.run()).resolves.toBeUndefined();
         expect(onAuthenticate).not.toBeCalled();
@@ -227,7 +227,7 @@ describe("AuthenticationApiKeyMiddleware", () => {
         //cspell:enable
 
         for (const schema of schemas) {
-            const call = server.newCall().withUrl(`http://localhost/?${schema}=`);
+            const call = server.newCall().withQuery(`${schema}=`);
 
             await expect(call.run()).resolves.toBeUndefined();
             expect(onAuthenticate).not.toBeCalled();

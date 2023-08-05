@@ -1,11 +1,14 @@
+import { useContext, useContextProperty } from "./context";
 
-export type LoggerOptions = {
+
+export type LogOptions = {
     level?: LogLevel
     ansi?: boolean
 }
 
 export type LogLevel =
     | "debug"
+    | "verbose"
     | "info"
     | "success"
     | "warn"
@@ -28,7 +31,8 @@ export function createConsoleColors(ansi = true) {
 }
 
 const LogLevel: Record<LogLevel, number> = {
-    debug: 5,
+    debug: 6,
+    verbose: 5,
     info: 4,
     success: 3,
     warn: 2,
@@ -36,7 +40,7 @@ const LogLevel: Record<LogLevel, number> = {
     critical: 0,
 };
 
-export function createLogger(options?: LoggerOptions): Logger {
+export function createLogger(options?: LogOptions): Logger {
     const {
         ansi = true,
         level: levelEnabled = "info",
@@ -65,10 +69,21 @@ export function createLogger(options?: LoggerOptions): Logger {
             console.log(`${yellow("WARN")} ${message}`, ...args);
         } else if (level === "success") {
             console.log(`${green("SUCCESS")} ${message}`, ...args);
+        } else if (level === "verbose") {
+            console.log(`${gray("VERBOSE")} ${gray(message)}`, ...args);
         } else if (level === "debug") {
             console.log(`${gray("DEBUG")} ${gray(message)}`, ...args);
         } else {
             console.log(`${red("INFO")} ${message}`, ...args);
         }
     }
+}
+
+
+export function useLogger(): Logger | undefined {
+    return useContext().logger as Logger; // force to avoid circular dependency from IHttpContext definition
+}
+
+export function useLog(level: LogLevel, message: string, ...args: any) {
+    return (useContext().logger as Logger)?.(level, message, ...args);
 }

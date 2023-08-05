@@ -1,5 +1,5 @@
 import { container as globalContainer } from "tsyringe";
-import { createHttpCServer, HttpCServer, HttpCServerError, HttpCServerOptions, HttpCServerRequestProcessor, IHttpCServer, useContextProperty } from "@httpc/server";
+import { createHttpCServerHandler, HttpCServerError, HttpCServerHandler, HttpCServerOptions, HttpCServerRequestMiddleware, IHttpCServer, useContextProperty } from "@httpc/server";
 import { EnvVariableKey, initializeContainer, KEY, RESOLVE } from "./di";
 import { ILogger } from "./logging";
 import { assert } from "./internal";
@@ -12,7 +12,7 @@ export type ApplicationOptions = HttpCServerOptions & {
 
 export class Application implements IHttpCServer {
     protected _isInitialized: boolean | Promise<void> = false;
-    protected _httpc?: HttpCServer = undefined;
+    protected _httpc?: HttpCServerHandler = undefined;
     protected _logger?: ILogger = undefined;
 
     constructor(protected readonly options: ApplicationOptions) {
@@ -25,7 +25,7 @@ export class Application implements IHttpCServer {
 
         await this.initialize();
 
-        return await this._httpc!.fetch(req, context);
+        return await this._httpc!(req, context);
     }
 
     get logger(): ILogger {
@@ -39,7 +39,7 @@ export class Application implements IHttpCServer {
         }
 
         const initialize = async () => {
-            this._httpc = this._createServer();
+            this._httpc = this._createHandler();
             await initializeContainer();
             this._logger = RESOLVE(globalContainer, "ApplicationLogger");
             this._isInitialized = true;
@@ -47,7 +47,7 @@ export class Application implements IHttpCServer {
 
         return this._isInitialized = initialize().then(() => {
             this._isInitialized = true;
-            this.fetch = this._httpc!.fetch;
+            this.fetch = this._httpc!;
         });
     }
 
@@ -82,12 +82,12 @@ export class Application implements IHttpCServer {
         }
     }
 
-    protected _createServer(): HttpCServer {
-        return createHttpCServer({
+    protected _createHandler() {
+        return createHttpCServerHandler({
             ...this.options,
-            processors: [
-                ContainerRequestProcessor(this.options.container),
-                ...this.options.processors || [],
+            requestMiddlewares: [
+                ContainerRequestMiddleware(this.options.container),
+                ...this.options.requestMiddlewares || [],
             ],
             log: false, // disable server logging, as it's handled by application services
         });
@@ -95,8 +95,8 @@ export class Application implements IHttpCServer {
 }
 
 
-function ContainerRequestProcessor(mode?: "global" | "request"): HttpCServerRequestProcessor {
-    return async () => {
+function ContainerRequestMiddleware(mode?: "global" | "request"): HttpCServerRequestMiddleware {
+    return (req, next) => {
         let container = globalContainer;
 
         if (mode === "request") {
@@ -104,5 +104,7 @@ function ContainerRequestProcessor(mode?: "global" | "request"): HttpCServerRequ
         }
 
         useContextProperty("container", container);
-    }
+
+        return next(req);
+    };
 }

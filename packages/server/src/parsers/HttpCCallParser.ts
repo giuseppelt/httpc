@@ -1,4 +1,4 @@
-import type { HttpCServerCallParser } from "../processor";
+import type { HttpCServerCallParser } from "../requests";
 import { BadRequestError, HttpCServerError } from "../errors";
 import Parser from "./Parser";
 
@@ -36,9 +36,18 @@ export function HttpCCallParser(options: HttpCCallParserOptions): HttpCServerCal
     }
 
     async function paramsFromBody(req: Request): Promise<any[]> {
+        if (!req.body) {
+            return [];
+        }
+
         const contentType = req.headers.get("content-type");
         if (contentType && Parser.contentType(contentType).mediaType !== "application/json") {
             throw new HttpCServerError("unsupportedMediaType", `Content type '${contentType}' not supported`);
+        }
+
+        const contentLength = req.headers.get("content-length");
+        if (contentLength === "0") {
+            return [];
         }
 
         try {

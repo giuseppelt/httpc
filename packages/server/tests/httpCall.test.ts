@@ -1,5 +1,5 @@
-import { useContext } from "../src";
-import { httpCallTester, testContext } from "../src/testing";
+import { useContext, httpCallTester, testContext } from "../src";
+
 
 describe("httpCall", () => {
 

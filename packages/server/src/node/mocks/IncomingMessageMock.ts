@@ -32,10 +32,10 @@ export function createIncomingMessageMock(params: IncomingMessageMockParams): In
         }
     }
 
-    const content = Readable.from(buffer || Buffer.from([]));
+    const content = Readable.from(buffer || []);
 
     return Object.assign(content, {
-        url: new URL(path, "http://localhost").toString(),
+        url: path,
         method,
         headers: normalizeHeaders(headers),
     }) as unknown as IncomingMessage;

@@ -49,7 +49,7 @@ export class BinaryResponse extends HttpCServerResponse {
 
         const status = this.statusCode || 200;
         const headers = {
-            ...this.headers,
+            ...this.getHeaders(),
             ...bodyLength !== undefined ? {
                 "Content-Length": bodyLength.toString()
             } : undefined,

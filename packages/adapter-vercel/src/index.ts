@@ -1,6 +1,6 @@
-import type { IncomingMessage, ServerResponse } from "http";
-import { HttpCServerOptions, IHttpCServer, createHttpCServer } from "@httpc/server";
-import { createRequest, writeResponse } from "@httpc/server/node";
+import type { IncomingMessage, ServerResponse } from "node:http";
+import { HttpCServerHandler, HttpCServerOptions, createHttpCServerHandler } from "@httpc/server";
+import { createRequestFromNode, writeResponseToNode } from "@httpc/server/node";
 
 
 export type HttpCVercelAdapterOptions = Pick<HttpCServerOptions,
@@ -19,20 +19,20 @@ export type HttpCVercelAdapterOptions = Pick<HttpCServerOptions,
 }
 
 
-let server: IHttpCServer | undefined;
+let server: HttpCServerHandler | undefined;
 
 //TODO: add a @httpc/kit solution
 
 export function createHttpCVercelAdapter(options: HttpCVercelAdapterOptions) {
-    const local = (!server || options.refresh)
-        ? (server = createHttpCServer({ path: "api", ...options }))
+    const handler = (!server || options.refresh)
+        ? (server = createHttpCServerHandler({ path: "api", ...options }))
         : server;
 
     return async (req: IncomingMessage, res: ServerResponse) => {
         try {
-            const request = createRequest(req);
-            const response = await local.fetch(request);
-            await writeResponse(res, response);
+            const request = createRequestFromNode(req);
+            const response = await handler(request);
+            await writeResponseToNode(res, response);
         } catch (err) {
             console.error(err);
 

@@ -22,7 +22,7 @@ export class JsonResponse extends HttpCServerResponse {
         // treat undefined as null, as undefined is not a valid json
         const body = JSON.stringify(this.body ?? null);
         const headers = {
-            ...this.headers,
+            ...this.getHeaders(),
             ...body ? {
                 "Content-Type": "application/json; charset=utf-8",
                 "Content-Length": body.length.toString()

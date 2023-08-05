@@ -1,4 +1,4 @@
-import type { HttpCall } from "./processor";
+import type { HttpCall } from "./requests";
 
 
 export type ErrorInfo = {
@@ -120,6 +120,7 @@ export class HttpCServerError extends HttpCallError {
         renderNotFound: 500,
         noRequestContext: 500,
         missingContextData: 500,
+        missingResponse: 500,
         invalidState: 500
     };
 

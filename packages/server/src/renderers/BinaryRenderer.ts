@@ -1,14 +1,13 @@
-import type { HttpCServerRenderer } from "../processor";
+import type { HttpCServerCallRenderer } from "../requests";
 import { BinaryResponse } from "../responses";
 
 
-export function BinaryRenderer(): HttpCServerRenderer {
+export function BinaryRenderer(): HttpCServerCallRenderer {
     return async result => {
 
         if (result && (
-            result instanceof Buffer ||
-            result instanceof ArrayBuffer ||
-            result instanceof Uint8Array
+            result instanceof Uint8Array ||
+            result instanceof ArrayBuffer
         )) {
             return new BinaryResponse(result);
         }

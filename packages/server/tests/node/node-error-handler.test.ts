@@ -1,5 +1,4 @@
-import { HttpCServerOptions, PassthroughMiddleware, createHttpCServerTester } from "../src";
-import { createRequest } from "./utils";
+import { createHttpCNodeServerTester, HttpCServerOptions, PassthroughMiddleware } from "../../src";
 
 
 type ErrorHandler = NonNullable<HttpCServerOptions["onError"]>;
@@ -13,12 +12,12 @@ describe("Global error handling", () => {
     test("No error, error handler not called", async () => {
         const handler = jest.fn(() => Promise.resolve());
 
-        const server = createHttpCServerTester({
+        const server = createHttpCNodeServerTester({
             calls,
             onError: handler
         });
 
-        await server.fetch(createRequest({ path: "/test", method: "GET" }));
+        await server.process({ path: "/test", method: "GET" });
 
         expect(handler).not.toBeCalled();
     });
@@ -26,14 +25,14 @@ describe("Global error handling", () => {
     test("When a call returns an Error, the error handler invoked with 'call' level", async () => {
         const handler = jest.fn(() => Promise.resolve());
 
-        const server = createHttpCServerTester({
+        const server = createHttpCNodeServerTester({
             calls: {
                 test: () => { return new Error(); }
             },
             onError: handler
         });
 
-        await server.fetch(createRequest({ path: "/test", method: "GET" }));
+        await server.process({ path: "/test", method: "GET" });
 
         expect(handler).toBeCalledTimes(1);
         expect(handler).toBeCalledWith<[ErrorHandlerLevel, Error]>("call", expect.any(Error));
@@ -42,14 +41,14 @@ describe("Global error handling", () => {
     test("When a call throws an Error, the error handler invoked with 'pipeline' level", async () => {
         const handler = jest.fn(() => Promise.resolve());
 
-        const server = createHttpCServerTester({
+        const server = createHttpCNodeServerTester({
             calls: {
                 test: () => { throw new Error(); }
             },
             onError: handler
         });
 
-        await server.fetch(createRequest({ path: "/test", method: "GET" }));
+        await server.process({ path: "/test", method: "GET" });
 
         expect(handler).toBeCalledTimes(1);
         expect(handler).toBeCalledWith<[ErrorHandlerLevel, Error]>("pipeline", expect.any(Error));
@@ -58,7 +57,7 @@ describe("Global error handling", () => {
     test("When a middleware throws an Error, the error handler invoked with 'pipeline' level", async () => {
         const handler = jest.fn(() => Promise.resolve());
 
-        const server = createHttpCServerTester({
+        const server = createHttpCNodeServerTester({
             middlewares: [
                 PassthroughMiddleware(() => { throw new Error() })
             ],
@@ -66,7 +65,7 @@ describe("Global error handling", () => {
             onError: handler
         });
 
-        await server.fetch(createRequest({ path: "/test", method: "GET" }));
+        await server.process({ path: "/test", method: "GET" });
 
         expect(handler).toBeCalledTimes(1);
         expect(handler).toBeCalledWith<[ErrorHandlerLevel, Error]>("pipeline", expect.any(Error));
@@ -75,7 +74,7 @@ describe("Global error handling", () => {
     test("When a parser throws an Error, the error handler invoked with 'pipeline' level", async () => {
         const handler = jest.fn(() => Promise.resolve());
 
-        const server = createHttpCServerTester({
+        const server = createHttpCNodeServerTester({
             parsers: [
                 () => { throw new Error(); }
             ],
@@ -83,7 +82,7 @@ describe("Global error handling", () => {
             onError: handler
         });
 
-        await server.fetch(createRequest({ path: "/test", method: "GET" }));
+        await server.process({ path: "/test", method: "GET" });
 
         expect(handler).toBeCalledTimes(1);
         expect(handler).toBeCalledWith<[ErrorHandlerLevel, Error]>("pipeline", expect.any(Error));
@@ -92,7 +91,7 @@ describe("Global error handling", () => {
     test("When a requestMiddlewares throws an Error, the error handler invoked with 'server' level", async () => {
         const handler = jest.fn(() => Promise.resolve());
 
-        const server = createHttpCServerTester({
+        const server = createHttpCNodeServerTester({
             requestMiddlewares: [
                 () => { throw new Error(); }
             ],
@@ -100,7 +99,7 @@ describe("Global error handling", () => {
             onError: handler
         });
 
-        await server.fetch(createRequest({ path: "/test", method: "GET" }));
+        await server.process({ path: "/test", method: "GET" });
 
         expect(handler).toBeCalledTimes(1);
         expect(handler).toBeCalledWith<[ErrorHandlerLevel, Error]>("server", expect.any(Error));

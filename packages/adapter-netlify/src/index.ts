@@ -1,4 +1,4 @@
-import { HttpCServer, HttpCServerOptions, createHttpCServer } from "@httpc/server";
+import { HttpCServerOptions, createHttpCServerHandler, HttpCServerHandler } from "@httpc/server";
 import type { Handler, HandlerEvent } from "@netlify/functions";
 
 
@@ -19,18 +19,18 @@ export type HttpCNetlifyAdapterOptions = Pick<HttpCServerOptions,
 }
 
 
-let server: HttpCServer | undefined;
+let server: HttpCServerHandler | undefined;
 
 //TODO: add a @httpc/kit solution
 
 export function createHttpCNetlifyHandler(options: HttpCNetlifyAdapterOptions): Handler {
     const handler = (!server || options.refresh)
-        ? (server = createHttpCServer(options))
+        ? (server = createHttpCServerHandler(options))
         : server;
 
     return async (event, context) => {
         const request = createRequest(event);
-        const response = await handler.fetch(request, {
+        const response = await handler(request, {
             requestId: context.awsRequestId
         });
 

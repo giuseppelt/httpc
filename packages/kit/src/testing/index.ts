@@ -1,6 +1,7 @@
-import { HttpCServerMiddleware, HttpCallMetadata, HttpCallAccess, httpPipelineTester, httpCall, HttpCServerTester, createHttpCServerTester, useContextProperty, PassthroughMiddleware, CallBuilder } from "@httpc/server"
-import { container as globalContainer, DependencyContainer } from "tsyringe";
-import { initializeContainer } from "../di";
+import { HttpCServerMiddleware, HttpCallMetadata, HttpCallAccess, useContextProperty, PassthroughMiddleware, CallBuilder } from "@httpc/server"
+import { container as globalContainer, DependencyContainer, container } from "tsyringe";
+import { KEY, initializeContainer } from "../di";
+import { NullLoggerService } from "../logging";
 
 
 export type ApplicationTesterOptions = {
@@ -9,7 +10,7 @@ export type ApplicationTesterOptions = {
 }
 
 export class ApplicationTester {
-    protected server!: HttpCServerTester;
+    // protected server!: HttpCServerTester;
     protected _middlewares?: HttpCServerMiddleware[] | undefined;
     protected _container: DependencyContainer;
 
@@ -32,6 +33,7 @@ export class ApplicationTester {
     }
 
     async initialize() {
+        container.register(KEY("ILogService"), NullLoggerService);
         await initializeContainer(this._container);
     }
 

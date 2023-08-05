@@ -1,4 +1,4 @@
-import type { HttpCallPipelineDefinition, HttpCServerMiddleware, HttpCallAccess } from "../processor";
+import type { HttpCallPipelineDefinition, HttpCServerMiddleware, HttpCallAccess } from "../requests";
 import { randomUUID } from "../utils";
 import { useContextProperty } from "../context";
 import { PassthroughMiddleware } from "../middlewares";
@@ -62,7 +62,7 @@ export type CallBuilderOptions = {
 
 export class CallBuilder {
     protected _headers = {};
-    protected _url: string | undefined;
+    protected _url: string = "http://localhost";
     protected _context = {};
     protected _middlewares: HttpCServerMiddleware[];
 
@@ -76,7 +76,21 @@ export class CallBuilder {
     }
 
     withUrl(url: string): this {
-        this._url = url;
+        this._url = url || "http://localhost";
+        return this;
+    }
+
+    withQuery(queryString: string | URLSearchParams): this {
+        if (typeof queryString !== "string") queryString = queryString.toString();
+        if (queryString.startsWith("?")) queryString = queryString.substring(1);
+
+        this._url = new URL("?" + queryString, "http://localhost").toString();
+
+        return this;
+    }
+
+    withPath(path: string): this {
+        this._url = new URL(path, "http://localhost").toString();
         return this;
     }
 
@@ -117,16 +131,16 @@ export class CallBuilder {
 
     private _buildRequest(): Request {
         return {
-            headers: normalizeHeaders(this._headers) as any,
-            url: this._url,
+            headers: new Headers(this._headers),
+            url: this._url
         } as Request;
     }
 }
 
 
-function normalizeHeaders(headers?: Record<string, number>) {
-    if (!headers) return {};
-    return Object.fromEntries(
-        Object.entries(headers || {}).map(([key, value]) => [key.toLowerCase(), value])
-    );
-}
+// function normalizeHeaders(headers?: Record<string, number>) {
+//     if (!headers) return {};
+//     return Object.fromEntries(
+//         Object.entries(headers || {}).map(([key, value]) => [key.toLowerCase(), value])
+//     );
+// }

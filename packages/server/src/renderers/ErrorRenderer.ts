@@ -1,8 +1,8 @@
-import type { HttpCServerRenderer } from "../processor";
+import type { HttpCServerCallRenderer } from "../requests";
 import { ErrorResponse, JsonResponse } from "../responses";
 
 
-export function ErrorRenderer(): HttpCServerRenderer {
+export function ErrorRenderer(): HttpCServerCallRenderer {
     return async result => {
         if (!result || !(result instanceof Error)) {
             return;

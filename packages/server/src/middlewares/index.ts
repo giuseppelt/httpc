@@ -1,2 +1,2 @@
 export * from "./PassthroughMiddleware";
-export * from "./LogRequestMiddleware";
+export * from "./LogCallMiddleware";

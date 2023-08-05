@@ -1,20 +1,19 @@
-import { performance } from "perf_hooks";
 import { HttpCall, HttpCServerMiddleware, useContext } from "@httpc/server";
 import { useLogger } from "./context";
 import { ILogger } from "./types";
 
 
-export type RequestLoggerParts = {
+export type CallLoggerSections = {
     logBegin?: boolean
     logRequestId?: boolean
     logParameters?: boolean
     logResult?: boolean
 }
 
-export type RequestLoggerMiddlewareOptions = RequestLoggerParts & Readonly<{
+export type CallLoggerMiddlewareOptions = CallLoggerSections & Readonly<{
 }>
 
-const PRESET: Record<string, RequestLoggerParts> = {
+const PRESET: Record<string, CallLoggerSections> = {
     defaults: {
         logBegin: true,
         logParameters: false,
@@ -35,7 +34,7 @@ const PRESET: Record<string, RequestLoggerParts> = {
     }
 };
 
-export function RequestLoggerMiddleware(options?: RequestLoggerMiddlewareOptions): HttpCServerMiddleware {
+export function CallLoggerMiddleware(options?: CallLoggerMiddlewareOptions): HttpCServerMiddleware {
     const preset = PRESET[process.env.NODE_ENV || ""] || PRESET.defaults;
 
     const {
@@ -57,7 +56,7 @@ export function RequestLoggerMiddleware(options?: RequestLoggerMiddlewareOptions
 
     function writeEnd(logger: ILogger, requestId: string, call: HttpCall, begin: number, result: any) {
         requestId = logRequestId ? `(${requestId})` : "";
-        const duration = (performance.now() - begin).toFixed(0);
+        const duration = Date.now() - begin;
         const level = result && result instanceof Error ? "error" : "info";
 
         if (level === "info") {
@@ -74,7 +73,7 @@ export function RequestLoggerMiddleware(options?: RequestLoggerMiddlewareOptions
         const { requestId } = useContext();
         const logger = useLogger();
 
-        const timestamp = performance.now();
+        const timestamp = Date.now();
 
         if (logBegin) {
             writeBegin(logger, requestId, call);

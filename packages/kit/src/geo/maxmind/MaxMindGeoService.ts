@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import os from "os";
 import path from "path";
-import { downloadTo, exists, unzip } from "../../node";
+import { downloadTo, exists, unzip } from "../../node/index.internal";
 import { singleton } from "tsyringe";
 import type { Reader, CityResponse } from "maxmind";
 import type { ILogger } from "../../logging";

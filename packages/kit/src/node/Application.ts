@@ -15,7 +15,7 @@ export class NodeApplication extends Application {
     override async initialize(): Promise<true | void> {
         await super.initialize();
 
-        createHttpCNodeServer(this);
+        this._server = createHttpCNodeServer(this);
     }
 
     start(port?: number) {

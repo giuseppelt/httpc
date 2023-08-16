@@ -12,6 +12,10 @@ export class NodeApplication extends Application {
     protected _server?: Server = undefined;
     protected readonly options!: NodeApplicationOptions; // retype
 
+    constructor(options: NodeApplicationOptions) {
+        super(options);
+    }
+
     override async initialize(): Promise<true | void> {
         await super.initialize();
 

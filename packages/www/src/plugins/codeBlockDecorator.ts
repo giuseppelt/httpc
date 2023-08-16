@@ -1,6 +1,6 @@
 import type { AstroIntegration } from "astro";
 import type { Root, Code } from "mdast";
-import type { Element } from "hast";
+import type { Content, Element, ElementContent, Parent } from "hast";
 import { visit, SKIP } from "unist-util-visit";
 
 
@@ -86,6 +86,14 @@ function enrichCode(info: ReturnType<typeof parseMeta>, codeElement: Element) {
 }
 
 function rehypeCodeBlockDecorator() {
+    function flatLine(node: Content): string {
+        if (!node) return "";
+        if (node.type === "text")
+            return node.value;
+
+        return (node as Parent)?.children.map((x: any) => flatLine(x)).join("");
+    }
+
     return () => (tree: Root, file: any) => {
         visit(tree, "element", (node: Element) => {
             let children: any[] = node.children;
@@ -93,19 +101,22 @@ function rehypeCodeBlockDecorator() {
                 return;
             }
 
+            const codeElement = node.children[0] as Parent;
+
             let meta: string | undefined;
-            const metaNode = children?.[0]?.children?.[0]?.children?.[0]?.children[0];
-            if (metaNode && metaNode.type === "text" && metaNode.value.startsWith("// meta:")) {
+            const firstLine = flatLine(codeElement.children[0]);
+            if (firstLine && firstLine.startsWith("// meta:")) {
                 // remove node
-                children?.[0].children.splice(0, 1);
+                codeElement.children.splice(0, 1);
 
                 // remove eventual break
-                if (children?.[0].children?.[0]?.value === "\n") {
-                    children?.[0].children.splice(0, 1);
+                if ((codeElement.children[0] as any)?.value === "\n") {
+                    codeElement.children.splice(0, 1);
                 }
 
-                meta = metaNode.value.substring("// meta:".length).trim() || undefined;
+                meta = firstLine.substring("// meta:".length).trim() || undefined;
             }
+
 
             if (!meta) {
                 return [SKIP];

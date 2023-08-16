@@ -18,7 +18,7 @@
     "@astrojs/sitemap": "^1.2.2",
     "@fontsource/mulish": "^4.5.14",
     "astro": "^2.10.9",
-    "astro-compress": "^1.1.36",
+    "astro-compress": "^2.0.12",
     "astro-integration-lottie": "^0.2.3",
     "lottie-web": "^5.11.0",
     "preact": "^10.13.2",

@@ -1,6 +1,6 @@
 import { inject, InjectionToken, registry, container, injectWithTransform, DependencyContainer } from "tsyringe";
 import { assert } from "../internal";
-import { Constructor, CONTAINER_KEY, KEY } from "./keys";
+import { Constructor, CONTAINER_KEY, EnvVariableKey, KEY } from "./keys";
 
 
 export function combine<T extends (...args: any[]) => any>(...decorators: T[]): T {
@@ -32,7 +32,7 @@ export function initializer(): ClassDecorator {
     return alias(KEY("IInitialize"));
 }
 
-export function env(variableName: string, defaultValue?: any): ParameterDecorator {
+export function env(variableName: EnvVariableKey, defaultValue?: any): ParameterDecorator {
     const key = KEY("ENV", variableName);
     const isOptional = arguments.length === 2;
 

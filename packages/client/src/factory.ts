@@ -2,6 +2,11 @@ import { HttpCallDefinition, HttpCClientMetadata, HttpCTypedClient, HttpCTypedCl
 import { isCall } from "./utils";
 
 
+const EXCLUDE_METHODS = [
+    "then",
+    "dispose"
+];
+
 export function createClient<T extends {}>(options: HttpCTypedClientOptions = {}): T & HttpCTypedClient {
     const client = new HttpCTypedClient(options);
     const {
@@ -9,6 +14,7 @@ export function createClient<T extends {}>(options: HttpCTypedClientOptions = {}
         mode = metadata ? "strict" : "loose"
     } = options;
 
+    const EXCLUDE = EXCLUDE_METHODS;
     const TARGET = () => { };
 
     function createMethod(path: string, op: HttpCallDefinition) {
@@ -40,6 +46,10 @@ export function createClient<T extends {}>(options: HttpCTypedClientOptions = {}
                 }
 
                 if (mode === "loose" && typeof property === "string") {
+                    if (EXCLUDE_METHODS.includes(property)) {
+                        return undefined;
+                    }
+
                     return createProxy(joinPath(path, property));
                 }
 

@@ -8,6 +8,7 @@ export * from "./responses";
 export * from "./pipeline";
 export * from "./presets";
 export * from "./middlewares";
+export { useLog } from "./logger";
 export * from "./testing";
 export * from "./server";
 export * from "./node";

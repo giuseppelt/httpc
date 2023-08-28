@@ -1,4 +1,4 @@
-import { useContext, useContextProperty } from "./context";
+import { useContext } from "./context";
 
 
 export type LogOptions = {

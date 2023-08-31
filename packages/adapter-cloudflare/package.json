@@ -1,7 +1,7 @@
 {
     "name": "@httpc/adapter-cloudflare",
     "description": "Adapter for hosting on Cloudflare worker or pages an httpc API",
-    "version": "0.0.1-pre20230812124313",
+    "version": "0.0.1-pre20230831141721",
     "type": "module",
     "author": {
         "name": "Giuseppe La Torre",

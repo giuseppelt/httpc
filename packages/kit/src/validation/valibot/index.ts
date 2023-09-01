@@ -14,7 +14,7 @@ export class ValibotValidator implements IValidator {
         }
 
         const s = schema as BaseSchema & { schema: string };
-        if (!s.schema || !s.parse) {
+        if (!s.schema || !s._parse) {
             return false;
         }
 

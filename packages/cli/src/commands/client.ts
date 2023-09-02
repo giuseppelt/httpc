@@ -129,7 +129,9 @@ const generate = createCommand("generate")
     .action(async (cmdOptions: GenerateCommandOptions) => {
         const configs = await readConfig();
 
-        const tsConfigPath = path.resolve("tsconfig.json");
+        const tsConfigPath = await fsUtils.exists("tsconfig.client.json")
+            ? path.resolve("tsconfig.client.json")
+            : path.resolve("tsconfig.json");
         const tsConfig = ts.readConfigFile(tsConfigPath, ts.sys.readFile);
         const { options, fileNames } = ts.parseJsonConfigFileContent(tsConfig.config, ts.sys, ".");
 

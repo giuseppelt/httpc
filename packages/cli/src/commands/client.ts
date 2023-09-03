@@ -121,20 +121,34 @@ const init = createCommand("init")
 
 type GenerateCommandOptions = Readonly<{
     debug?: boolean
+    tsConfig?: string
 }>
 
 const generate = createCommand("generate")
     .description("generate a client typings")
     .option("-d, --debug", "enable compilation settings like sourcemaps")
+    .option("-tc, --ts-config <tsconfig>", "path to a custom typescript config")
     .action(async (cmdOptions: GenerateCommandOptions) => {
         const configs = await readConfig();
 
-        const tsConfigPath = await fsUtils.exists("tsconfig.client.json")
-            ? path.resolve("tsconfig.client.json")
-            : path.resolve("tsconfig.json");
+
+        let tsConfigPath: string;
+        if (cmdOptions.tsConfig) {
+            tsConfigPath = path.resolve(".", cmdOptions.tsConfig);
+            if (!await fsUtils.exists(tsConfigPath)) {
+                throw new Error(`Custom tsConfig(${cmdOptions.tsConfig}) not found`);
+            }
+        } else {
+            tsConfigPath = await fsUtils.exists("tsconfig.client.json")
+                ? path.resolve("tsconfig.client.json")
+                : path.resolve("tsconfig.json");
+        }
+
+        log.verbose("TsConfig from " + path.relative(".", tsConfigPath));
+
+
         const tsConfig = ts.readConfigFile(tsConfigPath, ts.sys.readFile);
         const { options, fileNames } = ts.parseJsonConfigFileContent(tsConfig.config, ts.sys, ".");
-
 
         for (const config of configs) {
             const entry = path.resolve(config.entry);

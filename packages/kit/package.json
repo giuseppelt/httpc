@@ -1,7 +1,7 @@
 {
     "name": "@httpc/kit",
     "description": "httpc toolbox for building function-based API with minimal code and end-to-end type safety",
-    "version": "0.2.0-pre20230903101129",
+    "version": "0.2.0-pre20230904104045",
     "author": {
         "name": "Giuseppe La Torre",
         "url": "https://github.com/giuseppelt"

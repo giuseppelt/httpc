@@ -1,7 +1,7 @@
 import { injectable } from "tsyringe";
 import { fetch, Response } from "../fetch";
 import type { ILogger } from "../logging";
-import type { EmailRecipient, IEmailSender, SendEmailParams } from "./types";
+import type { EmailRecipient, IEmailSender, EmailMessage } from "./types";
 import { BaseService } from "../services";
 import { assert } from "../internal";
 import { options } from "../di";
@@ -30,7 +30,7 @@ export class MailersendEmailSender extends BaseService() implements IEmailSender
     }
 
 
-    async send(params: SendEmailParams) {
+    async send(params: EmailMessage) {
         assert(!!(params.bodyHtml || params.bodyText), "one of bodyHtml and bodyText is required");
 
         if (Array.isArray(params.to)) {

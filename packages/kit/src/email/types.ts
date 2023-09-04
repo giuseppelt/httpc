@@ -4,16 +4,16 @@ export type EmailRecipient = string | Readonly<{
     email: string
 }>
 
-export type SendEmailParams = {
-    subject: string
-    from?: EmailRecipient
+export type EmailMessage = {
+    from: EmailRecipient
     to: EmailRecipient | EmailRecipient[]
     cc?: EmailRecipient | EmailRecipient[]
     bcc?: EmailRecipient | EmailRecipient[]
+    subject?: string
     bodyHtml?: string
     bodyText?: string
 }
 
 export interface IEmailSender {
-    send(params: SendEmailParams): Promise<void>
+    send(params: EmailMessage): Promise<void>
 }

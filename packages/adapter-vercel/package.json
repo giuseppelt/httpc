@@ -61,13 +61,13 @@
         "@httpc/kit": "workspace:*",
         "@httpc/server": "workspace:*",
         "@types/express": "^4.17.17",
-        "@types/jest": "^29.5.0",
+        "@types/jest": "^29.5.5",
         "@types/node": "^16.18.23",
-        "jest": "^29.5.0",
+        "jest": "^29.7.0",
         "node-mocks-http": "^1.12.2",
         "reflect-metadata": "^0.1.13",
         "rimraf": "^5.0.0",
-        "ts-jest": "^29.1.0",
+        "ts-jest": "^29.1.1",
         "tsyringe": "^4.8.0",
         "typescript": "^5.1.6"
     }

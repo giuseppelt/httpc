@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@astrojs/mdx": "^0.19.6",
-    "@astrojs/preact": "^2.1.0",
+    "@astrojs/preact": "^2.2.2",
     "@astrojs/rss": "^2.4.4",
     "@astrojs/sitemap": "^1.2.2",
     "@fontsource/mulish": "^4.5.14",

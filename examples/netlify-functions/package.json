@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@types/node": "~16",
-    "netlify-cli": "^12.2.9",
+    "netlify-cli": "^16.5.1",
     "typescript": "^4.9.4"
   },
   "dependencies": {

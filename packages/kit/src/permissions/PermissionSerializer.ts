@@ -1,7 +1,7 @@
-import { AuthClaim, AssertionClaim, GrantClaim, TokenClaim, Authorization, Assertion } from ".";
+import { PermissionToken, AuthClaim, AssertionClaim, Authorization, Assertion } from "./models";
 
 
-function serializeTokenClaim(token: TokenClaim): string {
+function serializeTokenClaim(token: PermissionToken): string {
     return typeof token === "string" ? token : token.join(":");
 }
 

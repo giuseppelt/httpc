@@ -1,54 +1,73 @@
-import { TokenClaim } from ".";
+import type { PermissionTokenRawValue, PermissionToken, PermissionAtomToken, PermissionCompositeToken, PermissionTokenWildcard } from "./models";
+import { PERMISSION_TOKEN_WILDCARD } from "./models";
+import Parser from "./Parser";
 
 
-export function simplify(token: TokenClaim) {
-    if (typeof token === "string") {
-        return token;
-    } else if (token.length === 1) {
-        return token[0];
-    } else {
-        return token;
-    }
+function parse(token: PermissionTokenRawValue) {
+    return Parser.parseToken(token);
 }
 
-function matchSingle(source: string, target: string): boolean {
-    return source === target || target === "*";
+function isAtom(token: PermissionToken): token is PermissionAtomToken {
+    return typeof token === "string";
 }
 
-export function match(source: TokenClaim, target: TokenClaim): boolean {
-    // simplify first
-    source = simplify(source);
-    target = simplify(target);
+function isComposite(token: PermissionToken): token is PermissionCompositeToken {
+    return typeof token !== "string";
+}
 
-    if (typeof source === "string" && typeof target === "string") {
-        return matchSingle(source, target);
-    }
+function clone(token: PermissionToken): PermissionToken;
+function clone(token: PermissionToken | undefined): PermissionToken | undefined;
+function clone(token: PermissionToken | undefined): PermissionToken | undefined {
+    if (!token) return;
 
-    if (Array.isArray(source) && Array.isArray(target)) {
-        if (source.length !== target.length) return false;
+    return typeof token === "string"
+        ? token
+        : token.slice() as any as PermissionToken;
+}
 
-        for (let a = 0; a < source.length; a++) {
-            if (!matchSingle(source[a], target[a])) return false;
-        }
+function matchAtom(source: PermissionAtomToken, target: PermissionAtomToken | PermissionTokenWildcard): boolean {
+    return source === target || target === PERMISSION_TOKEN_WILDCARD;
+}
 
+function match(source: PermissionToken, target: PermissionToken): boolean {
+    if (source === target) {
         return true;
+    }
+
+    if (isAtom(source) && isAtom(target)) {
+        return matchAtom(source, target);
+    }
+
+    if (isComposite(source) && isComposite(target)) {
+        return (
+            matchAtom(source[0] as PermissionAtomToken, target[0] as PermissionAtomToken) &&
+            matchAtom(source[1] as PermissionAtomToken, target[1] as PermissionAtomToken)
+        );
     }
 
     return false;
 }
 
-export function equals(t1: TokenClaim, t2: TokenClaim) {
-    t1 = simplify(t1);
-    t2 = simplify(t2);
-
+function equals(t1: PermissionToken, t2: PermissionToken) {
+    // this matches:
+    // - both atoms
+    // - same composite instances
     if (t1 === t2) return true;
 
-    if (Array.isArray(t1) && Array.isArray(t2) && t1.length === t2.length) {
-        for (let a = 0; a < t1.length; a++) {
-            if (t1[a] !== t2[a]) return false;
-        }
-        return true;
+    // needs only to match composite here
+    if (isComposite(t1) && isComposite(t2)) {
+        return t1[0] == t2[0] && t1[1] === t2[1];
     }
 
     return false;
+}
+
+
+export default {
+    isAtom,
+    isComposite,
+    parse,
+    clone,
+    match,
+    equals,
 }

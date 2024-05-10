@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { Assertion, Authorization, PermissionsChecker } from "../src/permissions";
-import { permissions } from "../src/permissions/model";
+import { permissions } from "../src/permissions";
 
 
 declare global {
@@ -121,22 +121,22 @@ describe("Permissions model", () => {
 
     test("typescript autocomplete", () => {
         const model = permissions(p => p
-            .token("role", t => t
+            .composite("role", t => t
                 .alias("r")
-                .token("viewer")
-                .token("editor", t => t
+                .child("viewer")
+                .child("editor", t => t
                     .includes("role:viewer")
                 )
             )
-            .token("owner", t => t
+            .atom("owner", t => t
                 .alias("o")
                 .includes([
                     "role:viewer",
                     "role:editor"
                 ])
             )
-            .token("admin")
-            .token("super-admin", t => t
+            .atom("admin")
+            .atom("super-admin", t => t
                 .includes("admin")
             )
         );
@@ -152,7 +152,7 @@ describe("Permissions model", () => {
 
         test("support defined token (invariant case)", () => {
             const model = permissions(p => p
-                .token("Defined")
+                .atom("Defined")
             );
             const checker = new PermissionsChecker({ model });
 
@@ -162,7 +162,7 @@ describe("Permissions model", () => {
 
         test("support alias token (invariant case)", () => {
             const model = permissions(p => p
-                .token("Defined", t => t
+                .atom("Defined", t => t
                     .alias("def")
                 )
             );
@@ -174,7 +174,7 @@ describe("Permissions model", () => {
 
         test("support multiple alias token (invariant case)", () => {
             const model = permissions(p => p
-                .token("Defined", t => t
+                .atom("Defined", t => t
                     .alias("def")
                     .alias("d")
                 )
@@ -189,9 +189,9 @@ describe("Permissions model", () => {
 
         test("support composite token (invariant case)", () => {
             const model = permissions(p => p
-                .token("Defined", t => t
-                    .token("child1")
-                    .token("child2")
+                .composite("Defined", t => t
+                    .child("child1")
+                    .child("child2")
                 )
             );
 
@@ -205,10 +205,10 @@ describe("Permissions model", () => {
 
         test("support composite aliased token (invariant case)", () => {
             const model = permissions(p => p
-                .token("Defined", t => t
+                .composite("Defined", t => t
                     .alias("d")
-                    .token("child1")
-                    .token("child2")
+                    .child("child1")
+                    .child("child2")
                 )
             );
 
@@ -222,12 +222,12 @@ describe("Permissions model", () => {
 
         test("support composite aliased-child token (invariant case)", () => {
             const model = permissions(p => p
-                .token("Defined", t => t
+                .composite("Defined", t => t
                     .alias("d")
-                    .token("child1", t => t
+                    .child("child1", t => t
                         .alias("c1")
                     )
-                    .token("child2")
+                    .child("child2")
                 )
             );
 
@@ -241,7 +241,7 @@ describe("Permissions model", () => {
 
         test("support root wildcard", () => {
             const model = permissions(p => p
-                .token("Defined")
+                .atom("Defined")
             );
             const checker = new PermissionsChecker({ model });
 
@@ -250,10 +250,10 @@ describe("Permissions model", () => {
 
         test("support composite wildcard", () => {
             const model = permissions(p => p
-                .token("Defined", t => t
+                .composite("Defined", t => t
                     .alias("d")
-                    .token("child1")
-                    .token("child2")
+                    .child("child1")
+                    .child("child2")
                 )
             );
             const checker = new PermissionsChecker({ model });
@@ -263,9 +263,9 @@ describe("Permissions model", () => {
 
         test("no support for single token when composite", () => {
             const model = permissions(p => p
-                .token("Defined", t => t
-                    .token("child1")
-                    .token("child2")
+                .composite("Defined", t => t
+                    .child("child1")
+                    .child("child2")
                 )
             );
 
@@ -277,7 +277,7 @@ describe("Permissions model", () => {
 
         test("no support for not defined token", () => {
             const model = permissions(p => p
-                .token("Defined")
+                .atom("Defined")
             );
             const checker = new PermissionsChecker({ model });
 
@@ -286,7 +286,7 @@ describe("Permissions model", () => {
 
         test("no support for different level token", () => {
             const model = permissions(p => p
-                .token("Defined")
+                .atom("Defined")
             );
             const checker = new PermissionsChecker({ model });
 
@@ -297,8 +297,8 @@ describe("Permissions model", () => {
 
         test("must support all claims when multiple", () => {
             const model = permissions(p => p
-                .token("claim1")
-                .token("claim2")
+                .atom("claim1")
+                .atom("claim2")
             );
             const checker = new PermissionsChecker({ model });
 
@@ -310,8 +310,8 @@ describe("Permissions model", () => {
 
         test("no support when a claim is missing", () => {
             const model = permissions(p => p
-                .token("claim1")
-                .token("claim2")
+                .atom("claim1")
+                .atom("claim2")
             );
             const checker = new PermissionsChecker({ model });
 
@@ -369,8 +369,8 @@ describe("Permissions model", () => {
 
         test("simple token", () => {
             const model = permissions(p => p
-                .token("claim")
-                .token("another")
+                .atom("claim")
+                .atom("another")
             );
 
             const checker = new PermissionsChecker({ model });
@@ -388,10 +388,10 @@ describe("Permissions model", () => {
 
         test("simple token w/alias", () => {
             const model = permissions(p => p
-                .token("claim", t => t
+                .atom("claim", t => t
                     .alias("c")
                 )
-                .token("another")
+                .atom("another")
             );
 
             const checker = new PermissionsChecker({ model });
@@ -413,10 +413,10 @@ describe("Permissions model", () => {
 
         test("multi-token", () => {
             const model = permissions(p => p
-                .token("claim")
-                .token("parent", t => t
-                    .token("child1")
-                    .token("child2")
+                .atom("claim")
+                .composite("parent", t => t
+                    .child("child1")
+                    .child("child2")
                 )
             );
 
@@ -434,7 +434,7 @@ describe("Permissions model", () => {
     describe("authorize", () => {
         test("empty do not pass", () => {
             const model = permissions(p => p
-                .token("claim")
+                .atom("claim")
             );
 
             const checker = new PermissionsChecker({ model });
@@ -444,7 +444,7 @@ describe("Permissions model", () => {
 
         test("single token", () => {
             const model = permissions(p => p
-                .token("claim")
+                .atom("claim")
             );
 
             const checker = new PermissionsChecker({ model });
@@ -454,7 +454,7 @@ describe("Permissions model", () => {
 
         test("single token w/alias", () => {
             const model = permissions(p => p
-                .token("claim", t => t
+                .atom("claim", t => t
                     .alias("c")
                 )
             );
@@ -468,14 +468,14 @@ describe("Permissions model", () => {
 
         test("single token w/include", () => {
             const model = permissions(p => p
-                .token("base", t => t
+                .atom("base", t => t
                     .alias("b")
                 )
-                .token("top1", t => t
+                .atom("top1", t => t
                     .includes("base")
                     .alias("t1")
                 )
-                .token("top2", t => t
+                .atom("top2", t => t
                     .alias("t2")
                 )
             );
@@ -500,22 +500,22 @@ describe("Permissions model", () => {
 
         test("single token w/nested-include", () => {
             const model = permissions(p => p
-                .token("base", t => t
+                .atom("base", t => t
                     .alias("b")
                 )
-                .token("middle", t => t
+                .atom("middle", t => t
                     .includes("base")
                     .alias("m")
                 )
-                .token("top1", t => t
+                .atom("top1", t => t
                     .includes("middle")
                     .alias("t1")
                 )
-                .token("top2", t => t
+                .atom("top2", t => t
                     .includes("base")
                     .alias("t2")
                 )
-                .token("top3", t => t
+                .atom("top3", t => t
                     .alias("t3")
                 )
             );
@@ -562,9 +562,9 @@ describe("Permissions model", () => {
 
         test("multi-token w/include", () => {
             const model = permissions(p => p
-                .token("parent", t => t
-                    .token("child1")
-                    .token("child2", t => t
+                .composite("parent", t => t
+                    .child("child1")
+                    .child("child2", t => t
                         .includes("parent:child1")
                     )
                 )

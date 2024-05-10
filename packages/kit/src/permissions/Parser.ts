@@ -1,4 +1,4 @@
-import type { AuthClaim, AssertionClaim, GrantClaim, TokenClaim } from ".";
+import type { AuthClaim, AssertionClaim, GrantClaim, PermissionToken, PermissionAtomToken, PermissionCompositeToken, PermissionTokenRawValue } from "./models";
 
 
 export class ClaimParserError extends Error {
@@ -8,11 +8,26 @@ export class ClaimParserError extends Error {
 }
 
 
-function parseToken(token: string): TokenClaim {
-    return token.includes(":") ? token.split(":") : token;
+function parseToken(token: PermissionTokenRawValue): PermissionToken {
+    if (typeof token === "string") {
+        if (token.includes(":")) {
+            return parseToken(token.split(":"));
+        }
+
+        return token as PermissionAtomToken;
+    }
+
+    if (token.length === 1) {
+        return parseToken(token[0]);
+    }
+    if (token.length !== 2) {
+        throw new ClaimParserError(token.join(":"));
+    }
+
+    return token as PermissionCompositeToken;
 }
 
-function parseAuthSingle(claim: string): AuthClaim {
+function parseAuthorizationSingle(claim: string): AuthClaim {
     if (!claim) {
         throw new ClaimParserError(claim);
     }
@@ -30,7 +45,7 @@ function parseAuthSingle(claim: string): AuthClaim {
 function parseAuthorization(claim: string): AuthClaim[] {
     if (!claim) return [];
 
-    return claim.split(" ").map(parseAuthSingle);
+    return claim.split(" ").map(parseAuthorizationSingle);
 }
 
 
@@ -45,7 +60,7 @@ function parseAssertionSingle(assertion: string): AssertionClaim {
         assertion = assertion.substring(1);
     }
 
-    return { ...parseAuthSingle(assertion), negative };
+    return { ...parseAuthorizationSingle(assertion), negative };
 }
 
 function parseAssertion(assertion: string): AssertionClaim[] {
@@ -62,7 +77,7 @@ function parseGrantSingle(grant: string): GrantClaim {
     }
 
     return {
-        ...parseAuthSingle(grant.substring(subjectIdx + 1)),
+        ...parseAuthorizationSingle(grant.substring(subjectIdx + 1)),
         subject: parseToken(grant.substring(0, subjectIdx)),
     }
 }

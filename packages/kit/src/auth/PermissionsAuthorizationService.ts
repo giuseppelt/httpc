@@ -13,8 +13,8 @@ export type PermissionsAuthorizationServiceOptions = {
 }
 
 @injectable()
-export class PermissionsAuthorizationService extends BaseService() implements IAuthorizationService<Authorization> {
-    protected permissions: PermissionsChecker
+export class PermissionsAuthorizationService extends BaseService() implements IAuthorizationService<Authorization, Assertion | string> {
+    protected permissions: PermissionsChecker;
 
     constructor(
         @logger() logger: ILogger,
@@ -53,7 +53,7 @@ export class PermissionsAuthorizationService extends BaseService() implements IA
         }
     }
 
-    check(authorization: Authorization, assertion: any): boolean {
+    check(authorization: Authorization, assertion: Assertion | string): boolean {
         assertion = this._getAssertion(assertion);
 
         const result = this.permissions.test(authorization, assertion);
@@ -62,7 +62,7 @@ export class PermissionsAuthorizationService extends BaseService() implements IA
         return result.success;
     }
 
-    assert(authorization: Authorization, assertion: any): void {
+    assert(authorization: Authorization, assertion: Assertion | string): void {
         assertion = this._getAssertion(assertion);
 
         const result = this.permissions.test(authorization, assertion);
@@ -73,7 +73,7 @@ export class PermissionsAuthorizationService extends BaseService() implements IA
         this.logger.verbose("Assertion success: %s", assertion);
     }
 
-    protected _getAssertion(assertion: any): Assertion {
+    protected _getAssertion(assertion: Assertion | string): Assertion {
         if (typeof assertion === "string") {
             assertion = Assertion.parse(assertion);
         }

@@ -1,13 +1,13 @@
-import { Authorization } from "../permissions"
+import { Assertion, Authorization } from "../permissions";
 
 
 export interface IAuthenticationService<T = any> {
     authenticate(arg: T): Promise<IUser>
 }
 
-export interface IAuthorizationService<T = Authorization> {
-    authorize(user: IUser): Promise<T>
-    createAuthorization(authorization: string | T): T
-    assert(authorization: T, assertion: any): void
-    check(authorization: T, assertion: any): boolean
+export interface IAuthorizationService<Auth = Authorization, Assert = Assertion | string> {
+    authorize(user: IUser): Promise<Auth>
+    createAuthorization(authorization: string | Auth): Auth
+    assert(authorization: Auth, assertion: Assert): void
+    check(authorization: Auth, assertion: Assert): boolean
 }

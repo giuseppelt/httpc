@@ -58,7 +58,7 @@ class FluentAtomToken<Schema extends object, Token extends string> {
     }
 }
 
-class FluentCompositeToken<Schema extends object, Parent extends string, Children extends string>  {
+class FluentCompositeToken<Schema extends object, Parent extends string, Children extends string> {
     protected _alias?: Set<string>;
     protected _children?: PermissionAtomTokenDefinition[];
 

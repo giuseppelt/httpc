@@ -21,12 +21,16 @@ class AutoBatch<T = any, I = any, O = any> {
     }
 
     push(input: I): Promise<O> {
-        const resolvers = Promise.withResolvers<O>();
-        this.runs.set(input, resolvers);
+        let resolvers = this.runs.get(input);
+        if (!resolvers) {
+            resolvers = Promise.withResolvers<O>();
+            this.runs.set(input, resolvers);
+            this.options.logger?.debug("New run for batch %s", this.options.key, input);
+        } else {
+            this.options.logger?.debug("New run for batch %s (duplicate)", this.options.key, input);
+        }
 
         this.poll();
-
-        this.options.logger?.debug("New run for batch %s", this.options.key, input);
 
         return resolvers.promise;
     }
@@ -87,7 +91,7 @@ class AutoBatch<T = any, I = any, O = any> {
 const $batches = Symbol("batches");
 
 export function autoBatched<T = any, I = any, O = any>(options: Pick<AutoBatchOptions<T, I, O>, "batch" | "delay" | "maxWindow">): MethodDecorator {
-    return (target: any, property, descriptor) => {
+    return (target, property, descriptor) => {
         const key = property;
         const single = descriptor.value as () => any;
         assert(typeof single === "function", "Must be a method");

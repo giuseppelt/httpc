@@ -187,6 +187,30 @@ describe("decorators", () => {
             expect(doubleBatch).toBeCalledWith([2, 3]);
             expect(doubleBatch).toBeCalledWith([4, 5, 6]);
         });
+
+        test("duplicate input -> single", async () => {
+            const service = container.resolve(Service);
+            const doubleSingle = jest.spyOn(service, "doubleSingle");
+            const doubleBatch = jest.spyOn(service, "doubleBatch");
+
+            const results = await Promise.all([2, 2, 2].map(x => service.double(x)));
+            expect(results).toEqual([4, 4, 4]);
+            expect(doubleSingle).toBeCalledTimes(1);
+            expect(doubleSingle).toBeCalledWith(2);
+            expect(doubleBatch).toBeCalledTimes(0);
+        });
+
+        test("duplicate input -> batch", async () => {
+            const service = container.resolve(Service);
+            const doubleSingle = jest.spyOn(service, "doubleSingle");
+            const doubleBatch = jest.spyOn(service, "doubleBatch");
+
+            const results = await Promise.all([2, 3, 2].map(x => service.double(x)));
+            expect(results).toEqual([4, 6, 4]);
+            expect(doubleSingle).toBeCalledTimes(0);
+            expect(doubleBatch).toBeCalledTimes(1);
+            expect(doubleBatch).toBeCalledWith([2, 3]);
+        });
     });
 
 });

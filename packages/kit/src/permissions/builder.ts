@@ -10,11 +10,11 @@ type _SchemaTokenList<Schema extends object> = {
 type _SchemaAddAtom<Schema extends object, Token extends string> = Schema & {
     [token in Token]: Token
 }
-type _SchemaAddComposite<Schema extends object, Token extends string, Children = undefined> = Schema & {
+type _SchemaAddComposite<Schema extends object, Token extends string, Children = undefined> = Omit<Schema, Token> & {
     [token in Token]: Children extends string
-    ? `${Token}:${Exclude<Children, "">}`
+    ? `${Token}:${Children}`
     : Children extends FluentCompositeToken<any, any, infer ChildrenList>
-    ? `${Token}:${Exclude<ChildrenList, "">}`
+    ? `${Token}:${ChildrenList}`
     : never
 }
 
@@ -76,7 +76,7 @@ class FluentCompositeToken<Schema extends object, Parent extends string, Childre
         return this;
     }
 
-    children<T extends string>(token: T | T[]): FluentCompositeToken<Schema, Parent, Children | T> {
+    children<T extends string>(token: T | T[]): FluentCompositeToken<_SchemaAddComposite<Schema, Parent, Children | T>, Parent, Children | T> {
         this._children ??= [];
 
         if (typeof token === "string") {
@@ -127,8 +127,8 @@ class FluentPermission<Schema extends object = object> {
     }
 
     composite<Token extends string, Children extends string>(token: Token, children: Children[]): FluentPermission<_SchemaAddComposite<Schema, Token, Children>>;
-    composite<Token extends string, Builder extends FluentCompositeToken<Schema, Token, "">>(token: Token, builder: (token: FluentCompositeToken<Schema, Token, "">) => Builder): FluentPermission<_SchemaAddComposite<Schema, Token, Builder>>;
-    composite<Token extends string, Builder extends FluentCompositeToken<Schema, Token, "">>(token: Token, builderOrChildren: string[] | ((token: FluentCompositeToken<Schema, Token, "">) => Builder)): FluentPermission {
+    composite<Token extends string, Builder extends FluentCompositeToken<Schema, Token, any>>(token: Token, builder: (token: FluentCompositeToken<Schema, Token, never>) => Builder): FluentPermission<_SchemaAddComposite<Schema, Token, Builder>>;
+    composite<Token extends string, Builder extends FluentCompositeToken<Schema, Token, any>>(token: Token, builderOrChildren: string[] | ((token: FluentCompositeToken<Schema, Token, never>) => Builder)): FluentPermission {
         const fluent = new FluentCompositeToken(token);
         if (typeof builderOrChildren === "function") {
             builderOrChildren(fluent);

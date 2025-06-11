@@ -15,3 +15,12 @@ export const random = {
         return randomUUID();
     }
 }
+
+
+export const promises = {
+    delay(ms: number = 100) {
+        return new Promise((resolve, reject) => {
+            setTimeout(resolve, ms);
+        });
+    }
+}

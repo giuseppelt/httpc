@@ -1,7 +1,9 @@
 export * from "@httpc/server";
+import "./polyfills";
 export * from "./di";
 export * from "./services";
 export * from "./logging";
+export * from "./decorators";
 export * from "./events";
 export * from "./controller";
 export * from "./validation";

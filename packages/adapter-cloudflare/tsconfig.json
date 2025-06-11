@@ -3,6 +3,7 @@
     "compilerOptions": {
         "lib": [],
         "types": [
+            "node",
             "@cloudflare/workers-types"
         ],
         "sourceMap": true

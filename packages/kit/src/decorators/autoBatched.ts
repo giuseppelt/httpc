@@ -25,9 +25,9 @@ class AutoBatch<T = any, I = any, O = any> {
         if (!resolvers) {
             resolvers = Promise.withResolvers<O>();
             this.runs.set(input, resolvers);
-            this.options.logger?.debug("New run for batch %s", this.options.key, input);
+            this.options.logger?.debug("[AutoBatch] %s new run", this.options.key, { input });
         } else {
-            this.options.logger?.debug("New run for batch %s (duplicate)", this.options.key, input);
+            this.options.logger?.debug("[AutoBatch] %s new run (duplicate)", this.options.key, { input });
         }
 
         this.poll();
@@ -74,7 +74,7 @@ class AutoBatch<T = any, I = any, O = any> {
             single.call(null!, input)
                 .then(resolver.resolve, resolver.reject);
 
-            logger?.debug("Executed batch %s: single run", key);
+            logger?.debug("[AutoBatch] %s executed: single run", key);
         } else {
             batch.call(null!, [...current.keys()])
                 .then(
@@ -82,7 +82,7 @@ class AutoBatch<T = any, I = any, O = any> {
                     err => current.forEach(v => v.reject(err))
                 );
 
-            logger?.debug("Executed batch %s: multiple(%d) run", key, current.size);
+            logger?.debug("[AutoBatch] %s executed: multiple(%d) runs", key, current.size);
         }
     }
 }
@@ -112,7 +112,7 @@ export function autoBatched<T = any, I = any, O = any>(options: Pick<AutoBatchOp
                 });
 
                 batches.set(key, auto);
-                this.logger?.debug("AutoBatch for %s created", property);
+                this.logger?.debug("[AutoBatch] %s created", property);
             }
 
             return auto.push(input);

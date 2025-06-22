@@ -34,6 +34,25 @@ describe("decorators", () => {
                 await promises.delay(10);
                 return new Map(input.map(x => [x, x * 2]));
             }
+
+
+            @autoBatched<Service>({
+                batch: "negateBatch",
+                delay: 100,
+            })
+            async negate(input: number) {
+                return this.doubleSingle(input);
+            }
+
+            async negateSingle(input: number) {
+                await promises.delay(10);
+                return input * -1;
+            }
+
+            async negateBatch(input: number[]) {
+                await promises.delay(10);
+                return new Map(input.map(x => [x, x * -1]));
+            }
         }
 
         let container = globalContainer.createChildContainer();
@@ -87,6 +106,18 @@ describe("decorators", () => {
             expect(doubleSingle).toBeCalledTimes(0);
             expect(doubleBatch).toBeCalledTimes(1);
             expect(doubleBatch).toBeCalledWith([1, 2, 3, 4]);
+        });
+
+        test("batch run w/string definition", async () => {
+            const service = container.resolve(Service);
+            const negateSingle = jest.spyOn(service, "negateSingle");
+            const negateBatch = jest.spyOn(service, "negateBatch");
+
+            const results = await Promise.all([1, 2, 3, 4].map(x => service.negate(x)));
+            expect(results).toEqual([-1, -2, -3, -4]);
+            expect(negateSingle).toBeCalledTimes(0);
+            expect(negateBatch).toBeCalledTimes(1);
+            expect(negateBatch).toBeCalledWith([1, 2, 3, 4]);
         });
 
         test("batch run w/multiple in window", async () => {

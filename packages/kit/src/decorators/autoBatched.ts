@@ -5,11 +5,13 @@ import { assert } from "../internal";
 type AutoBatchOptions<T, I, O> = {
     key: string | symbol
     single(this: T, input: I): Promise<O>
-    batch(this: T, input: I[]): Promise<Map<I, O>>
     delay?: number
     maxWindow?: number
     logger?: ILogger
-}
+} & (
+        | { batch: keyof T }
+        | { batch(this: T, input: I[]): Promise<Map<I, O>> }
+    )
 
 class AutoBatch<T = any, I = any, O = any> {
     private readonly runs = new Map<I, PromiseWithResolvers<O>>();
@@ -68,6 +70,7 @@ class AutoBatch<T = any, I = any, O = any> {
         this.runs.clear();
 
         const { single, batch, logger, key } = this.options;
+        assert(typeof batch === "function", "batch must be a method");
 
         if (current.size === 1) {
             const [[input, resolver]] = current;
@@ -103,12 +106,15 @@ export function autoBatched<T = any, I = any, O = any>(options: Pick<AutoBatchOp
 
             let auto = batches.get(key);
             if (!auto) {
+                const batchCall = typeof batch === "string" ? this[batch] : batch;
+                assert(typeof batchCall === "function", "batch must point to a method");
+
                 auto = new AutoBatch({
                     ...rest,
                     key,
                     logger: this.logger,
                     single: single.bind(this),
-                    batch: batch.bind(this)
+                    batch: batchCall.bind(this)
                 });
 
                 batches.set(key, auto);

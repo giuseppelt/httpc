@@ -1,6 +1,7 @@
 import { container as globalContainer, DependencyContainer } from "tsyringe";
+import { runInContext } from "@httpc/server";
+import type { IInitialize } from "../services";
 import { ConsoleLogService, ILogger } from "../logging";
-import { IInitialize } from "../services";
 import { KEY, RESOLVE, RESOLVE_ALL } from "./keys";
 
 
@@ -16,14 +17,17 @@ export async function initializeContainer(container: DependencyContainer = globa
 
     if (container.isRegistered(KEY("IInitialize"))) {
         const initializers = RESOLVE_ALL(container, "IInitialize");
-        await Promise.all(initializers.map(async service => {
-            if ((service as IInitialize).initialize) {
-                await service.initialize();
 
-                if ("logger" in service) {
-                    ((service as any).logger as ILogger).verbose("Initialized");
+        await runInContext({ container }, () =>
+            Promise.all(initializers.map(async service => {
+                if ((service as IInitialize).initialize) {
+                    await service.initialize();
+
+                    if ("logger" in service) {
+                        ((service as any).logger as ILogger).verbose("Initialized");
+                    }
                 }
-            }
-        }));
+            }))
+        );
     }
 }

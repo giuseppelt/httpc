@@ -21,7 +21,7 @@ export const ServiceErrorPreset = new ServiceErrorPresets()
 export function BaseService<E extends ServiceErrorPresets = typeof ServiceErrorPreset>(presets?: E): typeof _BaseService<ServiceErrors<E>> {
     return !presets
         ? _BaseService
-        : class extends _BaseService<ServiceErrors<E>>{
+        : class extends _BaseService<ServiceErrors<E>> {
             constructor() {
                 //@ts-expect-error
                 super(...arguments);
@@ -89,7 +89,11 @@ export class _BaseService<TError extends string> {
             })
         };
 
-        this.logger.error("%s: %s", info.errorCode, info.message, info.data);
+        if (info.message) {
+            this.logger.error("%s: %s", info.errorCode, info.message, info.data);
+        } else {
+            this.logger.error("%s", info.errorCode, info.data);
+        }
 
         throw new ServiceError(info);
     }

@@ -15,6 +15,7 @@ export const ServiceErrorPreset = new ServiceErrorPresets()
     .add("not_found")
     .add("misconfiguration")
     .add("not_supported")
+    .add("not_implemented")
     .add("processing_error")
 
 

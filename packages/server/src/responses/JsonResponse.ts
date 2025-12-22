@@ -1,7 +1,9 @@
 import { HttpCServerResponse } from "./HttpCServerResponse";
 
+const ENCODER = new TextEncoder();
 
 export class JsonResponse extends HttpCServerResponse {
+
     constructor(data: unknown);
     constructor(statusCode: number, data: unknown);
     constructor(status: unknown, data?: unknown) {
@@ -20,7 +22,7 @@ export class JsonResponse extends HttpCServerResponse {
     override render() {
         const status = this.statusCode || 200;
         // treat undefined as null, as undefined is not a valid json
-        const body = JSON.stringify(this.body ?? null);
+        const body = ENCODER.encode(JSON.stringify(this.body ?? null));
         const headers = {
             ...this.getHeaders(),
             ...body ? {

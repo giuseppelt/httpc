@@ -41,7 +41,7 @@ describe("decorators", () => {
                 delay: 100,
             })
             async negate(input: number) {
-                return this.doubleSingle(input);
+                return this.negateSingle(input);
             }
 
             async negateSingle(input: number) {
@@ -51,7 +51,27 @@ describe("decorators", () => {
 
             async negateBatch(input: number[]) {
                 await promises.delay(10);
-                return new Map(input.map(x => [x, x * -1]));
+                return new Map(input.map(x => [x, -x]));
+            }
+
+
+            @autoBatched<Service>({
+                batch: "maxCountBatch",
+                delay: 100,
+                maxCount: 3,
+            })
+            async maxCount(input: number) {
+                return this.maxCountSingle(input);
+            }
+
+            async maxCountSingle(input: number) {
+                await promises.delay(10);
+                return input;
+            }
+
+            async maxCountBatch(input: number[]) {
+                await promises.delay(10);
+                return new Map(input.map(x => [x, x]));
             }
         }
 
@@ -143,6 +163,44 @@ describe("decorators", () => {
             expect(doubleSingle).toBeCalledTimes(0);
             expect(doubleBatch).toBeCalledTimes(1);
             expect(doubleBatch).toBeCalledWith([2, 3, 4]);
+        });
+
+        test("batch run w/maxCount in interval", async () => {
+            const service = container.resolve(Service);
+            const doubleSingle = jest.spyOn(service, "maxCountSingle");
+            const doubleBatch = jest.spyOn(service, "maxCountBatch");
+
+            const results = await Promise.all([1, 2, 3].map(x => service.maxCount(x)));
+            expect(results).toEqual([1, 2, 3]);
+            expect(doubleSingle).toBeCalledTimes(0);
+            expect(doubleBatch).toBeCalledTimes(1);
+            expect(doubleBatch).toBeCalledWith([1, 2, 3]);
+        });
+
+        test("sequence (batch, batch) w/maxCount out interval", async () => {
+            const service = container.resolve(Service);
+            const doubleSingle = jest.spyOn(service, "maxCountSingle");
+            const doubleBatch = jest.spyOn(service, "maxCountBatch");
+
+            const results = await Promise.all([1, 2, 3, 4, 5].map(x => service.maxCount(x)));
+            expect(results).toEqual([1, 2, 3, 4, 5]);
+            expect(doubleSingle).toBeCalledTimes(0);
+            expect(doubleBatch).toBeCalledTimes(2);
+            expect(doubleBatch).toBeCalledWith([1, 2, 3]);
+            expect(doubleBatch).toBeCalledWith([4, 5]);
+        });
+
+        test("sequence (batch, single) w/maxCount out interval", async () => {
+            const service = container.resolve(Service);
+            const doubleSingle = jest.spyOn(service, "maxCountSingle");
+            const doubleBatch = jest.spyOn(service, "maxCountBatch");
+
+            const results = await Promise.all([1, 2, 3, 4].map(x => service.maxCount(x)));
+            expect(results).toEqual([1, 2, 3, 4]);
+            expect(doubleSingle).toBeCalledTimes(1);
+            expect(doubleBatch).toBeCalledTimes(1);
+            expect(doubleBatch).toBeCalledWith([1, 2, 3]);
+            expect(doubleSingle).toBeCalledWith(4);
         });
 
         test("sequence (single, batch, single)", async () => {

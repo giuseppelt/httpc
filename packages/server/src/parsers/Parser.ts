@@ -95,7 +95,7 @@ function parseParam(value: string, options: QueryStringParsingOptions): string |
     } = options;
 
 
-    if (numbers && !isNaN(value as any)) {
+    if (numbers && !isNaN(value as any) && value !== "") {
         return Number(value);
     }
 

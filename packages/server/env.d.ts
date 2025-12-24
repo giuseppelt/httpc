@@ -1,5 +1,6 @@
 namespace HttpC {
     type LogLevel =
+        | "trace"
         | "debug"
         | "verbose"
         | "info"

@@ -7,6 +7,7 @@ export type LogOptions = {
 }
 
 export type LogLevel =
+    | "trace"
     | "debug"
     | "verbose"
     | "info"
@@ -27,10 +28,13 @@ export function createConsoleColors(ansi = true) {
         red: ansi ? escape.bind(null, 31, 39) : identity,
         green: ansi ? escape.bind(null, 32, 39) : identity,
         yellow: ansi ? escape.bind(null, 33, 39) : identity,
+        blue: ansi ? escape.bind(null, 34, 39) : identity,
+        purple: ansi ? escape.bind(null, 35, 39) : identity,
     };
 }
 
 const LogLevel: Record<LogLevel, number> = {
+    trace: 7,
     debug: 6,
     verbose: 5,
     info: 4,
@@ -51,6 +55,7 @@ export function createLogger(options?: LogOptions): Logger {
         green,
         red,
         yellow,
+        blue,
     } = createConsoleColors(ansi);
 
 
@@ -73,8 +78,10 @@ export function createLogger(options?: LogOptions): Logger {
             console.log(`${gray("VERBOSE")} ${gray(message)}`, ...args);
         } else if (level === "debug") {
             console.log(`${gray("DEBUG")} ${gray(message)}`, ...args);
+        } else if (level === "trace") {
+            console.log(`${gray("TRACE")} ${gray(message)}`, ...args);
         } else {
-            console.log(`${red("INFO")} ${message}`, ...args);
+            console.log(`${blue("INFO")} ${message}`, ...args);
         }
     }
 }

@@ -73,6 +73,25 @@ describe("decorators", () => {
                 await promises.delay(10);
                 return new Map(input.map(x => [x, x]));
             }
+
+            @autoBatched<Service>({
+                batch: "maxCountMultipleBatch",
+                delay: 100,
+                maxCount: 5,
+            })
+            async maxCountMultiple(input: number) {
+                return this.maxCountMultipleSingle(input);
+            }
+
+            async maxCountMultipleSingle(input: number) {
+                await promises.delay(10);
+                return input;
+            }
+
+            async maxCountMultipleBatch(input: number[]) {
+                await promises.delay(10);
+                return new Map(input.map(x => [x, x]));
+            }
         }
 
         let container = globalContainer.createChildContainer();
@@ -175,6 +194,18 @@ describe("decorators", () => {
             expect(doubleSingle).toBeCalledTimes(0);
             expect(doubleBatch).toBeCalledTimes(1);
             expect(doubleBatch).toBeCalledWith([1, 2, 3]);
+        });
+
+        test("batch run w/maxCount max", async () => {
+            const service = container.resolve(Service);
+            const single = jest.spyOn(service, "maxCountMultipleSingle");
+            const batch = jest.spyOn(service, "maxCountMultipleBatch");
+
+            const inputs = [...Array(50)].map((x, idx) => idx + 1);
+            const results = await Promise.all(inputs.map(x => service.maxCountMultiple(x)));
+            expect(results).toEqual([...inputs]);
+            expect(single).toBeCalledTimes(0);
+            expect(batch).toBeCalledTimes(10);
         });
 
         test("sequence (batch, batch) w/maxCount out interval", async () => {

@@ -199,7 +199,7 @@ const generate = createCommand("generate")
 
             const result = compiler.emit();
 
-            if (result.emitSkipped) {
+            if (result.emitSkipped && result.diagnostics.length > 0) {
                 console.error(result.diagnostics);
                 throw new Error(`Client '${config.name}' generation failed`);
             }

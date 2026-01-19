@@ -124,10 +124,6 @@ type GenerateCommandOptions = Readonly<{
     tsConfig?: string
 }>
 
-const collected = new Set<ts.Symbol>()
-const visiting = new Set<ts.Symbol>()
-
-
 const generate = createCommand("generate")
     .description("generate a client typings")
     .option("-d, --debug", "enable compilation settings like sourcemaps")
@@ -171,11 +167,11 @@ const generate = createCommand("generate")
 
             const compilerOptions: ts.CompilerOptions = {
                 ...options,
-                noEmit: false,
+                noEmit: true,
                 skipLibCheck: true,
                 sourceMap: false,
-                emitDeclarationOnly: true,
-                declaration: true,
+                // emitDeclarationOnly: true,
+                // declaration: true,
                 declarationMap: !!cmdOptions.debug,
                 outDir: dest,
                 removeComments: !cmdOptions.debug,
@@ -185,216 +181,304 @@ const generate = createCommand("generate")
                 throw new Error(`Client '${config.name}' entry '${config.entry}' not found`);
             }
 
-            const host = ts.createCompilerHost(compilerOptions);
-            const compiler = ts.createProgram(fileNames, compilerOptions, host);
-            const originalWriteFile = host.writeFile;
-            host.writeFile = function (filename: string, text: string, ...args: any[]) {
-                if (filename.endsWith(".d.ts")) {
-                    text = text.replaceAll(/import\(("|')@httpc\/server("|')\)\.HttpCallPipelineDefinition/g, "HttpCallPipelineDefinition");
-                    text = text.replaceAll(/import\s?\{\s?HttpCallPipelineDefinition\s?\}\s?from ("|')@httpc\/server("|');?/g, "");
-                    text = text.replaceAll(/import\(("|')@httpc\/kit("|')\)\.HttpCallPipelineDefinition/g, "HttpCallPipelineDefinition");
-                    text = text.replaceAll(/import\s?\{\s?HttpCallPipelineDefinition\s?\}\s?from ("|')@httpc\/kit("|');?/g, "");
-                }
-
-                //@ts-ignore
-                return originalWriteFile.call(this, filename, text, ...args);
-            }
-
-            const checker = compiler.getTypeChecker();
-            const source = compiler.getSourceFile(entry)!;
-            const symbol = checker.getSymbolAtLocation(source);
-            const exports = checker.getExportsOfModule(symbol!);
-
-            console.log("Collecting types...");
-            exports.forEach(collectSymbol);
-
-            const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-
-            function collectSymbol(symbol: ts.Symbol) {
-                if (collected.has(symbol)) return
-                if (visiting.has(symbol)) return
-                if (isFromLib(symbol)) return
-                if (isExternalDeclaration(symbol)) return
-
-                visiting.add(symbol)
-
-                const declarations = symbol.getDeclarations() ?? []
-
-                for (const decl of declarations) {
-                    console.log("Collecting from decl:", decl.kind, symbol.getName());
-                    if (ts.isVariableDeclaration(decl) || ts.isTypeAliasDeclaration(decl) || ts.isExportDeclaration(decl) || ts.isExportAssignment(decl)) {
-                        const type = checker.getTypeOfSymbolAtLocation(symbol, decl)
-                        collectType(type)
-                    }
-                }
-
-                visiting.delete(symbol)
-                collected.add(symbol)
-            }
-
-            function collectType(type: ts.Type) {
-                if (type.flags & ts.TypeFlags.BooleanLike) return
-                if (type.flags & ts.TypeFlags.StringLike) return
-                if (type.flags & ts.TypeFlags.NumberLike) return
-                if (type.flags & ts.TypeFlags.BooleanLike) return
-                if (checker.typeToString(type).startsWith("Promise")) return;
-                if (checker.typeToString(type).includes("ConcatArray")) return;
-
-                if (["string", "number", "boolean", "undefined", "null", "any", "any[]", "T", "T[]", "U", "U[]", "never", "never[]", "TResult", "TResult1", "() => string", "string[]", "string | undefined", "() => string | undefined"].includes(checker.typeToString(type))) return;
-
-                console.log("Collecting type:", checker.typeToString(type));
-                if (type.isUnion() || type.isIntersection()) {
-                    type.types.forEach(collectType)
-                    return
-                }
-
-                if (1 == 1 && type.isTypeParameter()) return
-
-                const symbol = type.getSymbol()
-                if (symbol) {
-                    collectSymbol(symbol)
-                }
-
-                // Handle generics
-                if (type.aliasTypeArguments) {
-                    type.aliasTypeArguments.forEach(collectType)
-                }
-
-                if (type.getCallSignatures().length) {
-                    type.getCallSignatures().forEach(sig => {
-                        sig.getParameters().forEach(p =>
-                            collectType(checker.getTypeOfSymbolAtLocation(p, p.valueDeclaration!))
-                        )
-                        collectType(sig.getReturnType())
-                    })
-                }
-
-                if (type.getProperties().length) {
-                    type.getProperties().forEach(p =>
-                        collectType(checker.getTypeOfSymbolAtLocation(p, p.valueDeclaration!))
-                    )
-                }
-            }
-
-
-            function printNode(node: ts.Node): string {
-                const sf = ts.createSourceFile(
-                    "declaration.d.ts",
-                    "",
-                    ts.ScriptTarget.Latest,
-                    false,
-                    ts.ScriptKind.TS
-                )
-                return printer.printNode(ts.EmitHint.Unspecified, node, sf)
-            }
-
-            function ensureExport(node: ts.Node): ts.Node {
-                if (!("modifiers" in node)) return node
-
-                const mods = (ts.canHaveModifiers(node) ? ts.getModifiers(node) : []) || [];
-                if (mods.some(m => m.kind === ts.SyntaxKind.ExportKeyword)) {
-                    return node
-                }
-
-                return node;
-                // return ts.factory.updateModifiers(
-                //     node,
-                //     ts.factory.createNodeArray([
-                //         ts.factory.createModifier(ts.SyntaxKind.ExportKeyword),
-                //         ...mods
-                //     ])
-                // )
-            }
-            function isFromLib(symbol: ts.Symbol): boolean {
-                const declarations = symbol.getDeclarations()
-                if (!declarations || declarations.length === 0) return false
-
-                if (symbol.getName().startsWith("Promise")) return true;
-
-                return declarations.some(decl => {
-                    const sf = decl.getSourceFile()
-                    return sf.isDeclarationFile && sf.fileName.includes("lib.");
-                })
-            }
-
-            function isExternalDeclaration(symbol: ts.Symbol): boolean {
-                const decls = symbol.getDeclarations()
-                if (!decls) return false
-
-                return decls.some(decl => {
-                    const sf = decl.getSourceFile()
-                    return (
-                        sf.isDeclarationFile &&
-                        !sf.fileName.includes("/src/") // adjust to your project root
-                    )
-                })
-            }
-
-            const output: string[] = [];
-
-            for (const symbol of collected) {
-                const decls = symbol.getDeclarations() ?? []
-                for (const decl of decls) {
-                    if (
-                        ts.isInterfaceDeclaration(decl) ||
-                        ts.isTypeAliasDeclaration(decl) ||
-                        ts.isEnumDeclaration(decl) ||
-                        ts.isClassDeclaration(decl) ||
-                        ts.isFunctionDeclaration(decl)
-                    ) {
-                        const exported = ensureExport(decl)
-                        output.push(printNode(exported))
-                    }
-                }
-            }
-
-            console.log(output.join("\n\n"));
-
-            return;
-
-            const result = compiler.emit();
-
-            if (result.emitSkipped && result.diagnostics.length > 0) {
-                console.error(result.diagnostics);
-                throw new Error(`Client '${config.name}' generation failed`);
-            }
-
-            await writeTypeIndex(entry, dest);
-
-
-            // create random main file
-            // in order to execute metadata extraction
-            const main = path.join(__dirname, `main-${crypto.randomUUID()}.ts`);
-
-            await fs.writeFile(main, `
-import "reflect-metadata";
-import api from "${sanitizePath(entry.replace(".ts", ""))}";
-import { writeMetadata } from "${sanitizePath(path.join(__dirname, "../utils/generateMetadata"))}";
-
-writeMetadata(api, "${sanitizePath(dest)}")
-    .then(()=> process.exit(0))
-    .catch(err=> {
-        console.error(err);
-        process.exit(1);
-    });
-`
-                , "utf8");
-
-            const executeOptions = {
-            };
-
-            //
-            // NB!
-            // skipIgnore is required because ts-node skips files inside node_modules
-            // but, the generated main- is placed inside a node_module
-            //
-
-            await run(`npx ts-node --transpileOnly --skipIgnore --project "${tsConfigPath}" -O "${JSON.stringify(executeOptions).split('"').join('\\"')}" "${sanitizePath(main)}"`)
-                .finally(() => fs.unlink(main));
+            await emitDeclaration(entry, fileNames, compilerOptions);
 
             log.success("Client '%s' generated", config.name);
         }
     });
+
+
+async function emitDeclaration(entry: string, fileNames: string[], compilerOptions: ts.CompilerOptions) {
+    const program = ts.createProgram(fileNames, compilerOptions);
+    const checker = program.getTypeChecker();
+    const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
+
+    const sourceFile = program.getSourceFile(entry)!;
+    const dest = compilerOptions.outDir!;
+    const exportedSymbols = new Map<string, { symbol: ts.Symbol; type: ts.Type }>();
+    const collectedTypes = new Map<string, ts.Type>();
+    const typeAliasNames = new Set<string>();
+    let defaultExportSymbol: ts.Symbol | undefined;
+
+    // Collect all exported symbols
+    const moduleSymbol = checker.getSymbolAtLocation(sourceFile)!;
+    const moduleExports = checker.getExportsOfModule(moduleSymbol);
+
+    for (const symbol of moduleExports) {
+        if (isHidden(symbol)) continue;
+
+        // Check if this is the default export
+        if (symbol.escapedName === "default") {
+            defaultExportSymbol = symbol;
+            continue;
+        }
+
+        const type = checker.getTypeOfSymbolAtLocation(symbol, sourceFile);
+        exportedSymbols.set(symbol.escapedName as string, { symbol, type });
+    }
+
+    // Recursively collect all types used by exports
+    const visitedTypes = new Set<ts.Type>();
+
+    function isCollectableType(type: ts.Type): boolean {
+        const primitiveFlags =
+            ts.TypeFlags.Any |
+            ts.TypeFlags.Unknown |
+            ts.TypeFlags.Undefined |
+            ts.TypeFlags.Null |
+            ts.TypeFlags.Void |
+            ts.TypeFlags.Never |
+            ts.TypeFlags.BooleanLike |
+            ts.TypeFlags.NumberLike |
+            ts.TypeFlags.BigIntLike |
+            ts.TypeFlags.StringLike |
+            ts.TypeFlags.ESSymbolLike;
+        if (type.flags & primitiveFlags) return false;
+
+        const decls = type.symbol?.declarations ?? type.aliasSymbol?.declarations;
+        if (decls?.some(d => d.getSourceFile().fileName.includes("typescript/lib/"))) return false;
+        return true;
+    }
+
+    function collectTypesRecursive(type: ts.Type, sourceTypeNames: Set<string> = new Set()) {
+        type = unwrapPipelineType(type, checker);
+        if (!isCollectableType(type)) return;
+        if (visitedTypes.has(type)) return;
+        visitedTypes.add(type);
+
+        // Prefer alias symbol to avoid de-aliasing
+        const typeSymbol = type.aliasSymbol || type.symbol;
+        if (typeSymbol) {
+            const typeName = typeSymbol.escapedName as string;
+            const sourceFile = typeSymbol.valueDeclaration?.getSourceFile();
+
+            if (sourceFile && !isHidden(typeSymbol)) {
+                sourceTypeNames.add(typeName);
+                collectedTypes.set(typeName, type);
+                typeAliasNames.add(typeName);
+            }
+        }
+
+        // Collect types from call signatures (params and return), preserving aliases via nodes
+        for (const sig of type.getCallSignatures()) {
+            const sigDecl = sig.getDeclaration?.();
+            const params = sig.getParameters();
+
+            params.forEach((param, i) => {
+                let paramType: ts.Type | undefined;
+                const paramDecl = sigDecl?.parameters?.[i];
+                if (paramDecl?.type) {
+                    paramType = checker.getTypeFromTypeNode(paramDecl.type);
+                }
+                if (!paramType) {
+                    const decl = param.valueDeclaration || param.declarations?.[0] || sourceFile!;
+                    paramType = checker.getTypeOfSymbolAtLocation(param, decl);
+                }
+                if (paramType) collectTypesRecursive(paramType, sourceTypeNames);
+            });
+
+            let returnType: ts.Type | undefined;
+            if (sigDecl?.type) {
+                returnType = checker.getTypeFromTypeNode(sigDecl.type);
+            }
+            if (!returnType) {
+                returnType = sig.getReturnType();
+            }
+            collectTypesRecursive(returnType, sourceTypeNames);
+        }
+
+        // Collect types from constructor signatures (params and return/instance), preserving aliases via nodes
+        for (const sig of type.getConstructSignatures()) {
+            const sigDecl = sig.getDeclaration?.();
+            const params = sig.getParameters();
+
+            params.forEach((param, i) => {
+                let paramType: ts.Type | undefined;
+                const paramDecl = sigDecl?.parameters?.[i];
+                if (paramDecl?.type) {
+                    paramType = checker.getTypeFromTypeNode(paramDecl.type);
+                }
+                if (!paramType) {
+                    const decl = param.valueDeclaration || param.declarations?.[0] || sourceFile!;
+                    paramType = checker.getTypeOfSymbolAtLocation(param, decl);
+                }
+                if (paramType) collectTypesRecursive(paramType, sourceTypeNames);
+            });
+
+            let returnType: ts.Type | undefined;
+            if (sigDecl?.type) {
+                returnType = checker.getTypeFromTypeNode(sigDecl.type);
+            }
+            if (!returnType) {
+                returnType = sig.getReturnType();
+            }
+            collectTypesRecursive(returnType, sourceTypeNames);
+        }
+
+        // Recursively collect from object type properties
+        if (type.isClassOrInterface() || type.flags & ts.TypeFlags.Object) {
+            const properties = type.getProperties();
+            for (const prop of properties) {
+                const propType = checker.getTypeOfSymbolAtLocation(prop, sourceFile!);
+                collectTypesRecursive(propType, sourceTypeNames);
+            }
+            const bases = (type as ts.InterfaceType).getBaseTypes?.() ?? [];
+            for (const base of bases) collectTypesRecursive(base, sourceTypeNames);
+        }
+
+        // Handle union and intersection types
+        if (type.isUnion()) {
+            for (const unionType of (type as ts.UnionType).types) {
+                collectTypesRecursive(unionType, sourceTypeNames);
+            }
+        }
+
+        if (type.flags & ts.TypeFlags.Intersection) {
+            for (const intersectionType of (type as ts.IntersectionType).types) {
+                collectTypesRecursive(intersectionType, sourceTypeNames);
+            }
+        }
+
+        // Handle generic type arguments
+        if (type.flags & ts.TypeFlags.Object && (type as ts.TypeReference).typeArguments) {
+            for (const typeArg of (type as ts.TypeReference).typeArguments!) {
+                collectTypesRecursive(typeArg, sourceTypeNames);
+            }
+        }
+    }
+
+    for (const { type } of exportedSymbols.values()) {
+        collectTypesRecursive(type);
+    }
+
+    if (defaultExportSymbol) {
+        const defaultType = checker.getTypeOfSymbolAtLocation(defaultExportSymbol, sourceFile);
+        collectTypesRecursive(defaultType);
+    }
+
+    // Handle name collisions by renaming duplicates
+    const nameMap = new Map<string, string>();
+    const usedNames = new Set(exportedSymbols.keys());
+
+    for (const typeName of typeAliasNames) {
+        if (usedNames.has(typeName)) {
+            let newName = `${typeName}_`;
+            let counter = 1;
+            while (usedNames.has(newName)) {
+                newName = `${typeName}_${counter++}`;
+            }
+            nameMap.set(typeName, newName);
+            usedNames.add(newName);
+        }
+    }
+
+    // Generate consolidated declaration file with transformations
+    const declarations: string[] = [];
+
+    console.log([...collectedTypes.values()].map((t) => t.symbol?.escapedName));
+
+    // Add type imports/definitions
+    for (const [originalName, type] of collectedTypes) {
+        const renamedName = nameMap.get(originalName) || originalName;
+        const typeSymbol = type.symbol || type.aliasSymbol;
+        if (typeSymbol?.declarations) {
+            const declaration = typeSymbol.declarations[0];
+            if (declaration && (ts.isTypeAliasDeclaration(declaration) || ts.isInterfaceDeclaration(declaration) || ts.isEnumDeclaration(declaration))) {
+                declarations.push(printDeclarationWithRename(printer, declaration, sourceFile, originalName, renamedName));
+            }
+        }
+    }
+
+    // Add exports with transformations
+    declarations.push("");
+    for (const [exportName, { symbol }] of exportedSymbols) {
+        const exportType = checker.getTypeOfSymbolAtLocation(symbol, sourceFile);
+        const unwrappedType = unwrapPipelineType(exportType, checker);
+        let typeNode = checker.typeToTypeNode(unwrappedType, undefined, ts.NodeBuilderFlags.NoTruncation | ts.NodeBuilderFlags.WriteArrayAsGenericType);
+        typeNode = typeNode ? unwrapPipelineTypeNode(typeNode) : typeNode;
+        const typeStr = typeNode ? printTypeNodeWithCommas(printer, typeNode, sourceFile) : "any";
+        declarations.push(`export declare const ${exportName}: ${typeStr};`);
+    }
+
+    if (defaultExportSymbol) {
+        const defaultType = checker.getTypeOfSymbolAtLocation(defaultExportSymbol, sourceFile);
+        const unwrappedType = unwrapPipelineType(defaultType, checker);
+        let typeNode = checker.typeToTypeNode(unwrappedType, undefined, ts.NodeBuilderFlags.NoTruncation | ts.NodeBuilderFlags.WriteArrayAsGenericType);
+        typeNode = typeNode ? unwrapPipelineTypeNode(typeNode) : typeNode;
+        const typeStr = typeNode ? printTypeNodeWithCommas(printer, typeNode, sourceFile) : "any";
+        declarations.push(`export default ${typeStr};`);
+    }
+
+    // Write consolidated declaration file
+    const indexDtsPath = path.resolve(dest, "index.d.ts");
+    await fs.writeFile(indexDtsPath, declarations.join("\n\n"), "utf-8");
+
+    // Write type index redirects if needed
+    // await writeTypeIndex(entry, dest);
+}
+
+function unwrapPipelineType(type: ts.Type, checker: ts.TypeChecker): ts.Type {
+    // Unwrap HttpCallPipelineDefinition<T> to T
+    if (type.aliasSymbol?.escapedName === "HttpCallPipelineDefinition" &&
+        type.aliasTypeArguments?.length === 1) {
+        return type.aliasTypeArguments[0];
+    }
+    return type;
+}
+
+function unwrapPipelineTypeNode(typeNode: ts.TypeNode): ts.TypeNode {
+    const visit = (node: ts.Node): ts.VisitResult<ts.Node> => {
+        if (ts.isTypeReferenceNode(node) && ts.isIdentifier(node.typeName) && node.typeName.text === "HttpCallPipelineDefinition" && node.typeArguments?.length === 1) {
+            return ts.visitNode(node.typeArguments[0], visit);
+        }
+        return ts.visitEachChild(node, visit, undefined);
+    };
+    return ts.visitNode(typeNode, visit) as ts.TypeNode;
+}
+
+function printDeclarationWithRename(
+    printer: ts.Printer,
+    declaration: ts.Declaration,
+    sourceFile: ts.SourceFile,
+    originalName: string,
+    renamedName: string
+): string {
+    let text = printer.printNode(ts.EmitHint.Unspecified, declaration, sourceFile);
+    if (originalName !== renamedName) {
+        text = text.replace(new RegExp(`\\b${originalName}\\b`, "g"), renamedName);
+    }
+    return text;
+}
+
+function printTypeNodeWithCommas(printer: ts.Printer, node: ts.TypeNode, sourceFile: ts.SourceFile, indent = 0): string {
+    if (ts.isTypeLiteralNode(node)) {
+        const pad = "    ".repeat(indent);
+        const childPad = "    ".repeat(indent + 1);
+        const members = node.members.map(m => {
+            if (ts.isPropertySignature(m)) {
+                const name = printer.printNode(ts.EmitHint.Unspecified, m.name, sourceFile);
+                const optional = m.questionToken ? "?" : "";
+                const typePart = m.type ? printTypeNodeWithCommas(printer, m.type, sourceFile, indent + 1) : "any";
+                return `${childPad}${name}${optional}: ${typePart}`;
+            }
+            return `${childPad}${printer.printNode(ts.EmitHint.Unspecified, m, sourceFile)}`;
+        });
+        return members.length ? `{\n${members.join(",\n")}\n${pad}}` : "{}";
+    }
+    return printer.printNode(ts.EmitHint.Unspecified, node, sourceFile);
+}
+
+function isHidden(symbol: ts.Symbol): boolean {
+    if (!symbol.declarations) return false;
+
+    for (const declaration of symbol.declarations) {
+        const jsDocTags = ts.getJSDocTags(declaration);
+        if (jsDocTags.some(tag => tag.tagName.text === "hidden")) {
+            return true;
+        }
+    }
+    return false;
+}
 
 
 const ClientCommand = createCommand("client")

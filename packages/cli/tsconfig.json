@@ -4,6 +4,8 @@
     "outDir": "./dist",
     "module": "commonjs",
     "noEmit": false,
+    "sourceMap": true,
+    "declaration": true,
     "lib": [
       "ESNext"
     ]

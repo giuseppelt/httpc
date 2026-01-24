@@ -56,6 +56,7 @@ class BufferedWritable extends Writable {
         if (!this._buffer) {
             this._buffer = chunk;
         } else {
+            // @ts-ignore, check if future typings if this is still needed
             this._buffer = Buffer.concat([this._buffer, newChunk]);
         }
 

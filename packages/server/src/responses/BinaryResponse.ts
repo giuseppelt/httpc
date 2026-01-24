@@ -65,6 +65,7 @@ export class BinaryResponse extends HttpCServerResponse {
             } : undefined,
         };
 
+        //@ts-ignore, change BinaryResponseType to be supported by Response platform-independent
         return new Response(body, {
             status,
             headers,

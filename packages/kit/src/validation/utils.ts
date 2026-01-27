@@ -5,13 +5,21 @@ export function isClass(func: Function): boolean {
 
 
 export function OptionalSchema<T>(schema: T): T {
-    return new Optional(schema) as any as T;
+    return new MetaSchema(schema, "optional") as any as T;
 }
 
-class Optional {
-    constructor(readonly schema: any) { }
+export function ArraySchema<T>(schema: T): T {
+    return new MetaSchema(schema, "array") as any as T;
 }
 
-export function isOptionalSchema(schema: any): schema is Optional {
-    return schema && schema instanceof Optional;
+class MetaSchema {
+    constructor(readonly schema: any, readonly type: "optional" | "array") { }
+}
+
+export function isOptionalSchema(schema: any): schema is MetaSchema {
+    return schema && schema instanceof MetaSchema && schema.type === "optional";
+}
+
+export function isArraySchema(schema: any): schema is MetaSchema {
+    return schema && schema instanceof MetaSchema && schema.type === "array";
 }

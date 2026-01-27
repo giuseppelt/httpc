@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { NativeTypeValidator } from "../../src/validation";
+import { ArraySchema, NativeTypeValidator } from "../../src/validation";
 
 
 describe("NativeTypeValidator", () => {

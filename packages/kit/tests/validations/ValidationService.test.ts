@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { container as globalContainer } from "tsyringe";
 import { testContext } from "@httpc/server";
-import { ValidationService, NativeTypeValidator, ApplicationTester, useInjected, Validate, ValidationError, NullLogger, OptionalSchema } from "../../src";
+import { ValidationService, NativeTypeValidator, ApplicationTester, useInjected, Validate, ValidationError, NullLogger, OptionalSchema, ArraySchema } from "../../src";
 
 
 describe("ValidationService", () => {
@@ -14,6 +14,14 @@ describe("ValidationService", () => {
         expect(service.validate(undefined, OptionalSchema(String))).toMatchObject({ success: true });
         expect(service.validate("value", OptionalSchema(String))).toMatchObject({ success: true, object: "value" });
         expect(service.validate(1, OptionalSchema(String))).toMatchObject({ success: false });
+    });
+
+    test("can validate array schemas", () => {
+        const service = new ValidationService(logger, [new NativeTypeValidator()]);
+
+        expect(service.validate([1, 2, 3], ArraySchema(Number))).toMatchObject({ success: true, object: [1, 2, 3] });
+        expect(service.validate(1, ArraySchema(Number))).toMatchObject({ success: false });
+        expect(service.validate([1, "a"], ArraySchema(Number))).toMatchObject({ success: false });
     });
 
     test("validation of 'undefined' value fails", () => {

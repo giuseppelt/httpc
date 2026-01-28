@@ -23,6 +23,8 @@ export type JsonSafeType<T> =
     T extends void ? undefined :
     T extends Function ? never :
     T extends Promise<any> ? never :
+    T extends string & Record<any, any> ? string :
+    T extends number & Record<any, any> ? number :
     T extends number | string | boolean | undefined | null ? T :
     T extends Date | BigInt ? string :
     T extends [infer H, ...infer R] ? (

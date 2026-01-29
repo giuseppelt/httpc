@@ -25,6 +25,11 @@ export class ServiceError extends HttpCallError {
     }
 }
 
+export function isServiceError(err: any): err is ServiceError {
+    return err instanceof ServiceError;
+}
+
+
 export class ServiceErrorPresets<T extends string = ""> {
     constructor(
         protected readonly map = new Map<string, ErrorInfo>()

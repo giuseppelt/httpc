@@ -17,6 +17,8 @@ export const ServiceErrorPreset = new ServiceErrorPresets()
     .add("not_supported")
     .add("not_implemented")
     .add("processing_error")
+    .add("timeout")
+    .add("aborted")
 
 
 export function BaseService<E extends ServiceErrorPresets = typeof ServiceErrorPreset>(presets?: E): typeof _BaseService<ServiceErrors<E>> {

@@ -92,7 +92,7 @@ class AutoBatch<T = any, I = any, O = any> {
 
         if (!this.timeoutId) {
             this.start = Date.now();
-            this.timeoutId = setTimeout(() => this.poll(), delay);
+            this.timeoutId = setTimeout(() => this.execute(), delay);
             return;
         }
 
@@ -112,7 +112,7 @@ class AutoBatch<T = any, I = any, O = any> {
 
         if ((elapsed + polling) < maxTime && (maxCount < 1 || this.runs.size < maxCount)) {
             // reschedule if under max
-            this.timeoutId = setTimeout(() => this.poll(), polling);
+            this.timeoutId = setTimeout(() => this.execute(), polling);
             return;
         }
 

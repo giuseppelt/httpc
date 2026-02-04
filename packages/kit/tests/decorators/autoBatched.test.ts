@@ -203,6 +203,22 @@ describe("decorators", () => {
             expect(doubleSingle).toBeCalledWith(4);
         });
 
+        test("chain (single, single, single) w/maxCount out interval", async () => {
+            const service = container.resolve(Service);
+            const doubleSingle = jest.spyOn(service, "maxCountSingle");
+            const doubleBatch = jest.spyOn(service, "maxCountBatch");
+
+            for (let i = 1; i <= 4; i++) {
+                const result = await service.maxCount(i);
+                expect(result).toBe(i);
+                expect(doubleSingle).toBeCalledWith(i);
+                expect(doubleSingle).toBeCalledTimes(1);
+                expect(doubleBatch).toBeCalledTimes(0);
+                doubleSingle.mockClear();
+                doubleBatch.mockClear();
+            }
+        });
+
         test("sequence (single, batch, single)", async () => {
             const service = container.resolve(Service);
             const doubleSingle = jest.spyOn(service, "doubleSingle");
